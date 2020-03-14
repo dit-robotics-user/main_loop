@@ -9,4 +9,5 @@ int16 enemy2_x
 int16 enemy2_y
 int16 ally_x
 int16 ally_y
+float32 time 
 

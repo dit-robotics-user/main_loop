@@ -215,7 +215,9 @@ add_executable(path_planning_ src/path_planning_.cpp)
 add_dependencies(path_planning_ main_loop_gencpp)
 target_link_libraries(path_planning_ ${catkin_LIBRARIES})
 
-
+add_executable(agent src/agent.cpp)
+add_dependencies(agent main_loop_gencpp)
+target_link_libraries(agent ${catkin_LIBRARIES})
 
 
 

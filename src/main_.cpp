@@ -12,18 +12,18 @@
 int my_pos_x_ = 200 ;
 int my_pos_y_ = 200 ;
 
-void callback(const main_loop::aler_range::ConstPtr& msg)
+void callback(const main_loop::agent::ConstPtr& msg)
 {
   my_pos_x_ = msg->my_pos_x ;
   my_pos_y_ = msg->my_pos_y ;
-  ROS_INFO("my_pos_x: %d", my_pos_x_);
-  ROS_INFO("my_pos_y: %d", my_pos_y_);
+  ROS_INFO("my_pos_x in main: %d", my_pos_x_);
+  ROS_INFO("my_pos_y in main: %d", my_pos_y_);
 }
 
 
 int main(int argc, char **argv)
 {
-  ros::init(argc, argv, "main_");
+  ros::init (argc, argv, "main_");
 
   ros::NodeHandle n;
   

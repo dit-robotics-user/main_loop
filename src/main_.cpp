@@ -4,6 +4,7 @@
 #include <std_msgs/Int32MultiArray.h>
 
 #include "main_loop/path.h"
+#include "main_loop/agent.h"
 #include "main_loop/path_planning.h"
 
 #include <cstdlib>
@@ -11,10 +12,10 @@
 int my_pos_x_ = 200 ;
 int my_pos_y_ = 200 ;
 
-void callback(const std_msgs::Int32MultiArray::ConstPtr& msg)
+void callback(const main_loop::aler_range::ConstPtr& msg)
 {
-  my_pos_x_ = msg->data[0] ;
-  my_pos_y_ = msg->data[1] ;
+  my_pos_x_ = msg->my_pos_x ;
+  my_pos_y_ = msg->my_pos_y ;
   ROS_INFO("my_pos_x: %d", my_pos_x_);
   ROS_INFO("my_pos_y: %d", my_pos_y_);
 }
@@ -30,7 +31,7 @@ int main(int argc, char **argv)
 
 
   //test v1
-  ros::Subscriber sub = n.subscribe("rxST1", 1, callback);
+  ros::Subscriber sub = n.subscribe("agent_msg", 1, callback);
   ros::Publisher pub = n.advertise<std_msgs::Int32MultiArray>("txST1", 1);
 
   while(ros::ok()){

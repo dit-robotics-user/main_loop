@@ -609,6 +609,7 @@ int big_to_small_maze(int big){
     return small;
 }
 
+
 bool add(main_loop::path::Request  &req,
          main_loop::path::Response &res)
 {
@@ -626,12 +627,12 @@ bool add(main_loop::path::Request  &req,
     int goal_pos[2] = {big_to_small_maze(req.goal_pos_x),big_to_small_maze(req.goal_pos_y)};//<---goap  
 
 
-
     vector<PosNode> a = AStar(start_pos, goal_pos, maze);
     vector<PosNode> b = bresenhams_line_alg(a, maze);//--->output b
-       
+
     res.next_pos_x = get_x(b)*50 ;//--->for big map 
     res.next_pos_y = get_y(b)*50 ;//--->for big map
+    cout << "degree: " << move_degree(start_pos,b) << "\n" ;//--->output degree!!
 
 
     return true;

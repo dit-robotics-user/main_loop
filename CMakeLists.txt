@@ -63,6 +63,7 @@ add_service_files(
 	FILES
 	AddTwoInts.srv
 	path.srv
+	goap.srv
 )
 
 ## Generate actions in the 'action' folder

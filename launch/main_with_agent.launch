@@ -6,11 +6,12 @@
 	<node pkg="main_loop" type="path_planning_" name="path_planning_" output="screen">
 	</node>
 
-	<node pkg="main_loop" type="main_" name="main_" output="screen">
+	<node pkg="main_loop" type="main_" name="main_" output="log">
 	</node>
 	<node pkg="main_loop" type="agent" name="agent" output="screen">
 	</node>
-	<node pkg="serial_port" type="serial_port_node" name="serial_port_node" output="screen">
+
+	<node pkg="serial_port" type="serial_port_node_2" name="serial_port_node_2" output="log">
 	</node>
 	
 	<include file="$(find lidar_2020)/launch/octagonal_range.launch">

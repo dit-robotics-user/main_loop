@@ -16,8 +16,12 @@ void callback(const main_loop::agent::ConstPtr& msg)
 {
   my_pos_x_ = msg->my_pos_x ;
   my_pos_y_ = msg->my_pos_y ;
+  
   ROS_INFO("my_pos_x in main: %d", my_pos_x_);
   ROS_INFO("my_pos_y in main: %d", my_pos_y_);
+  ROS_INFO("rx[0] in main: %d", msg->task_state);
+  ROS_INFO("rx[1] in main: %d", msg->ally_x);
+  ROS_INFO("rx[2] in main: %d", msg->ally_y);
 }
 
 
@@ -33,6 +37,7 @@ int main(int argc, char **argv)
   //test v1
   ros::Subscriber sub = n.subscribe("agent_msg", 1, callback);
   ros::Publisher pub = n.advertise<std_msgs::Int32MultiArray>("txST1", 1);
+  ros::Publisher pub_2 = n.advertise<std_msgs::Int32MultiArray>("txST2", 1);
 
   while(ros::ok()){
     ROS_INFO("333 ");
@@ -68,8 +73,15 @@ int main(int argc, char **argv)
     msg_.data.push_back(srv.response.next_pos_x);
     msg_.data.push_back(srv.response.next_pos_y);
     msg_.data.push_back(90);
-
+    
+    std_msgs::Int32MultiArray msg_2 ;
+    msg_2.data.push_back(1);
+    msg_2.data.push_back(2);
+    msg_2.data.push_back(3);
+    msg_2.data.push_back(4);    
+    
     pub.publish(msg_);
+    pub_2.publish(msg_2);
 
     ros::spinOnce();
   }

@@ -76,9 +76,9 @@ int main(int argc, char **argv)
     
     std_msgs::Int32MultiArray msg_2 ;
     msg_2.data.push_back(1);
-    msg_2.data.push_back(2);
-    msg_2.data.push_back(3);
-    msg_2.data.push_back(4);    
+    msg_2.data.push_back(0);
+    msg_2.data.push_back(0);
+    msg_2.data.push_back(0);    
     
     pub.publish(msg_);
     pub_2.publish(msg_2);

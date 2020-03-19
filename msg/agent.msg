@@ -1,5 +1,6 @@
 std_msgs/Header header
 bool[] emergency
+bool[] cup_state
 int16 task_state
 int16 my_pos_x
 int16 my_pos_y

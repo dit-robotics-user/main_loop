@@ -632,7 +632,9 @@ bool add(main_loop::path::Request  &req,
 
     res.next_pos_x = get_x(b)*50 ;//--->for big map 
     res.next_pos_y = get_y(b)*50 ;//--->for big map
-    cout << "degree: " << move_degree(start_pos,b) << "\n" ;//--->output degree!!
+    
+    res.degree = move_degree(start_pos,b);
+    cout << "degree: " << res.degree << "\n" ;//--->output degree!!
 
 
     return true;

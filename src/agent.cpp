@@ -14,7 +14,8 @@
 
 class sub_class{
     public:
-        void ST1_sub_callback(const std_msgs::Int32MultiArray::ConstPtr& msg); 
+        void ST1_sub_callback(const std_msgs::Int32MultiArray::ConstPtr& msg);
+        void ST2_sub_callback(const std_msgs::Int32MultiArray::ConstPtr& msg); 
         void lidarmsg_sub_callback(const lidar_2020::alert_range::ConstPtr& msg);
         void publish_(float time);
         sub_class(int my_pos_x_ = 250, int my_pos_y_ = 250);
@@ -24,7 +25,7 @@ class sub_class{
         ros::NodeHandle n;
 		ros::Publisher agent_pub= n.advertise<main_loop::agent>("agent_msg", 1);
 		ros::Subscriber ST1_sub = n.subscribe<std_msgs::Int32MultiArray>("rxST1", 1, &sub_class::ST1_sub_callback,this);
-        ros::Subscriber ST2_sub;
+        ros::Subscriber ST2_sub = n.subscribe<std_msgs::Int32MultiArray>("rxST2", 1, &sub_class::ST2_sub_callback,this);
         ros::Subscriber lidarmsg_sub= n.subscribe<lidar_2020::alert_range>("range_alert", 1, &sub_class::lidarmsg_sub_callback,this);
         main_loop::agent pub_to_main;
 
@@ -42,6 +43,13 @@ void sub_class::ST1_sub_callback(const std_msgs::Int32MultiArray::ConstPtr& msg)
     pub_to_main.my_pos_y = msg->data[1] ;
     ROS_INFO("my_pos_x: %d", pub_to_main.my_pos_x);
     ROS_INFO("my_pos_y: %d", pub_to_main.my_pos_y);
+}
+void sub_class::ST2_sub_callback(const std_msgs::Int32MultiArray::ConstPtr& msg){
+    
+    pub_to_main.my_pos_x = msg->data[0] ;
+    pub_to_main.my_pos_y = msg->data[1] ;
+    ROS_INFO("task_state_1: %d", pub_to_main.my_pos_x);
+    ROS_INFO("task_state_2: %d", pub_to_main.my_pos_y);
 }
 void sub_class::lidarmsg_sub_callback(const lidar_2020::alert_range::ConstPtr& msg){
 

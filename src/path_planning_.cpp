@@ -2,12 +2,11 @@
 #include "std_msgs/String.h"
 #include "main_loop/path.h"
 #include "main_loop/AddTwoInts.h"
-#include <cstdlib>
-
 #include <iostream>
 #include <queue>
 #include <vector>
 #include <cmath>
+#include <stdlib.h>
 
 using namespace std;
 
@@ -15,7 +14,7 @@ using namespace std;
 #define mazeSizeY 61
 #define robotSize 9
 
-void build_maze(int maze[mazeSizeX][mazeSizeY])   //build the maze
+void build_maze(int maze[mazeSizeX][mazeSizeY])
 {
     // maze field
     for(int j = 0; j < mazeSizeY; j++)
@@ -48,27 +47,45 @@ void build_maze(int maze[mazeSizeX][mazeSizeY])   //build the maze
     }
 }
 
-void build_obstacles(int middlePoint[2], int wallThick, int maze[mazeSizeX][mazeSizeY], int weight){
-    int middlePointX = middlePoint[0];
-    int middlePointY = middlePoint[1];
-    int halfWallThick = (wallThick-1)/2;
-    for(int j = middlePointY-halfWallThick; j <= middlePointY+halfWallThick; j++)
-    {
-        for(int i = middlePointX-halfWallThick; i <= middlePointX + halfWallThick; i++)
-        {
-            if(i>0&&i<mazeSizeX&&j>0&&j<mazeSizeY)
-            {
-                maze[i][j] = weight;
-            }
-        }
-    }
-}
-
-class PosNode   //used to store path;
+class PosNode
 {
 public:
     int pos[2];
 };
+
+bool build_obstacles(int middlePoint[2], int wallThick, int maze[mazeSizeX][mazeSizeY], int weight, int goal[2]){
+    int middlePointX = middlePoint[0];
+    int middlePointY = middlePoint[1];
+    int halfWallThick = (wallThick-1)/2;
+    bool overlap = false;
+
+    for(int j = middlePointY-halfWallThick; j <= middlePointY+halfWallThick; j++)
+    {
+        for(int i = middlePointX-halfWallThick; i <= middlePointX + halfWallThick; i++)
+        {
+            if(i == goal[0] && j == goal[1]){
+                overlap = true;
+                return true;
+            }
+        }
+    }
+    if(overlap == false){
+        for(int j = middlePointY-halfWallThick; j <= middlePointY+halfWallThick; j++)
+        {
+            for(int i = middlePointX-halfWallThick; i <= middlePointX + halfWallThick; i++)
+            {
+                if(i>0&&i<mazeSizeX&&j>0&&j<mazeSizeY)
+                {
+                    maze[i][j] = weight;
+                }
+                if(i == goal[0] && j == goal[1]){
+                    overlap = true;
+                }
+            }
+        }
+        return false;
+    }
+}
 
 class Node
 {
@@ -187,7 +204,30 @@ vector<Node> FindSuccessors(int pos[2], int maze[mazeSizeX][mazeSizeY])
     vector<Node> output;
     Node successor;
     int new_pos[2];
+    // the priority should start from low cost movements to higher cost movements, since it goes through a priority queue!!
+    // this up right down left(cost 1) upright downright downleft upleft(cost 1.4142) priority is crucial in promising a complete solution!!
     Up(new_pos, pos);
+    if(isValid(new_pos, maze)==true)
+    {
+        successor.GivePos(new_pos);
+        successor.move_cost = strait;
+        output.push_back(successor);
+    }
+    Right(new_pos, pos);
+    if(isValid(new_pos, maze)==true)
+    {
+        successor.GivePos(new_pos);
+        successor.move_cost = strait;
+        output.push_back(successor);
+    }
+    Down(new_pos, pos);
+    if(isValid(new_pos, maze)==true)
+    {
+        successor.GivePos(new_pos);
+        successor.move_cost = strait;
+        output.push_back(successor);
+    }
+    Left(new_pos, pos);
     if(isValid(new_pos, maze)==true)
     {
         successor.GivePos(new_pos);
@@ -201,13 +241,6 @@ vector<Node> FindSuccessors(int pos[2], int maze[mazeSizeX][mazeSizeY])
         successor.move_cost = diagnal;
         output.push_back(successor);
     }
-    Right(new_pos, pos);
-    if(isValid(new_pos, maze)==true)
-    {
-        successor.GivePos(new_pos);
-        successor.move_cost = strait;
-        output.push_back(successor);
-    }
     DownRight(new_pos, pos);
     if(isValid(new_pos, maze)==true)
     {
@@ -215,25 +248,11 @@ vector<Node> FindSuccessors(int pos[2], int maze[mazeSizeX][mazeSizeY])
         successor.move_cost = diagnal;
         output.push_back(successor);
     }
-    Down(new_pos, pos);
-    if(isValid(new_pos, maze)==true)
-    {
-        successor.GivePos(new_pos);
-        successor.move_cost = strait;
-        output.push_back(successor);
-    }
     DownLeft(new_pos, pos);
     if(isValid(new_pos, maze)==true)
     {
         successor.GivePos(new_pos);
         successor.move_cost = diagnal;
-        output.push_back(successor);
-    }
-    Left(new_pos, pos);
-    if(isValid(new_pos, maze)==true)
-    {
-        successor.GivePos(new_pos);
-        successor.move_cost = strait;
         output.push_back(successor);
     }
     UpLeft(new_pos, pos);
@@ -262,6 +281,12 @@ double HeuristicFunctionDiagnal(Node start, Node goal)
     return cost;
 }
 
+double HeuristicFunctionExactDistance(Node start, Node goal){
+    double cost = sqrt((start.PosX()-goal.PosX())*(start.PosX()-goal.PosX()) + (start.PosY()-goal.PosY())*(start.PosY()-goal.PosY()));
+    cout << "cost: " << cost << "\n";
+    return cost;
+}
+
 void PrintPath(vector<PosNode> p, int maze[mazeSizeX][mazeSizeY])
 {
     cout << "path: ";
@@ -274,7 +299,7 @@ void PrintPath(vector<PosNode> p, int maze[mazeSizeX][mazeSizeY])
     cout << "\n";
 }
 
-void PrintMaze(int start[2], int goal[2], int maze[mazeSizeX][mazeSizeY])      // print out maze
+void PrintMaze(int start[2], int goal[2], int maze[mazeSizeX][mazeSizeY])
 {
     cout << "\n";
     maze[start[0]][start[1]] = 5;  //set maze start point as 5
@@ -336,6 +361,7 @@ bool operator<(Node const& n1, Node const& n2)
 vector<PosNode> AStar(int start_pos[2], int goal_pos[2], int maze[mazeSizeX][mazeSizeY])
 {
     int priority_count = 0;
+    int weight = 1;
     Node start, goal;
     start.GivePos(start_pos);
     goal.GivePos(goal_pos);
@@ -354,14 +380,25 @@ vector<PosNode> AStar(int start_pos[2], int goal_pos[2], int maze[mazeSizeX][maz
     }
     start.move_cost = 0;
     start.g = 0;
-    start.h = HeuristicFunctionDiagnal(start, goal);
-    start.f = start.g + start.h;
+    start.h = HeuristicFunctionDiagnal(start, goal); //<----change method here
+    start.f = start.g + start.h*weight;
     priority_count ++;
     start.priority_stamp = priority_count;
     priority_q.push(start);
     while(!priority_q.empty())
     {
         Node top_node = priority_q.top();
+        /*//////////////////
+        cout << "pos: (" << top_node.PosX() << "," << top_node.PosY() << ") g: " << top_node.g << " h: " << top_node.h << " f: " << top_node.f << "\n";
+         Node temp;
+                temp.path = top_node.path;
+                cout << "path: ";
+                for(unsigned int i = 0; i<temp.path.size(); i++){
+                    PosNode p = temp.path[i];
+                    cout << "(" << p.pos[0] << "," << p.pos[1] << ")";
+                }
+                cout << "\n";
+        //////////////////*/
         PosNode pos;
         pos.pos[0] = top_node.PosX();
         pos.pos[1] = top_node.PosY();
@@ -382,8 +419,8 @@ vector<PosNode> AStar(int start_pos[2], int goal_pos[2], int maze[mazeSizeX][maz
             {
                 maze[succ.PosX()][succ.PosY()] = 4;
                 succ.path.push_back(pos);
-                succ.h = HeuristicFunctionDiagnal(succ, goal);
-                succ.f = succ.g + succ.h;
+                succ.h = HeuristicFunctionDiagnal(succ, goal); //<----change method here
+                succ.f = succ.g + succ.h*weight;
                 priority_count ++;
                 succ.priority_stamp = priority_count;
                 priority_q.push(succ);
@@ -400,11 +437,15 @@ vector<PosNode> bresenhams_line_alg(vector<PosNode> path, int maze[mazeSizeX][ma
 {
     PosNode start = path.front();
     vector<PosNode> output;
+    bool steep_swap = false;
+    bool right_to_left_swap = false;
     for(unsigned int i = 1; i < path.size(); i++)
     {
         PosNode goal = path[i];
         bool steep = false;
         bool walkable = true;
+
+        //cout << "Start: (" << start.pos[0] << "," << start.pos[1] << ") Goal: (" << goal.pos[0] << "," << goal.pos[1] << ")\n";
         if(abs(goal.pos[1]-start.pos[1])>abs(goal.pos[0]-start.pos[0]))
         {
             steep = true;
@@ -413,12 +454,15 @@ vector<PosNode> bresenhams_line_alg(vector<PosNode> path, int maze[mazeSizeX][ma
         {
             swap(start.pos[0], start.pos[1]);
             swap(goal.pos[0], goal.pos[1]);
+            steep_swap = true;
         }
         if(start.pos[0]>goal.pos[0])
         {
             swap(start.pos[0], goal.pos[0]);
             swap(start.pos[1], goal.pos[1]);
+            right_to_left_swap = true;
         }
+
         int delta_x = goal.pos[0] - start.pos[0];
         int delta_y = abs(goal.pos[1] - start.pos[1]);
         int error = delta_x;
@@ -455,12 +499,22 @@ vector<PosNode> bresenhams_line_alg(vector<PosNode> path, int maze[mazeSizeX][ma
                 error += 2*delta_x;
             }
         }
-
+        if(steep_swap == true){
+            swap(start.pos[0], start.pos[1]);
+            swap(goal.pos[0], goal.pos[1]);
+            steep_swap = false;
+        }
+        if(right_to_left_swap == true){
+            swap(start.pos[0], goal.pos[0]);
+            swap(start.pos[1], goal.pos[1]);
+            right_to_left_swap = false;
+        }
         if(walkable == false)
         {
             output.push_back(path[i-1]);
             start = path[i-1];
         }
+
     }
     output.push_back(path.back());
     return output;
@@ -478,7 +532,7 @@ int get_y(vector<PosNode> path){
     return y;
 }
 
-void prediction_of_movement(int maze[mazeSizeX][mazeSizeY],int obstacle_pos[2], int move_vector[2]){
+void prediction_of_movement(int maze[mazeSizeX][mazeSizeY],int obstacle_pos[2], int move_vector[2], int goal_p[2]){
     int prediction_ratio = 2;
     int prediction_point[2] = {obstacle_pos[0] + prediction_ratio*move_vector[0], obstacle_pos[1] + prediction_ratio*move_vector[1]};
     int start[2] = {obstacle_pos[0], obstacle_pos[1]};
@@ -552,7 +606,7 @@ void prediction_of_movement(int maze[mazeSizeX][mazeSizeY],int obstacle_pos[2], 
     for(unsigned int i = 0; i < prediction.size(); i++)
     {
 
-        build_obstacles(prediction[i].pos, robotSize, maze, 0);
+        build_obstacles(prediction[i].pos, robotSize, maze, 0, goal_p);
         j+=i*100;
     }
 }
@@ -598,9 +652,9 @@ float move_degree(int start_pos[2], vector<PosNode> path){
         cout << "error\n";
     }
     in_degree = in_radius * 180 / pi;
-    cout << "start: (" << start.pos[0] << "," << start.pos[1] << ")\n";
-    cout << "goal: (" << goal.pos[0] << "," << goal.pos[1] << ")\n";
-    cout << "num: " << num << " den: " << den << " degree: " << in_degree << "\n";
+    //cout << "start: (" << start.pos[0] << "," << start.pos[1] << ")\n";
+    //cout << "goal: (" << goal.pos[0] << "," << goal.pos[1] << ")\n";
+    //cout << " degree: " << in_degree << "\n";
     return in_degree;
 }
 
@@ -617,24 +671,27 @@ bool add(main_loop::path::Request  &req,
     build_maze(maze); 
     int obstacle_a[2] = {big_to_small_maze(req.enemy1_x),big_to_small_maze(req.enemy1_y)};//<---from camera
     int obstacle_b[2] = {big_to_small_maze(req.enemy2_x),big_to_small_maze(req.enemy2_y)};//<---from camera
-    int obstacle_c[2] = {big_to_small_maze(req.ally_x),big_to_small_maze(req.ally_y)};//<---from camera 
-    build_obstacles(obstacle_a, robotSize, maze, 0);
-    build_obstacles(obstacle_b, robotSize, maze, 0);
-    build_obstacles(obstacle_c, robotSize, maze, 0);
-  
+    int obstacle_c[2] = {big_to_small_maze(req.ally_x),big_to_small_maze(req.ally_y)};//<---from camera   
     int start_pos[2] = {big_to_small_maze(req.my_pos_x),big_to_small_maze(req.my_pos_y)};//<---my_pos
-    int goal_pos[2] = {big_to_small_maze(req.goal_pos_x),big_to_small_maze(req.goal_pos_y)};//<---goap  
-
-
-
+    int goal_pos[2] = {big_to_small_maze(req.goal_pos_x),big_to_small_maze(req.goal_pos_y)};//<---goap 
+    bool blocked = false;
+    bool is_blocked_a = build_obstacles(obstacle_a, robotSize, maze, 0, goal_pos);
+    bool is_blocked_b = build_obstacles(obstacle_b, robotSize, maze, 0, goal_pos);
+    bool is_blocked_c = build_obstacles(obstacle_c, robotSize, maze, 0, goal_pos);
     vector<PosNode> a = AStar(start_pos, goal_pos, maze);
-    vector<PosNode> b = bresenhams_line_alg(a, maze);//--->output b
-       
+    vector<PosNode> b = bresenhams_line_alg(a, maze); 
+
     res.next_pos_x = get_x(b)*50 ;//--->for big map 
     res.next_pos_y = get_y(b)*50 ;//--->for big map
+    cout << " degree: " << move_degree(start_pos, b) << "\n";//--->output degree!!
+    if(is_blocked_a || is_blocked_b || is_blocked_c){
+        blocked = true;
+        cout << "blocked\n";
+    }
 
 
     return true;
+    
 
 }
 

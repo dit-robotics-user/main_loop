@@ -650,6 +650,7 @@ float move_degree(int start_pos[2], vector<PosNode> path){
     }
     else{
         cout << "error\n";
+        in_radius = -500 ;
     }
     in_degree = in_radius * 180 / pi;
     //cout << "start: (" << start.pos[0] << "," << start.pos[1] << ")\n";
@@ -688,7 +689,7 @@ bool add(main_loop::path::Request  &req,
         blocked = true;
         cout << "blocked\n";
     }
-
+    res.degree = move_degree(start_pos, b);
 
     return true;
     

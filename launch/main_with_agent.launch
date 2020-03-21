@@ -11,7 +11,7 @@
 	<node pkg="main_loop" type="agent" name="agent" output="log">
 	</node>
 
-	<node pkg="serial_port" type="serial_port_node_2" name="serial_port_node_2" output="screen">
+	<node pkg="serial_port" type="serial_port_node" name="serial_port_node" output="screen">
 	</node>
 	
 	<include file ="$(find lidar_2020)/launch/octagonal_range.launch">

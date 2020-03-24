@@ -27,7 +27,7 @@ class sub_class{
 		ros::Publisher agent_pub= n.advertise<main_loop::agent>("agent_msg", 1);
 		ros::Subscriber ST1_sub = n.subscribe<std_msgs::Int32MultiArray>("rxST1", 1, &sub_class::ST1_sub_callback,this);
         ros::Subscriber ST2_sub = n.subscribe<std_msgs::Int32MultiArray>("rxST2", 1, &sub_class::ST2_sub_callback,this);
-        ros::Subscriber lidarmsg_sub= n.subscribe<lidar_2020::alert_range>("ranging_alert", 1000, &sub_class::lidarmsg_sub_callback,this);
+        ros::Subscriber lidarmsg_sub= n.subscribe<lidar_2020::alert_range>("ranging_alert", 10, &sub_class::lidarmsg_sub_callback,this);
         main_loop::agent pub_to_main;
 
 };
@@ -44,6 +44,7 @@ void sub_class::ST1_sub_callback(const std_msgs::Int32MultiArray::ConstPtr& msg)
     pub_to_main.my_pos_y = msg->data[1] ;
     ROS_INFO("my_pos_x: %d", pub_to_main.my_pos_x);
     ROS_INFO("my_pos_y: %d", pub_to_main.my_pos_y);
+    ROS_INFO("ST1");
 }
 void sub_class::ST2_sub_callback(const std_msgs::Int32MultiArray::ConstPtr& msg){
     
@@ -53,19 +54,22 @@ void sub_class::ST2_sub_callback(const std_msgs::Int32MultiArray::ConstPtr& msg)
     ROS_INFO("rx[0]=: %d", pub_to_main.task_state); 
     ROS_INFO("rx[1]=: %d", pub_to_main.ally_x);
     ROS_INFO("rx[2]=: %d", pub_to_main.ally_y);
+    ROS_INFO("ST2");
 }
 
 void sub_class::lidarmsg_sub_callback(const lidar_2020::alert_range::ConstPtr& msg){
-
+/*
     for(int j=0 ;j<8;j++){
         pub_to_main.emergency.push_back(msg->alert[j]);
-          ROS_INFO("lidar in agent: %d", pub_to_main.emergency[j]);
-    }
-    
-    ROS_INFO("234");
+        ROS_INFO("lidar in agent: %d", msg->alert[j]);
+    }  
+    */ 
+    ROS_INFO("lidar");
 }
+
 void sub_class::publish_(float time ){
     pub_to_main.time =time ; 
+    ROS_INFO("000");
     agent_pub.publish(pub_to_main);
 }
 
@@ -75,14 +79,14 @@ int main(int argc, char **argv){
     sub_class A;
     ros::Time::init();
     float begin_time =ros::Time::now().toSec();
-    ros::Rate loop_rate(50);
+    
     while(ros::ok()){
-    ROS_INFO("123");
+        ROS_INFO("123");
         float clustering_time = ros::Time::now().toSec () - begin_time ;
+        
         A.publish_(clustering_time);
-
         ros::spinOnce();
-        loop_rate.sleep();
+     
     }
 
 }

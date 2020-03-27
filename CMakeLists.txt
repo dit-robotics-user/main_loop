@@ -51,10 +51,6 @@ find_package(catkin REQUIRED COMPONENTS
 add_message_files(
    FILES
    agent.msg
-   camera_input.msg
-   st1_input.msg
-   st2_input.msg
-   path_planning.msg
    string_with_header.msg
    
 )

@@ -20,8 +20,6 @@ void callback(const main_loop::agent::ConstPtr& msg)
 {
   my_pos_x_ = msg->my_pos_x ;
   my_pos_y_ = msg->my_pos_y ;
-
-ROS_INFO("333 ");
   ROS_INFO("my_pos_x in main: %d", my_pos_x_);
   ROS_INFO("my_pos_y in main: %d", my_pos_y_);
 /*
@@ -29,7 +27,8 @@ ROS_INFO("333 ");
   ROS_INFO("rx[1] in main: %d", msg->ally_x);
   ROS_INFO("rx[2] in main: %d", msg->ally_y);
   */
-//  ROS_INFO("emergency= %d",msg-> emergency[0]);
+ // ROS_INFO("emergency= %d",msg-> emergency[0]);
+
 }
 
 

@@ -58,18 +58,18 @@ void sub_class::ST2_sub_callback(const std_msgs::Int32MultiArray::ConstPtr& msg)
 }
 
 void sub_class::lidarmsg_sub_callback(const lidar_2020::alert_range::ConstPtr& msg){
-/*
-    for(int j=0 ;j<8;j++){
-        pub_to_main.emergency.push_back(msg->alert[j]);
-        ROS_INFO("lidar in agent: %d", msg->alert[j]);
-    }  
-    */ 
-    ROS_INFO("lidar");
+
+    pub_to_main.emergency={0};
+    if(msg->header.seq>2){
+        for(int j=0 ;j<8;j++){
+            pub_to_main.emergency.push_back(msg->alert[j]);
+            ROS_INFO("lidar[%d] in agent: %d",j, pub_to_main.emergency[j]);
+        }  
+    }
 }
 
 void sub_class::publish_(float time ){
     pub_to_main.time =time ; 
-    ROS_INFO("000");
     agent_pub.publish(pub_to_main);
 }
 
@@ -81,7 +81,6 @@ int main(int argc, char **argv){
     float begin_time =ros::Time::now().toSec();
     
     while(ros::ok()){
-        ROS_INFO("123");
         float clustering_time = ros::Time::now().toSec () - begin_time ;
         
         A.publish_(clustering_time);

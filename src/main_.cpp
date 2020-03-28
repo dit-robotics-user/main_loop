@@ -27,7 +27,9 @@ void callback(const main_loop::agent::ConstPtr& msg)
   ROS_INFO("rx[1] in main: %d", msg->ally_x);
   ROS_INFO("rx[2] in main: %d", msg->ally_y);
   */
- // ROS_INFO("emergency= %d",msg-> emergency[0]);
+    for(int j=0;j<8;j++){
+        ROS_INFO("lidar[%d] in main: %d",j, msg->emergency[j]);
+    }
 
 }
 

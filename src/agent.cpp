@@ -59,7 +59,7 @@ void sub_class::ST2_sub_callback(const std_msgs::Int32MultiArray::ConstPtr& msg)
 
 void sub_class::lidarmsg_sub_callback(const lidar_2020::alert_range::ConstPtr& msg){
 
-    pub_to_main.emergency={0};
+    pub_to_main.emergency={};
     if(msg->header.seq>2){
         for(int j=0 ;j<8;j++){
             pub_to_main.emergency.push_back(msg->alert[j]);

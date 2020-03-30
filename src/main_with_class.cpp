@@ -6,7 +6,6 @@
 
 #include "main_loop/path.h"
 #include "main_loop/agent.h"
-#include "main_loop/path_planning.h"
 #include <iostream>
 #include <queue>
 #include <vector>
@@ -20,8 +19,8 @@ int my_pos_y_ = 300 ;
 class sub_state{
 	public:
 		void callback(const main_loop::agent::ConstPtr& msg);
-		int change_value_my_pos_x(int my_pos_x);
-		int change_value_my_pos_y(int my_pos_y);
+		void change_value_my_pos_x(int &my_pos_x);
+		void change_value_my_pos_y(int &my_pos_y);
 		main_loop::path srv_to_path;
 		
 
@@ -45,8 +44,8 @@ sub_state::sub_state(){
 }
 
 void sub_state::callback(const main_loop::agent::ConstPtr& msg){
-  pub_to_goap.my_pos_x = msg->my_pos_x ;
-  pub_to_goap.my_pos_y = msg->my_pos_y ;
+  srv_to_path.request.my_pos_x = msg->my_pos_x ;
+  srv_to_path.request.my_pos_y = msg->my_pos_y ;
   ROS_INFO("my_pos_x in main_with_class: %d", pub_to_goap.my_pos_x);
   ROS_INFO("my_pos_y in main_with_class: %d", pub_to_goap.my_pos_y);
 /*
@@ -57,16 +56,6 @@ void sub_state::callback(const main_loop::agent::ConstPtr& msg){
   pub_to_goap={};
 
     //    pub_to_goap.emergency.push_back(msg->emergency[j]);
-
- 
-  
-  
-}
-int sub_state::change_value_my_pos_x(int my_pos_x){
-    return pub_to_goap.my_pos_x ; 
-}
-int sub_state::change_value_my_pos_y(int my_pos_y){
-    return pub_to_goap.my_pos_y ; 
 }
 
 
@@ -85,8 +74,8 @@ int main(int argc, char **argv)
 	ros::Publisher pub_2 = nh.advertise<std_msgs::Int32MultiArray>("txST2", 1);
 	ros::ServiceClient client = nh.serviceClient<main_loop::path>("path_plan");
 	main_loop::path srv;
-	srv.request.my_pos_x = my_pos_x_ ;
-    srv.request.my_pos_y = my_pos_y_ ;
+	B.request.my_pos_x = my_pos_x_ ;
+    B.request.my_pos_y = my_pos_y_ ;
    
 
 	//loop parameter setting
@@ -94,6 +83,8 @@ int main(int argc, char **argv)
     int r1;
     int r2;
     int r3;
+    int now_my_pos_x;
+    int now_my_pos_y;
     
       //change mode 
       float distance_square ; 
@@ -109,10 +100,10 @@ int main(int argc, char **argv)
 
 		//path plan service 
 		
-		B.request.my_pos_x=A.srv_to_path.request.my_pos_x;
-		B.request.my_pos_x=A.change_value_my_pos_y(B.request.my_pos_y);
-ROS_INFO("A.srv.request.my_pos_x: %d", B.request.my_pos_x);
-ROS_INFO("A.srv.request.my_pos_y: %d", B.request.my_pos_y);
+        B.request.my_pos_x = A.srv_to_path.request.my_pos_x;
+        B.request.my_pos_y = A.srv_to_path.request.my_pos_y ;
+        ROS_INFO("B.request.my_pos_x: %d", B.request.my_pos_x);
+    ROS_INFO("B.request.my_pos_y: %d", B.request.my_pos_y);
         B.request.enemy1_x = 1600 ;
         B.request.enemy1_y = 2400 ;
         B.request.enemy2_x = 800 ;
@@ -125,7 +116,7 @@ ROS_INFO("A.srv.request.my_pos_y: %d", B.request.my_pos_y);
 
 
 
-		if (client.call(A.srv_to_path)){
+		if (client.call(B)){
 			double clustering_time = ros::Time::now().toSec () - begin_time; 
 			ROS_INFO ("%f secs for path plan .", clustering_time);
 			ROS_INFO("next_pos_x: %ld", (long int)B.response.next_pos_x);

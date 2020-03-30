@@ -5,7 +5,6 @@
 
 #include "main_loop/path.h"
 #include "main_loop/agent.h"
-#include "main_loop/path_planning.h"
 #include <iostream>
 #include <queue>
 #include <vector>
@@ -43,7 +42,7 @@ int main(int argc, char **argv)
   ros::Subscriber sub = n.subscribe("agent_msg", 1, callback);
   ros::Publisher pub = n.advertise<std_msgs::Int32MultiArray>("txST1", 1);
   ros::Publisher pub_2 = n.advertise<std_msgs::Int32MultiArray>("txST2", 1);
-  
+  double begin_time =ros::Time::now().toSec();
   
   //change mode 
   float distance_square ; 
@@ -56,7 +55,7 @@ int main(int argc, char **argv)
 
   while(ros::ok()){
     
-    double begin_time =ros::Time::now().toSec();
+    //double begin_time =ros::Time::now().toSec();
     main_loop::path srv;
     srv.request.my_pos_x = my_pos_x_ ;
     srv.request.my_pos_y = my_pos_y_ ;

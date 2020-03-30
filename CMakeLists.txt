@@ -222,6 +222,10 @@ add_executable(main_ src/main_.cpp)
 add_dependencies(main_ main_loop_gencpp)
 target_link_libraries(main_ ${catkin_LIBRARIES})
 
+add_executable(main_with_class src/main_with_class.cpp)
+add_dependencies(main_with_class main_loop_gencpp)
+target_link_libraries(main_with_class ${catkin_LIBRARIES})
+
 add_dependencies(agent ${catkin_EXPORTED_TARGETS})
 
 

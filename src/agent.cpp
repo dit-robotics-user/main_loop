@@ -19,7 +19,7 @@ class sub_class{
         void ST2_sub_callback(const std_msgs::Int32MultiArray::ConstPtr& msg); 
         void lidarmsg_sub_callback(const lidar_2020::alert_range::ConstPtr& msg);
         void publish_(float time);
-        sub_class(int my_pos_x_ = 250, int my_pos_y_ = 250);
+        sub_class(int my_pos_x_ = 300, int my_pos_y_ = 300);
         ~sub_class(){};
 
     private:

@@ -3,6 +3,7 @@
 
 #include "std_msgs/String.h"
 #include <std_msgs/Int32MultiArray.h>
+#include <main_loop/AddTwoInts.h>  //test_goap
 
 #include "main_loop/path.h"
 #include "main_loop/agent.h"
@@ -48,11 +49,7 @@ void sub_state::callback(const main_loop::agent::ConstPtr& msg){
   srv_to_path.request.my_pos_y = msg->my_pos_y ;
   ROS_INFO("my_pos_x in main_with_class: %d", pub_to_goap.my_pos_x);
   ROS_INFO("my_pos_y in main_with_class: %d", pub_to_goap.my_pos_y);
-/*
-  ROS_INFO("rx[0] in main: %d", msg->task_state);
-  ROS_INFO("rx[1] in main: %d", msg->ally_x);
-  ROS_INFO("rx[2] in main: %d", msg->ally_y);
-*/
+
   pub_to_goap={};
 
     //    pub_to_goap.emergency.push_back(msg->emergency[j]);
@@ -73,6 +70,8 @@ int main(int argc, char **argv)
     ros::Publisher pub = nh.advertise<std_msgs::Int32MultiArray>("txST1", 1);
 	ros::Publisher pub_2 = nh.advertise<std_msgs::Int32MultiArray>("txST2", 1);
 	ros::ServiceClient client = nh.serviceClient<main_loop::path>("path_plan");
+    ros::ServiceClient client_goap = nh.serviceClient<main_loop::AddTwoInts>("goap_test_");
+    main_loop::AddTwoInts srv_1; //test
 	main_loop::path srv;
 	B.request.my_pos_x = my_pos_x_ ;
     B.request.my_pos_y = my_pos_y_ ;
@@ -103,16 +102,24 @@ int main(int argc, char **argv)
         B.request.my_pos_x = A.srv_to_path.request.my_pos_x;
         B.request.my_pos_y = A.srv_to_path.request.my_pos_y ;
         ROS_INFO("B.request.my_pos_x: %d", B.request.my_pos_x);
-    ROS_INFO("B.request.my_pos_y: %d", B.request.my_pos_y);
+        ROS_INFO("B.request.my_pos_y: %d", B.request.my_pos_y);
         B.request.enemy1_x = 1600 ;
         B.request.enemy1_y = 2400 ;
         B.request.enemy2_x = 800 ;
         B.request.enemy2_y = 1500 ;
         B.request.ally_x = 1400 ;
         B.request.ally_y = 1800 ; 
-         
         B.request.goal_pos_x = 1600;
         B.request.goal_pos_y = 2400;
+
+        srv_1.request.a = 2;
+        srv_1.request.b = 3;
+
+        if (client_goap.call(srv_1)){
+            ROS_INFO("test_goap: %ld", (long int)srv_1.response.sum);
+        }else{
+            ROS_ERROR("Failed to call goap_test");
+        }
 
 
 

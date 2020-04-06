@@ -228,6 +228,7 @@ target_link_libraries(main_with_class ${catkin_LIBRARIES})
 
 add_dependencies(agent ${catkin_EXPORTED_TARGETS})
 
+target_link_libraries(main_with_class ${catkin_LIBRARIES} python2.7) 
 
 
 

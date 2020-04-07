@@ -65,7 +65,6 @@ void sub_class::lidarmsg_sub_callback(const lidar_2020::alert_range::ConstPtr& m
     if(msg->header.seq>2){
         for(int j=0 ;j<8;j++){
             pub_to_main.emergency.push_back(msg->alert[j]);
-            ROS_INFO("lidar[%d] in agent: %d",j, pub_to_main.emergency[j]);
         }  
     }
 }

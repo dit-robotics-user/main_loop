@@ -24,6 +24,7 @@ class sub_state{
 		void change_value_my_pos_x(int &my_pos_x);
 		void change_value_my_pos_y(int &my_pos_y);
 		main_loop::path srv_to_path;
+		bool emergency[8];
         int status;
         int robot_degree;
 		
@@ -54,10 +55,19 @@ void sub_state::callback(const main_loop::agent::ConstPtr& msg){
     status = msg->task_state;
     ROS_INFO("my_pos_x in main_with_class: %d", pub_to_goap.my_pos_x);
     ROS_INFO("my_pos_y in main_with_class: %d", pub_to_goap.my_pos_y);
+	ROS_INFO("lidar[0]: %d", msg->emergency[0]);
+	emergency[0]=msg->emergency[0];
+emergency[1]=msg->emergency[1];
+emergency[2]=msg->emergency[2];
+emergency[3]=msg->emergency[3];
+emergency[4]=msg->emergency[4];
+emergency[5]=msg->emergency[5];
+emergency[6]=msg->emergency[6];
+emergency[7]=msg->emergency[7];
 
-    pub_to_goap={};
-
-    //    pub_to_goap.emergency.push_back(msg->emergency[j]);
+	
+	   
+	
 }
 
 

@@ -88,7 +88,6 @@ def add_two_ints_server():
 	rospy.init_node('goap_test')
 	rospy.Service('goap_test_v1', goap_, handle_return_to_main)
 	print "Ready to use goap test."
-
 	rospy.spin()
     
 def replan_path(action_name, a_list):

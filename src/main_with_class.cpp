@@ -7,6 +7,7 @@
 
 #include "main_loop/path.h"
 #include "main_loop/agent.h"
+#include "main_loop/goap_.h"
 #include <iostream>
 #include <queue>
 #include <vector>
@@ -23,6 +24,8 @@ class sub_state{
 		void change_value_my_pos_x(int &my_pos_x);
 		void change_value_my_pos_y(int &my_pos_y);
 		main_loop::path srv_to_path;
+        int status;
+        int robot_degree;
 		
 
 		sub_state();
@@ -45,12 +48,14 @@ sub_state::sub_state(){
 }
 
 void sub_state::callback(const main_loop::agent::ConstPtr& msg){
-  srv_to_path.request.my_pos_x = msg->my_pos_x ;
-  srv_to_path.request.my_pos_y = msg->my_pos_y ;
-  ROS_INFO("my_pos_x in main_with_class: %d", pub_to_goap.my_pos_x);
-  ROS_INFO("my_pos_y in main_with_class: %d", pub_to_goap.my_pos_y);
+    srv_to_path.request.my_pos_x = msg->my_pos_x ;
+    srv_to_path.request.my_pos_y = msg->my_pos_y ;
+    robot_degree = msg->my_degree ; 
+    status = msg->task_state;
+    ROS_INFO("my_pos_x in main_with_class: %d", pub_to_goap.my_pos_x);
+    ROS_INFO("my_pos_y in main_with_class: %d", pub_to_goap.my_pos_y);
 
-  pub_to_goap={};
+    pub_to_goap={};
 
     //    pub_to_goap.emergency.push_back(msg->emergency[j]);
 }
@@ -70,9 +75,10 @@ int main(int argc, char **argv)
     ros::Publisher pub = nh.advertise<std_msgs::Int32MultiArray>("txST1", 1);
 	ros::Publisher pub_2 = nh.advertise<std_msgs::Int32MultiArray>("txST2", 1);
 	ros::ServiceClient client = nh.serviceClient<main_loop::path>("path_plan");
-    ros::ServiceClient client_goap = nh.serviceClient<main_loop::AddTwoInts>("goap_test_");
+    ros::ServiceClient client_goap = nh.serviceClient<main_loop::goap_>("goap_test_v1");
     main_loop::AddTwoInts srv_1; //test
 	main_loop::path srv;
+    main_loop::goap_ goap_srv;
 	B.request.my_pos_x = my_pos_x_ ;
     B.request.my_pos_y = my_pos_y_ ;
    
@@ -93,7 +99,7 @@ int main(int argc, char **argv)
       float return_degree = 0 ;
 	
 	while(ros::ok()){
-	 double begin_time =ros::Time::now().toSec();
+	    double begin_time =ros::Time::now().toSec();
 		//calculate time
 		
 
@@ -114,9 +120,14 @@ int main(int argc, char **argv)
 
         srv_1.request.a = 2;
         srv_1.request.b = 3;
+        goap_srv.request.replan=0;
+        goap_srv.request.action_done=0;
+        goap_srv.request.pos.push_back(A.srv_to_path.request.my_pos_x);
+        goap_srv.request.pos.push_back(A.srv_to_path.request.my_pos_y);
+        goap_srv.request.my_degree = A.robot_degree ; 
 
-        if (client_goap.call(srv_1)){
-            ROS_INFO("test_goap: %ld", (long int)srv_1.response.sum);
+        if (client_goap.call(goap_srv)){
+            ROS_INFO("test_goap: %ld", (long int)goap_srv.response.degree);
         }else{
             ROS_ERROR("Failed to call goap_test");
         }

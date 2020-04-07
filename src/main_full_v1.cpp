@@ -4,7 +4,7 @@
 #include "std_msgs/String.h"
 #include <std_msgs/Int32MultiArray.h>
 #include <main_loop/AddTwoInts.h>  //test_goap
-#include "main_loop/goap.h"
+#include "main_loop/goap_.h"
 #include "main_loop/path.h"
 #include "main_loop/agent.h"
 #include <iostream>
@@ -210,9 +210,9 @@ int main(int argc, char **argv)
     ros::Publisher pub = nh.advertise<std_msgs::Int32MultiArray>("txST1", 1);
 	ros::Publisher pub_2 = nh.advertise<std_msgs::Int32MultiArray>("txST2", 1);
 	ros::ServiceClient client = nh.serviceClient<main_loop::path>("path_plan");
-    ros::ServiceClient client_goap = nh.serviceClient<main_loop::goap>("goap_test_v1");
+    ros::ServiceClient client_goap = nh.serviceClient<main_loop::goap_>("goap_test_v1");
     main_loop::AddTwoInts srv_1; //test
-    main_loop::goap goap_srv;
+    main_loop::goap_ goap_srv;
 	main_loop::path srv;
 	B.request.my_pos_x = my_pos_x_ ;
     B.request.my_pos_y = my_pos_y_ ;

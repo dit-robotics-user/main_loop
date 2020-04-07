@@ -121,7 +121,7 @@ int main(int argc, char **argv)
         srv_1.request.a = 2;
         srv_1.request.b = 3;
         goap_srv.request.replan=0;
-        goap_srv.request.action_done=0;
+        goap_srv.request.action_done=1;
         goap_srv.request.pos.push_back(A.srv_to_path.request.my_pos_x);
         goap_srv.request.pos.push_back(A.srv_to_path.request.my_pos_y);
         goap_srv.request.my_degree = A.robot_degree ; 

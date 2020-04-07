@@ -1,6 +1,43 @@
-#!/usr/bin/env python
-from cup import *
 import math
+
+
+def calculate_unit_vector(start, goal):  # give two points and calculates the unit vector
+    x = goal[0] - start[0]
+    y = goal[1] - start[1]
+    length = math.sqrt(x*x + y*y)
+    unit_vector = (x/length, y/length)
+    return unit_vector
+
+
+def calculate_degree(start, goal):  # from vector then calculates the degree from 0-360
+    num = goal[1] - start[1]
+    den = goal[0] - start[0]
+    pi = 3.1415926
+    radius = 0
+    if num != 0 and den != 0:
+        if num > 0 and den > 0:  # 1 quadrant
+            radius = math.atan(num / den)
+        elif num > 0:  # 2, 3 quadrant
+            radius = pi + math.atan(num / den)
+        else:  # 4 quadrant
+            radius = 2 * pi + math.atan(num / den)
+    elif num == 0 and den > 0:
+        radius = 0  # slope is zero
+    elif num == 0 and den < 0:
+        radius = pi  # slope is zero
+    elif num > 0 and den == 0:
+        radius = pi / 2  # slope is infinity
+    elif num < 0 and den == 0:
+        radius = 3 * pi / 2  # slope is infinity
+    else:
+        '''print('start:')
+        print(start)
+        print('goal')
+        print(goal)
+        print('error')'''
+    degree = int(radius * 180 / pi)  # switches radius to degree
+    #print('degree:', degree)
+    return degree
 
 
 class Action:
@@ -53,7 +90,6 @@ class Action:
             if effect in rws:
                 rws.remove(effect)
         self.required_world_state = rws
-        #self.calculate_priority()
 
     def refresh(self):
         self.path = []
@@ -61,13 +97,13 @@ class Action:
         self.required_world_state = []
         self.current_world_state = []
 
-
-    def tangent_point_calculation(self, my_pos, radius, is_right):  # is_right should be included in cup actions
+    def tangent_point_calculation(self, my_pos, stretch_factor):  # is_right should be included in cup actions
         cx = self.position[0]
         cy = self.position[1]
         x = my_pos[0]
         y = my_pos[1]
-        r = radius
+        r = self.radius
+        is_right = False
         if (cx - x)*(cx - x) + (cy - y)*(cy - y) <= r*r:
             print('error input, my pos is inside/on the radius')
             return 0
@@ -110,18 +146,14 @@ class Action:
         pos1 = (x1, y1)
         pos2 = (x2, y2)
 
-        print('pos1:')
-        print(pos1)
         degree1 = calculate_degree(my_pos, pos1)
-        print('pos2:')
-        print(pos2)
         degree2 = calculate_degree(my_pos, pos2)
-        print('pos_cen:')
-        print(self.position)
 
         center_degree = calculate_degree(my_pos, self.position)
-        stretch_factor = 2
+
         # determines using left or right claw
+        if '1' in self.preconditions or '2' in self.preconditions:
+            is_right = True
         if is_right is True:  # use right claw
             self.degree = min(degree1, degree2, center_degree)
             # extend the goal along vector

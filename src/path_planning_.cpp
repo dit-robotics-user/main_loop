@@ -650,7 +650,8 @@ float move_degree(int start_pos[2], vector<PosNode> path){
     }
     else{
         cout << "error\n";
-        in_radius = -500 ;
+
+        ///////////////////////////////////////////////////////////////////
     }
     in_degree = in_radius * 180 / pi;
     //cout << "start: (" << start.pos[0] << "," << start.pos[1] << ")\n";

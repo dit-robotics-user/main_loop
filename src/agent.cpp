@@ -19,7 +19,7 @@ class sub_class{
         void ST2_sub_callback(const std_msgs::Int32MultiArray::ConstPtr& msg); 
         void lidarmsg_sub_callback(const lidar_2020::alert_range::ConstPtr& msg);
         void publish_(float time);
-        sub_class(int my_pos_x_ = 300, int my_pos_y_ = 300);
+        sub_class(int my_pos_x_ = 300, int my_pos_y_ = 300,int my_degree_ = 300);
         ~sub_class(){};
 
     private:
@@ -32,9 +32,10 @@ class sub_class{
 
 };
 
-sub_class::sub_class(int my_pos_x_,int my_pos_y_){
+sub_class::sub_class(int my_pos_x_,int my_pos_y_,int my_degree_){
     pub_to_main.my_pos_x = my_pos_x_ ; 
     pub_to_main.my_pos_y = my_pos_y_ ; 
+    pub_to_main.my_degree = my_degree_ ; 
   
 }
 
@@ -42,6 +43,7 @@ void sub_class::ST1_sub_callback(const std_msgs::Int32MultiArray::ConstPtr& msg)
     
     pub_to_main.my_pos_x = msg->data[0] ;
     pub_to_main.my_pos_y = msg->data[1] ;
+    pub_to_main.my_degree = msg->data[2] ;  
     ROS_INFO("my_pos_x: %d", pub_to_main.my_pos_x);
     ROS_INFO("my_pos_y: %d", pub_to_main.my_pos_y);
     ROS_INFO("ST1");

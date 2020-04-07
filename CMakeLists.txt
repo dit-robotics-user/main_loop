@@ -60,6 +60,7 @@ add_service_files(
 	FILES
 	AddTwoInts.srv
 	path.srv
+	goap_.srv
 )
 
 ## Generate actions in the 'action' folder
@@ -216,8 +217,6 @@ add_executable(agent src/agent.cpp)
 add_dependencies(agent main_loop_gencpp)
 target_link_libraries(agent ${catkin_LIBRARIES})
 
-
-
 add_executable(main_ src/main_.cpp)
 add_dependencies(main_ main_loop_gencpp)
 target_link_libraries(main_ ${catkin_LIBRARIES})
@@ -226,9 +225,14 @@ add_executable(main_with_class src/main_with_class.cpp)
 add_dependencies(main_with_class main_loop_gencpp)
 target_link_libraries(main_with_class ${catkin_LIBRARIES})
 
+add_executable(main_full_v1 src/main_full_v1.cpp)
+add_dependencies(main_full_v1 main_loop_gencpp)
+target_link_libraries(main_full_v1 ${catkin_LIBRARIES})
+
 add_dependencies(agent ${catkin_EXPORTED_TARGETS})
 
 target_link_libraries(main_with_class ${catkin_LIBRARIES} python2.7) 
+target_link_libraries(main_full_v1 ${catkin_LIBRARIES} python2.7)
 
 
 

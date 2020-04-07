@@ -1,0 +1,9 @@
+bool replan
+bool action_done
+int16[] pos
+int16 my_degree
+---
+int16 degree
+int16 speed
+int16 mode
+

@@ -1,0 +1,24 @@
+
+<launch>
+
+
+	<node pkg="main_loop" type="path_planning_" name="path_planning_" output="screen" respawn="true">
+	</node>
+
+	<node pkg="main_loop" type="main_full_v1" name="main_full_v1" output="screen" respawn="true">
+	</node>
+	<node pkg="main_loop" type="agent" name="agent" output="screen">
+	</node>
+	<node pkg="serial_port" type="serial_port_node" name="serial_port_node" output="screen">
+	</node>
+	<node pkg="main_loop" type="goap_test.py" name="goap_test" respawn="true" >
+	</node>
+	
+	
+	   <include file="$(find lidar_2020)/launch/octagonal_range.launch">
+    </include>	
+	
+    
+
+
+</launch>

@@ -45,7 +45,8 @@ class sub_class{
 
 void sub_class::status_sub_callback(const std_msgs::Int32::ConstPtr& msg)
 {
-	status.data = msg->data;
+	status.data = msg->data ;
+    pub_to_main.status = msg->data ; 
 }
 void sub_class::status_publish()
 {
@@ -100,7 +101,7 @@ void sub_class::publish_(float time ){
 
 
 int main(int argc, char **argv){
-    ros::init(argc,argv, "agent");
+    ros::init(argc,argv, "agent_add_status");
     sub_class A;
     ros::Time::init();
     float begin_time =ros::Time::now().toSec();

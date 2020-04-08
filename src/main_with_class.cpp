@@ -25,9 +25,9 @@ class sub_state{
 		main_loop::path srv_to_path;
 		bool emergency[8];
         int status;
+        int task_state;
         int robot_degree;
-		
-
+        bool lidar_be_blocked(float speed_degree,float car_degree);
 		sub_state();
 		~sub_state(){};
 		
@@ -51,7 +51,8 @@ void sub_state::callback(const main_loop::agent::ConstPtr& msg){
     srv_to_path.request.my_pos_x = msg->my_pos_x ;
     srv_to_path.request.my_pos_y = msg->my_pos_y ;
     robot_degree = msg->my_degree ; 
-    status = msg->task_state;
+    task_state = msg->task_state;
+    status = msg->status;
     ROS_INFO("my_pos_x in main_with_class: %d", pub_to_goap.my_pos_x);
     ROS_INFO("my_pos_y in main_with_class: %d", pub_to_goap.my_pos_y);
     /*
@@ -65,6 +66,24 @@ void sub_state::callback(const main_loop::agent::ConstPtr& msg){
     emergency[6]=msg->emergency[6];
     emergency[7]=msg->emergency[7];
     */	
+}
+
+bool sub_state::lidar_be_blocked(float speed_degree,float car_degree){
+    if(car_degree>speed_degree){
+        if(car_degree-speed_degree<90){
+            if( emergemcy[1]=false || emergemcy[2]=false || emergemcy[3]=false ){
+                return false
+            }else{
+                return true
+            }
+        }else{
+            if( emergemcy[4]=false || emergemcy[5]=false || emergemcy[6]=false ){
+                return false
+            }else{
+                return true
+            }            
+        }
+    }
 }
 
 

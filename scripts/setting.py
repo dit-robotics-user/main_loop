@@ -6,7 +6,7 @@ this .py file is the only place you will need to change
 from action import *
 
 
-def setting(mode, demo_path):
+def setting(mode):
     if mode is 1:  # name, preconditions, effects, position, cost, degree, speed, mode, speed_mode_radius, number, iscup
         c1 = Action("cup1_1",      ['1', '3'], ['get_cup'], (200, 20), 3, 90, 150, 2, 0, 1, True)
         c2 = Action("cup1_2",      ['2', '4'], ['get_cup'], (60, 50), 3, 90, 150, 2, 0, 1, True)

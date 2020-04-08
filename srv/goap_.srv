@@ -6,4 +6,7 @@ int16 my_degree
 int16 degree
 int16 speed
 int16 mode
+int16[] pos
+int16[] ST2
+
 

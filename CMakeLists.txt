@@ -217,6 +217,10 @@ add_executable(agent src/agent.cpp)
 add_dependencies(agent main_loop_gencpp)
 target_link_libraries(agent ${catkin_LIBRARIES})
 
+add_executable(agent_add_status src/agent_add_status.cpp)
+add_dependencies(agent_add_status main_loop_gencpp)
+target_link_libraries(agent_add_status ${catkin_LIBRARIES})
+
 add_executable(main_ src/main_.cpp)
 add_dependencies(main_ main_loop_gencpp)
 target_link_libraries(main_ ${catkin_LIBRARIES})

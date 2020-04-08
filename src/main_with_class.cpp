@@ -3,7 +3,6 @@
 
 #include "std_msgs/String.h"
 #include <std_msgs/Int32MultiArray.h>
-#include <main_loop/AddTwoInts.h>  //test_goap
 
 #include "main_loop/path.h"
 #include "main_loop/agent.h"
@@ -55,19 +54,17 @@ void sub_state::callback(const main_loop::agent::ConstPtr& msg){
     status = msg->task_state;
     ROS_INFO("my_pos_x in main_with_class: %d", pub_to_goap.my_pos_x);
     ROS_INFO("my_pos_y in main_with_class: %d", pub_to_goap.my_pos_y);
+    /*
 	ROS_INFO("lidar[0]: %d", msg->emergency[0]);
 	emergency[0]=msg->emergency[0];
-emergency[1]=msg->emergency[1];
-emergency[2]=msg->emergency[2];
-emergency[3]=msg->emergency[3];
-emergency[4]=msg->emergency[4];
-emergency[5]=msg->emergency[5];
-emergency[6]=msg->emergency[6];
-emergency[7]=msg->emergency[7];
-
-	
-	   
-	
+    emergency[1]=msg->emergency[1];
+    emergency[2]=msg->emergency[2];
+    emergency[3]=msg->emergency[3];
+    emergency[4]=msg->emergency[4];
+    emergency[5]=msg->emergency[5];
+    emergency[6]=msg->emergency[6];
+    emergency[7]=msg->emergency[7];
+    */	
 }
 
 
@@ -86,7 +83,6 @@ int main(int argc, char **argv)
 	ros::Publisher pub_2 = nh.advertise<std_msgs::Int32MultiArray>("txST2", 1);
 	ros::ServiceClient client = nh.serviceClient<main_loop::path>("path_plan");
     ros::ServiceClient client_goap = nh.serviceClient<main_loop::goap_>("goap_test_v1");
-    main_loop::AddTwoInts srv_1; //test
 	main_loop::path srv;
     main_loop::goap_ goap_srv;
 	B.request.my_pos_x = my_pos_x_ ;
@@ -101,12 +97,12 @@ int main(int argc, char **argv)
     int now_my_pos_x;
     int now_my_pos_y;
     
-      //change mode 
-      float distance_square ; 
-      float switch_mode_distance = 350 ; 
-      float last_degree = 0 ;
-      float now_degree = 0 ;
-      float return_degree = 0 ;
+    //change mode 
+    float distance_square ; 
+    float switch_mode_distance = 350 ; 
+    float last_degree = 0 ;
+    float now_degree = 0 ;
+    float return_degree = 0 ;
 	
 	while(ros::ok()){
 	    double begin_time =ros::Time::now().toSec();
@@ -128,16 +124,17 @@ int main(int argc, char **argv)
         B.request.goal_pos_x = 1600;
         B.request.goal_pos_y = 2400;
 
-        srv_1.request.a = 2;
-        srv_1.request.b = 3;
         goap_srv.request.replan=0;
-        goap_srv.request.action_done=1;
+        goap_srv.request.action_done=0;
         goap_srv.request.pos.push_back(A.srv_to_path.request.my_pos_x);
         goap_srv.request.pos.push_back(A.srv_to_path.request.my_pos_y);
         goap_srv.request.my_degree = A.robot_degree ; 
 
         if (client_goap.call(goap_srv)){
             ROS_INFO("test_goap: %ld", (long int)goap_srv.response.degree);
+            ROS_INFO("test_goap: %ld", (long int)goap_srv.response.speed);
+            ROS_INFO("test_goap: %ld", (long int)goap_srv.response.mode);
+            ROS_INFO("test_goap: %ld", (long int)goap_srv.response.pos[0]);
         }else{
             ROS_ERROR("Failed to call goap_test");
         }
@@ -150,44 +147,43 @@ int main(int argc, char **argv)
 			ROS_INFO("next_pos_x: %ld", (long int)B.response.next_pos_x);
 			ROS_INFO("next_pos_y: %ld", (long int)B.response.next_pos_y);
 			return_degree = B.response.degree ; 
-		}
-		else{
+		}else{
 			ROS_ERROR("Failed to call service path plan");
 		}
         distance_square = (B.request.my_pos_x - B.request.goal_pos_x)*(B.request.my_pos_x - B.request.goal_pos_x) + (B.request.my_pos_y - B.request.goal_pos_y)*(B.request.my_pos_y - B.request.goal_pos_y);
     
-    if(now_degree<0){
-        now_degree = last_degree;
-    }
-    ROS_INFO("next_degree: %ld", (long int)now_degree);
+        if(now_degree<0){
+            now_degree = last_degree;
+        }
+        ROS_INFO("next_degree: %ld", (long int)now_degree);
 
 
 
-    //publish to serial node 
-    std_msgs::Int32MultiArray msg_ ;
-    if(distance_square < switch_mode_distance){
-        msg_.data.push_back(0x4000);
-        msg_.data.push_back(B.response.next_pos_x);
-        msg_.data.push_back(B.response.next_pos_y);
-        msg_.data.push_back(90);
-    }else{
-        msg_.data.push_back(0x3000);
-        msg_.data.push_back(200);
-        msg_.data.push_back(now_degree);
-        msg_.data.push_back(0);
-    
-    }   
-    std_msgs::Int32MultiArray msg_2 ;
-    msg_2.data.push_back(2);
-    msg_2.data.push_back(1);
-    msg_2.data.push_back(31);
-    
-    pub.publish(msg_);
-    pub_2.publish(msg_2);
-    last_degree = now_degree ; 
+        //publish to serial node 
+        std_msgs::Int32MultiArray msg_ ;
+        if(distance_square < switch_mode_distance){
+            msg_.data.push_back(0x4000);
+            msg_.data.push_back(B.response.next_pos_x);
+            msg_.data.push_back(B.response.next_pos_y);
+            msg_.data.push_back(90);
+        }else{
+            msg_.data.push_back(0x3000);
+            msg_.data.push_back(200);
+            msg_.data.push_back(now_degree);
+            msg_.data.push_back(0);
+
+        }   
+        std_msgs::Int32MultiArray msg_2 ;
+        msg_2.data.push_back(2);
+        msg_2.data.push_back(1);
+        msg_2.data.push_back(31);
+
+        pub.publish(msg_);
+        pub_2.publish(msg_2);
+        last_degree = now_degree ; 
 
 
-		ros::spinOnce();
+        ros::spinOnce();
 	}
 	return 0;
 }

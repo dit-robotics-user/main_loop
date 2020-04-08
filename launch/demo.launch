@@ -7,13 +7,13 @@
 
 	<node pkg="main_loop" type="main_with_class" name="main_with_class" output="screen" respawn="true">
 	</node>
-	<node pkg="main_loop" type="agent" name="agent" output="screen">
+	<node pkg="main_loop" type="agent_add_status" name="agent_add_status" output="screen">
 	</node>
 	<node pkg="serial_port" type="serial_port_node" name="serial_port_node" output="screen">
 	</node>
 	<node pkg="serial_port" type="serial_port_node_2" name="serial_port_node_2" output="screen">
 	</node>
-	<node pkg="main_loop" type="goap_main_v1.py" name="goap_main_v1" respawn="true" >
+	<node pkg="main_loop" type="goap_main_v1.py" name="goap_main_v1" output="screen" respawn="true" >
 	</node>
 	
 	

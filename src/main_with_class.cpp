@@ -71,16 +71,16 @@ void sub_state::callback(const main_loop::agent::ConstPtr& msg){
 bool sub_state::lidar_be_blocked(float speed_degree,float car_degree){
     if(car_degree>speed_degree){
         if(car_degree-speed_degree<90){
-            if( emergemcy[1]=false || emergemcy[2]=false || emergemcy[3]=false ){
-                return false
+            if( emergency[1]==false || emergency[2]==false || emergency[3]==false ){
+                return false ;
             }else{
-                return true
+                return true ;
             }
         }else{
-            if( emergemcy[4]=false || emergemcy[5]=false || emergemcy[6]=false ){
-                return false
+            if( emergency[4]==false || emergency[5]==false || emergency[6]==false ){
+                return false ;
             }else{
-                return true
+                return true ;
             }            
         }
     }

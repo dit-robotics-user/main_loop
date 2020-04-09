@@ -165,6 +165,7 @@ int main(int argc, char **argv)
 			ROS_INFO ("%f secs for path plan .", clustering_time);
 			ROS_INFO("next_pos_x: %ld", (long int)B.response.next_pos_x);
 			ROS_INFO("next_pos_y: %ld", (long int)B.response.next_pos_y);
+            ROS_INFO("blocked: %ld", (long int)B.response.blocked);
 			return_degree = B.response.degree ; 
 		}else{
 			ROS_ERROR("Failed to call service path plan");

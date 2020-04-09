@@ -691,6 +691,7 @@ bool add(main_loop::path::Request  &req,
         cout << "blocked\n";
     }
     res.degree = move_degree(start_pos, b);
+    res.blocked = blocked ; 
 
     return true;
     

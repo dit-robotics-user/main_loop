@@ -29,8 +29,7 @@ class sub_class{
     private:
         ros::NodeHandle n;
         
-        ros::Publisher status_pub = n.advertise<std_msgs::Int32>("pub_status",1);
-        
+        ros::Publisher status_pub = n.advertise<std_msgs::Int32>("pub_status",1); 
 		ros::Publisher agent_pub= n.advertise<main_loop::agent>("agent_msg", 1);
 		ros::Subscriber ST1_sub = n.subscribe<std_msgs::Int32MultiArray>("rxST1", 1, &sub_class::ST1_sub_callback,this);
         ros::Subscriber ST2_sub = n.subscribe<std_msgs::Int32MultiArray>("rxST2", 1, &sub_class::ST2_sub_callback,this);
@@ -43,18 +42,14 @@ class sub_class{
 };
 
 
-void sub_class::status_sub_callback(const std_msgs::Int32::ConstPtr& msg)
-{
+void sub_class::status_sub_callback(const std_msgs::Int32::ConstPtr& msg){
 	status.data = msg->data ;
     pub_to_main.status = msg->data ; 
 }
-void sub_class::status_publish()
-{
+void sub_class::status_publish(){
+    pub_to_main.status = status.data ;
 	status_pub.publish(status);
 }
-
-
-
 
 
 

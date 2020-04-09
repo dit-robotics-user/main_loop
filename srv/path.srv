@@ -12,4 +12,5 @@ int16 goal_pos_y
 int16 next_pos_x
 int16 next_pos_y
 float32 degree 
+bool blocked
 

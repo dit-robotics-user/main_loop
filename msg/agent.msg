@@ -10,6 +10,6 @@ int16 enemy2_x
 int16 enemy2_y
 int16 ally_x
 int16 ally_y
-int16 status
+int32 status
 float32 time 
 

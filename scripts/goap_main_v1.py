@@ -4,13 +4,16 @@ from main_loop.srv import *
 import rospy
 from setting import *
 
+class MyClass:
+    output_degree = -1  # --->
+    output_speed = 0  # --->
+    output = [-1]*15  # --->
+    output_mode = -1  # --->
+    output_position = (0, 0)  # --->
+
+
 action_done = False  # <----
 my_pos = (3, 3)  # <----
-output = [-1]*15  # --->
-output_speed = 0  # --->
-output_mode = -1  # --->
-output_degree = -1  # --->
-output_position = (0, 0)  # --->
 demo_path = setting(1)
 goal = []
 path_done = False
@@ -48,8 +51,10 @@ def output_processor(output_action, left_side, right_side):
 def handle_return_to_main(req):
 	action_done = req.action_done  # <----
 	my_pos = (req.pos[0],req.pos[1])  # <----
+	rospy.loginfo(action_done)
+	rospy.loginfo(MyClass.output_speed)
 	print "in goap_test.py"
-	return [output_degree,output_speed,output_mode,output_position,output]
+	return [MyClass.output_degree,MyClass.output_speed,MyClass.output_mode,MyClass.output_position,MyClass.output]
 
 def add_two_ints_server():
 	global demo_path
@@ -67,11 +72,11 @@ def add_two_ints_server():
 
 		while path_done is False:
 			if action_done is False:
-				output = output_processor(path, left_side, right_side)
-				output_degree = path.degree
-				output_speed = path.speed
-				output_mode = path.grab_mode
-				output_position = path.position
+				MyClass.output = output_processor(path, left_side, right_side)
+				MyClass.output_degree = path.degree
+				MyClass.output_speed = path.speed
+				MyClass.output_mode = path.grab_mode
+				MyClass.output_position = path.position
 			else:
 				#print(path.name)
 				#print(path.position)

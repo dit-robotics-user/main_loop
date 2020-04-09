@@ -177,7 +177,7 @@ void sub_state::callback(const main_loop::agent::ConstPtr& msg){
     robot_degree = msg->my_degree ; 
     task_state = msg->task_state;
     status = msg->status;
- /* 
+  
 	ROS_INFO("lidar[0]: %d", msg->emergency[0]);
 	emergency[0]=msg->emergency[0];
     emergency[1]=msg->emergency[1];
@@ -187,7 +187,7 @@ void sub_state::callback(const main_loop::agent::ConstPtr& msg){
     emergency[5]=msg->emergency[5];
     emergency[6]=msg->emergency[6];
     emergency[7]=msg->emergency[7];
- */   	
+   	
 }
 
 bool sub_state::lidar_be_blocked(float speed_degree,float car_degree){
@@ -240,7 +240,7 @@ int main(int argc, char **argv){
     int cover_limit = 20;
     int old_grab_status[12] = {0};
     int distance_square = 0;
-    int a_done = false;
+    bool a_done = false;
     int now_my_pos_x;
     int now_my_pos_y;
     
@@ -273,7 +273,7 @@ int main(int argc, char **argv){
         path_srv.request.ally_y = 2200 ; 
         //GOAP
         goap_srv.request.replan=false;
-        goap_srv.request.action_done=temp.task_state;
+        goap_srv.request.action_done=a_done;
         goap_srv.request.pos.push_back(temp.srv_to_path.request.my_pos_x);
         goap_srv.request.pos.push_back(temp.srv_to_path.request.my_pos_y);
         goap_srv.request.my_degree = temp.robot_degree ; 
@@ -286,17 +286,21 @@ int main(int argc, char **argv){
                 for_st1.data.push_back(0);
                 break;
             case Status::RUN:{ //5
-                state current_state(1,temp.srv_to_path.request.my_pos_x,temp.srv_to_path.request.my_pos_y,lidar_blocked,temp.status);//<--------get undergoing, finish, my_x, my_y, block from other nodes ()********
-                state action_state(1,temp.srv_to_path.request.my_pos_x,temp.srv_to_path.request.my_pos_y,lidar_blocked,temp.status);
+                state current_state(1,temp.srv_to_path.request.my_pos_x,temp.srv_to_path.request.my_pos_y,false,temp.status);//<--------get undergoing, finish, my_x, my_y, block from other nodes ()********
+                state action_state(1,temp.srv_to_path.request.my_pos_x,temp.srv_to_path.request.my_pos_y,false,temp.status);
 
                 if(a_done = true){
                     goal_covered_counter = 0;
                 }
                 action_state = current_state;//----->goap subscribe action state, then cover it with current
                 if(client_goap.call(goap_srv)){
+                    path_srv.request.goal_pos_x = goap_srv.response.pos[0];
+                    path_srv.request.goal_pos_y = goap_srv.response.pos[1];
                     ROS_INFO("test_goap: %ld", (long int)goap_srv.response.degree);
                     ROS_INFO("test_goap: %ld", (long int)goap_srv.response.speed);
                     ROS_INFO("test_goap: %ld", (long int)goap_srv.response.mode);
+                    ROS_INFO("from goap: %ld", (long int)goap_srv.response.pos[0]);
+                    ROS_INFO("from goap: %ld", (long int)goap_srv.response.pos[1]);
                     temp.movement_from_goap[0]=goap_srv.response.ST2[0];
                     temp.movement_from_goap[1]=goap_srv.response.ST2[1];
                     temp.movement_from_goap[2]=goap_srv.response.ST2[2];
@@ -312,9 +316,7 @@ int main(int argc, char **argv){
                     temp.movement_from_goap[12]=goap_srv.response.ST2[12];
                     temp.movement_from_goap[13]=goap_srv.response.ST2[13];
                     temp.movement_from_goap[14]=goap_srv.response.ST2[14];
-                    path_srv.request.goal_pos_x = goap_srv.response.pos[0];
-                    path_srv.request.goal_pos_y = goap_srv.response.pos[1];
-                    ROS_INFO("ST2: %ld", (long int)goap_srv.response.ST2[0]);
+
                 }else{
                     ROS_ERROR("Failed to call goap_test");
                 }
@@ -338,6 +340,7 @@ int main(int argc, char **argv){
                 else{
                     a_done = false;
                 }
+                ROS_INFO("a_done: %ld", a_done);
                 Mode m;
                 if(desire_mode == 1){
                     m = Mode::POSITION_MODE;
@@ -347,6 +350,7 @@ int main(int argc, char **argv){
                 }
                 switch(m){
                     case Mode::POSITION_MODE:
+                        ROS_INFO("State:POSITION_MODE");
                         RobotState robot;
 
                         if(current_state.MyPosX() == desire_pos_x && current_state.MyPosY() == desire_pos_y){
@@ -362,6 +366,7 @@ int main(int argc, char **argv){
                         }
                         switch(robot){
                             case RobotState::AT_POS:
+                                ROS_INFO("State:AT_POS");
                                 // give orders to STM2
                                 for_st2.data.push_back(desire_movement[12]);
                                 for_st2.data.push_back(desire_movement[13]);
@@ -385,6 +390,7 @@ int main(int argc, char **argv){
                                 break;
 
                             case RobotState::BLOCKED:
+                                ROS_INFO("State:BLOCKED");
                                 //return stop; //<-------------tell STM to stop
                                 for_st1.data.push_back(0x5000);
                                 for_st1.data.push_back(0);
@@ -394,6 +400,7 @@ int main(int argc, char **argv){
                                 break;
 
                             case RobotState::ON_THE_WAY:
+                                ROS_INFO("State:ON_THE_WAY");
                                 if(client_path.call(path_srv)){
                                     double clustering_time = ros::Time::now().toSec () - begin_time; 
                                     ROS_INFO ("%f secs for path plan .", clustering_time);
@@ -442,6 +449,7 @@ int main(int argc, char **argv){
                         break;
 
                     case Mode::SPEED_MODE:
+                        ROS_INFO("State:SPEED_MODE");
                         for_st2.data.push_back(desire_movement[12]);
                         for_st2.data.push_back(desire_movement[13]);
                         for(int i = 0; i < 12; i ++){

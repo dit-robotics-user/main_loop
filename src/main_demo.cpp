@@ -274,8 +274,8 @@ int main(int argc, char **argv){
         path_srv.request.goal_pos_x = 1600;
         path_srv.request.goal_pos_y = 2400;
         //GOAP
-        goap_srv.request.replan=0;
-        goap_srv.request.action_done=0;
+        goap_srv.request.replan=false;
+        goap_srv.request.action_done=temp.task_state;
         goap_srv.request.pos.push_back(temp.srv_to_path.request.my_pos_x);
         goap_srv.request.pos.push_back(temp.srv_to_path.request.my_pos_y);
         goap_srv.request.my_degree = temp.robot_degree ; 

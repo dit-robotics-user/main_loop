@@ -1,12 +1,12 @@
 bool replan
 bool action_done
-int16[] pos
-int16 my_degree
+int32[] pos
+int32 my_degree
 ---
-int16 degree
-int16 speed
-int16 mode
-int16[] pos
-int16[] ST2
+int32 degree
+int32 speed
+int32 mode
+int32[] pos
+int32[] ST2
 
 

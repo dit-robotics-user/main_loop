@@ -57,6 +57,7 @@ sub_class::sub_class(int my_pos_x_,int my_pos_y_, int ini_status){
     pub_to_main.my_pos_x = my_pos_x_ ; 
     pub_to_main.my_pos_y = my_pos_y_ ; 
     status.data = ini_status;
+    pub_to_main.task_state=0;
 }
 
 void sub_class::ST1_sub_callback(const std_msgs::Int32MultiArray::ConstPtr& msg){

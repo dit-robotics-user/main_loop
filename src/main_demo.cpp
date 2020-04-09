@@ -29,7 +29,7 @@ class sub_state{
         int movement_from_goap[15];
         int status;
         int task_state;
-        int robot_degree;
+        float robot_degree;
         main_loop::path srv_to_path;
 		
 	private:
@@ -66,16 +66,16 @@ void sub_state::callback(const main_loop::agent::ConstPtr& msg){
 bool sub_state::lidar_be_blocked(float speed_degree,float car_degree){
     if(car_degree>speed_degree){
         if(car_degree-speed_degree<90){
-            if( emergency[1]==false || emergency[2]==false || emergency[3]==false ){
-                return false ;
-            }else{
+            if( emergency[1]==true || emergency[2]==true || emergency[3]==true ){
                 return true ;
+            }else{
+                return false ;
             }
         }else{
-            if( emergency[4]==false || emergency[5]==false || emergency[6]==false ){
-                return false ;
-            }else{
+            if( emergency[4]==true || emergency[5]==true || emergency[6]==true ){
                 return true ;
+            }else{
+                return false ;
             }            
         }
     }
@@ -231,17 +231,17 @@ int main(int argc, char **argv){
     int rx1;
     int rx2;
     int rx3;
+    int out = 0;
     int goal_covered_counter = 0;
     int cover_limit = 20;
+    int old_grab_status[12] = {0};
+    int distance_square = 0;
     int now_my_pos_x;
     int now_my_pos_y;
     
-    //change mode 
-    float distance_square ; 
-    float switch_mode_distance = 350 ; 
+
     float last_degree = 0 ;
     float now_degree = 0 ;
-    float return_degree = 0 ;
 	
 	while(ros::ok()){
         //calculate time
@@ -253,9 +253,10 @@ int main(int argc, char **argv){
 
         int s = temp.status; //<----------get from command
         Status stat  = static_cast<Status>(s);
+        bool lidar_blocked=temp.lidar_be_blocked(now_degree,temp.robot_degree);//<------------lidar
 
-        state current_state(temp.status,temp.srv_to_path.request.my_pos_x,temp.srv_to_path.request.my_pos_y,0);//<--------get undergoing, finish, my_x, my_y, block from other nodes ()********
-        state action_state;
+        state current_state(temp.status,temp.srv_to_path.request.my_pos_x,temp.srv_to_path.request.my_pos_y,lidar_blocked);//<--------get undergoing, finish, my_x, my_y, block from other nodes ()********
+        state action_state(temp.status,temp.srv_to_path.request.my_pos_x,temp.srv_to_path.request.my_pos_y,lidar_blocked);
         if(action_state.MyActionStatus() == 2){
             goal_covered_counter = 0;
         }
@@ -303,6 +304,7 @@ int main(int argc, char **argv){
             ROS_ERROR("Failed to call goap_test");
         }
 
+
         action act(goap_srv.response.pos[0] ,goap_srv.response.pos[1] ,temp.movement_from_goap ,goap_srv.response.degree ,goap_srv.response.speed ,true ,goap_srv.response.mode);//<----------get from goap(x, y, movement_num, what_angle, how_fast, is_wait, what_mode)*********
         int switch_mode_distance = 100;
         int desire_pos_x = act.PosX();
@@ -322,12 +324,12 @@ int main(int argc, char **argv){
                 for_st1.data.push_back(0);
                 for_st1.data.push_back(0);
                 break;
-            case Status::RUN: //5
-
+            case Status::RUN:{ //5
                 Mode m;
                 if(desire_mode == 1){
                     m = Mode::POSITION_MODE;
-                }else{
+                }
+                else{
                     m = Mode::SPEED_MODE;
                 }
                 switch(m){
@@ -336,19 +338,35 @@ int main(int argc, char **argv){
 
                         if(current_state.MyPosX() == desire_pos_x && current_state.MyPosY() == desire_pos_y){
                             robot = RobotState::AT_POS;
-                        }else{
+                        }
+                        else{
                             if(current_state.IsBlocked()){
                                 robot = RobotState::BLOCKED;
-                            }else{
+                            }
+                            else{
                                 robot = RobotState::ON_THE_WAY;
                             }
                         }
                         switch(robot){
                             case RobotState::AT_POS:
                                 // give orders to STM2
-                                rx0 = desire_movement[12];
-                                rx1 = desire_movement[13];
-                                rx3 = desire_movement[14];
+                                for_st2.data.push_back(desire_movement[12]);
+                                for_st2.data.push_back(desire_movement[13]);
+                                for(int i = 0; i < 12; i ++){
+                                    if(desire_movement[i] == 1){
+                                        old_grab_status[i] = 1;
+                                    }
+                                    else if(desire_movement[i] == 0){
+                                        old_grab_status[i] = 0;
+                                    }
+                                }
+                                for(int i = 0; i < 12; i ++){
+                                    out += old_grab_status[i];
+                                    out = out << 2;
+                                }
+                                out = out << 6;
+                                for_st2.data.push_back(out);
+                                for_st2.data.push_back(desire_movement[14]);
                                 /////////////////////////////////////////////////////////////////////////////************
                                 break;
 
@@ -357,7 +375,7 @@ int main(int argc, char **argv){
                                 for_st1.data.push_back(0x5000);
                                 for_st1.data.push_back(0);
                                 for_st1.data.push_back(0);
-                                for_st1.data.push_back(0);
+                                for_st1.data.push_back(0);                    
                                 action_state.ChangeReplanMission(true);   //---------------> GOAP replan == True
                                 break;
 
@@ -367,7 +385,6 @@ int main(int argc, char **argv){
                                     ROS_INFO ("%f secs for path plan .", clustering_time);
                                     ROS_INFO("next_pos_x: %ld", (long int)path_srv.response.next_pos_x);
                                     ROS_INFO("next_pos_y: %ld", (long int)path_srv.response.next_pos_y);
-                                    ROS_INFO("blocked: %ld", (long int)path_srv.response.blocked);
                                     now_degree = path_srv.response.degree ; 
                                 }else{
                                     ROS_ERROR("Failed to call service path plan");
@@ -375,14 +392,15 @@ int main(int argc, char **argv){
                                 if(now_degree<0){
                                     now_degree = last_degree;
                                 }
-                                int distance_square = (current_state.MyPosX() - desire_pos_x)*(current_state.MyPosX() - desire_pos_x) + (current_state.MyPosY() - desire_pos_y)*(current_state.MyPosY() - desire_pos_y);
+                                distance_square = (current_state.MyPosX() - desire_pos_x)*(current_state.MyPosX() - desire_pos_x) + (current_state.MyPosY() - desire_pos_y)*(current_state.MyPosY() - desire_pos_y);
                                 if(distance_square < switch_mode_distance){
                                     for_st1.data.push_back(0x4000);
                                     for_st1.data.push_back(desire_pos_x);
                                     for_st1.data.push_back(desire_pos_y);
                                     for_st1.data.push_back(desire_angle);
                                     //return pos_mode; //<----------------
-                                }else{
+                                }
+                                else{
                                     for_st1.data.push_back(0x3000);
                                     for_st1.data.push_back(desire_speed);
                                     for_st1.data.push_back(path_srv.response.degree);;//<-----------------
@@ -402,13 +420,31 @@ int main(int argc, char **argv){
                                     if(goal_covered_counter > cover_limit){
                                         action_state.ChangeKillMission(true);
                                         goal_covered_counter = 0;
-                                    }      
+                                    }   
                                     //return speed_mode;//<-----------------
                                 }
                                 break;
                         }
                         break;
+
                     case Mode::SPEED_MODE:
+                        for_st2.data.push_back(desire_movement[12]);
+                        for_st2.data.push_back(desire_movement[13]);
+                        for(int i = 0; i < 12; i ++){
+                            if(desire_movement[i] == 1){
+                                old_grab_status[i] = 2;
+                            }
+                            else if(desire_movement[i] == 0){
+                                old_grab_status[i] = 0;
+                            }
+                        }
+                        for(int i = 0; i < 12; i ++){
+                            out += old_grab_status[i];
+                            out = out << 2;
+                        }
+                        out = out << 6;
+                        for_st2.data.push_back(out);
+                        for_st2.data.push_back(desire_movement[14]);
                         if(current_state.MyPosX() != desire_pos_x && current_state.MyPosY() != desire_pos_y){
                            if(current_state.MyActionStatus() == 1){ //if not at pos and hasn't got cup, keep going
                                 if (client_path.call(path_srv)){
@@ -422,12 +458,12 @@ int main(int argc, char **argv){
                                 }
                                 if(now_degree<0){
                                     now_degree = last_degree;
-                                }
+                                }                                
                                 for_st1.data.push_back(0x3000);
                                 for_st1.data.push_back(desire_speed);
                                 for_st1.data.push_back(path_srv.response.degree);;//<-----------------
                                 for_st1.data.push_back(0);
-                                if( path_srv.response.blocked == true){ //<-------------path be blocked 
+                                if( path_srv.response.blocked == true){ //<-------------
                                     goal_covered_counter ++;
                                 }
                                 if( path_srv.response.blocked == false){ //<-------------
@@ -437,16 +473,34 @@ int main(int argc, char **argv){
                                     //action_state.ChangeKillMission(true);
                                     action_state.ChangeActionStatus(2); //should kill mission but fuck that.. this should still work
                                     goal_covered_counter = 0;
-                                }
-                            } //if get cup, action_done is then true(MyActionStatus()==2), GOAP will automatically give next action
+                                    for(int i = 0; i < 12; i ++){
+                                       if(desire_movement[i] == 2){
+                                            old_grab_status[i] = 0;
+                                        }
+                                    }
+                            	} //if get cup, action_done is then true(MyActionStatus()==2), GOAP will automatically give next action
+                           }
+                            else{
+                                for(int i = 0; i < 12; i ++){
+                                       if(desire_movement[i] == 2){
+                                            old_grab_status[i] = 1;
+                                        }
+                                    }
+                            }
                         }
                         else{ //at pos, mission has failed..
                             //action_state.ChangeKillMission(true);
                             action_state.ChangeActionStatus(2); //should kill mission but fuck that.. this should still work
+                            for(int i = 0; i < 12; i ++){
+                               if(desire_movement[i] == 2){
+                                    old_grab_status[i] = 0;
+                                }
+                            }
                         }
                         break;
-                    }
+                }
                 break;
+                }
             case Status::STOP: //6
                 for_st1.data.push_back(0x5000);
                 for_st1.data.push_back(0);
@@ -455,7 +509,7 @@ int main(int argc, char **argv){
                 break;  
         }
         pub_st1.publish(for_st1);
-        pub_st1.publish(for_st2);
+        pub_st2.publish(for_st2);
         last_degree = now_degree ; 
         ros::spinOnce();
 	}

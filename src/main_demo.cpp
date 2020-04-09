@@ -368,7 +368,7 @@ int main(int argc, char **argv){
                                     ROS_INFO("next_pos_x: %ld", (long int)path_srv.response.next_pos_x);
                                     ROS_INFO("next_pos_y: %ld", (long int)path_srv.response.next_pos_y);
                                     ROS_INFO("blocked: %ld", (long int)path_srv.response.blocked);
-                                    return_degree = path_srv.response.degree ; 
+                                    now_degree = path_srv.response.degree ; 
                                 }else{
                                     ROS_ERROR("Failed to call service path plan");
                                 }
@@ -416,7 +416,7 @@ int main(int argc, char **argv){
                                     ROS_INFO ("%f secs for path plan .", clustering_time);
                                     ROS_INFO("next_pos_x: %ld", (long int)path_srv.response.next_pos_x);
                                     ROS_INFO("next_pos_y: %ld", (long int)path_srv.response.next_pos_y);
-                                    return_degree = path_srv.response.degree ; 
+                                    now_degree = path_srv.response.degree ; 
                                 }else{
                                     ROS_ERROR("Failed to call service path plan");
                                 }

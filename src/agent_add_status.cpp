@@ -70,13 +70,11 @@ void sub_class::ST1_sub_callback(const std_msgs::Int32MultiArray::ConstPtr& msg)
 }
 void sub_class::ST2_sub_callback(const std_msgs::Int32MultiArray::ConstPtr& msg){
     
-    pub_to_main.task_state = msg->data[0] ;
-    pub_to_main.have_cup = msg->data[1] ;
-    pub_to_main.cup_state = msg->data[2] ;
-    ROS_INFO("rx[0]=: %d", pub_to_main.task_state); 
-    ROS_INFO("rx[1]=: %d", pub_to_main.ally_x);
-    ROS_INFO("rx[2]=: %d", pub_to_main.ally_y);
-    ROS_INFO("ST2");
+    pub_to_main.cup_state = msg->data[0] ;
+    pub_to_main.left_stepper = msg->data[1] ;
+    pub_to_main.right_stepper = msg->data[2] ;
+    pub_to_main.hand = msg->data[3] ;
+    
 }
 
 void sub_class::lidarmsg_sub_callback(const lidar_2020::alert_range::ConstPtr& msg){

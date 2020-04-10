@@ -22,11 +22,12 @@ using namespace std;
 class state{
 public:
     state(){};
-    state(int action_status, int my_x, int my_y, bool block, int tx1){
+    state(int action_status, int my_x, int my_y, bool block, int tx0_){
         status = action_status;
         my_pos_x = my_x;
         my_pos_y = my_y;
         is_blocked = block;
+        tx0 = tx0_ ;
     }
     void ChangeActionStatus(int state){
         status = state;
@@ -72,8 +73,8 @@ public:
     bool ReplanPath(){
         return replan_path;
     }
-    int MyTx1(){
-        return tx1;
+    int MyTx0(){
+        return tx0;
     }
     void RefreshActionState(){
         status = 1;
@@ -94,7 +95,7 @@ private:
     bool is_blocked;
     bool action_wait;
     bool state_change;
-    int tx1;
+    int tx0;
 };
 
 class action{
@@ -158,6 +159,7 @@ class sub_state{
         int task_state;
         float robot_degree;
         main_loop::path srv_to_path;
+        main_loop::agent from_agent;
 		
 	private:
 		ros::NodeHandle n ;
@@ -177,6 +179,11 @@ void sub_state::callback(const main_loop::agent::ConstPtr& msg){
     robot_degree = msg->my_degree ; 
     task_state = msg->task_state;
     status = msg->status;
+    from_agent.cup_state = msg->cup_state;
+    ROS_INFO("from_agent.cup_state: %d", from_agent.cup_state);
+    from_agent.left_stepper = msg -> left_stepper ;
+    from_agent.right_stepper = msg -> right_stepper ; 
+    from_agent.hand = msg->hand ; 
   
 	ROS_INFO("lidar[0]: %d", msg->emergency[0]);
 	emergency[0]=msg->emergency[0];
@@ -234,7 +241,7 @@ int main(int argc, char **argv){
     int rx0;
     int rx1;
     int rx2;
-    int rx3;
+    long int rx3;
     int out = 0;
     int goal_covered_counter = 0;
     int cover_limit = 20;
@@ -243,6 +250,8 @@ int main(int argc, char **argv){
     bool a_done = false;
     int now_my_pos_x;
     int now_my_pos_y;
+    int tem[12];
+    int margin=50;
     
 
     float last_degree = 0 ;
@@ -286,8 +295,8 @@ int main(int argc, char **argv){
                 for_st1.data.push_back(0);
                 break;
             case Status::RUN:{ //5
-                state current_state(1,temp.srv_to_path.request.my_pos_x,temp.srv_to_path.request.my_pos_y,false,temp.status);//<--------get undergoing, finish, my_x, my_y, block from other nodes ()********
-                state action_state(1,temp.srv_to_path.request.my_pos_x,temp.srv_to_path.request.my_pos_y,false,temp.status);
+                state current_state(1,temp.srv_to_path.request.my_pos_x,temp.srv_to_path.request.my_pos_y,false,temp.from_agent.cup_state);//<--------get undergoing, finish, my_x, my_y, block from other nodes ()********
+                state action_state(1,temp.srv_to_path.request.my_pos_x,temp.srv_to_path.request.my_pos_y,false,temp.from_agent.cup_state);
 
                 if(a_done = true){
                     goal_covered_counter = 0;
@@ -334,13 +343,13 @@ int main(int argc, char **argv){
                 bool desire_wait = act.Wait();
                 double desire_angle = act.Angle();
                 action_state.RefreshActionState();
-                if((out==current_state.MyTx1()) && (rx0 == desire_movement[12]) && (rx1 == desire_movement[13]) && (rx3 == desire_movement[14])){
+                if((out==current_state.MyTx0()) && (temp.from_agent.left_stepper == desire_movement[12]) && (temp.from_agent.right_stepper == desire_movement[13]) && (temp.from_agent.hand == desire_movement[14])){
                     a_done = true;
                 }
                 else{
                     a_done = false;
                 }
-                ROS_INFO("a_done: %ld", a_done);
+
                 Mode m;
                 if(desire_mode == 1){
                     m = Mode::POSITION_MODE;
@@ -353,7 +362,7 @@ int main(int argc, char **argv){
                         ROS_INFO("State:POSITION_MODE");
                         RobotState robot;
 
-                        if(current_state.MyPosX() == desire_pos_x && current_state.MyPosY() == desire_pos_y){
+                        if(abs(current_state.MyPosX()-desire_pos_x)<margin && abs(current_state.MyPosY()-desire_pos_y)<margin){
                             robot = RobotState::AT_POS;
                         }
                         else{
@@ -366,6 +375,7 @@ int main(int argc, char **argv){
                         }
                         switch(robot){
                             case RobotState::AT_POS:
+                                out = 0;
                                 ROS_INFO("State:AT_POS");
                                 // give orders to STM2
                                 for_st2.data.push_back(desire_movement[12]);
@@ -383,7 +393,9 @@ int main(int argc, char **argv){
                                     out = out << 2;
                                 }
                                 out = out << 6;
-                                for_st2.data.push_back(out);
+                                rx3 = out ; 
+                                ROS_INFO("rx3: %ld",rx3);
+                                for_st2.data.push_back(rx3);
                                 for_st2.data.push_back(desire_movement[14]);
 
                                 /////////////////////////////////////////////////////////////////////////////************
@@ -537,4 +549,5 @@ int main(int argc, char **argv){
 	}
 	return 0;
 }
+
 

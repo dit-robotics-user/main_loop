@@ -11,7 +11,9 @@ int32 enemy2_y
 int32 ally_x
 int32 ally_y
 int32 cup_state
-int32 have_cup
+int32 left_stepper
+int32 right_stepper
+int32 hand
 int32 status
 float32 time 
 

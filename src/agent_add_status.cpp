@@ -18,10 +18,9 @@ class sub_class{
         void ST1_sub_callback(const std_msgs::Int32MultiArray::ConstPtr& msg);
         void ST2_sub_callback(const std_msgs::Int32MultiArray::ConstPtr& msg); 
         void lidarmsg_sub_callback(const lidar_2020::alert_range::ConstPtr& msg);
-        void publish_(float time);
         void status_sub_callback(const std_msgs::Int32::ConstPtr& msg);
-        void status_publish();
-        
+        void publish_(float time);
+        void status_publish();   
         
         sub_class(int my_pos_x_ = 300, int my_pos_y_ = 300, int ini_status = 0);
         ~sub_class(){};
@@ -31,14 +30,13 @@ class sub_class{
         
         ros::Publisher status_pub = n.advertise<std_msgs::Int32>("pub_status",1); 
 		ros::Publisher agent_pub= n.advertise<main_loop::agent>("agent_msg", 1);
+        ros::Subscriber status_sub= n.subscribe<std_msgs::Int32>("update_status", 1, &sub_class::status_sub_callback,this);
 		ros::Subscriber ST1_sub = n.subscribe<std_msgs::Int32MultiArray>("rxST1", 1, &sub_class::ST1_sub_callback,this);
         ros::Subscriber ST2_sub = n.subscribe<std_msgs::Int32MultiArray>("rxST2", 1, &sub_class::ST2_sub_callback,this);
         ros::Subscriber lidarmsg_sub= n.subscribe<lidar_2020::alert_range>("ranging_alert", 10, &sub_class::lidarmsg_sub_callback,this);
-        ros::Subscriber status_sub= n.subscribe<std_msgs::Int32>("update_status", 1, &sub_class::status_sub_callback,this);
         
         std_msgs::Int32 status;
         main_loop::agent pub_to_main;
-
 };
 
 
@@ -51,17 +49,13 @@ void sub_class::status_publish(){
 	status_pub.publish(status);
 }
 
-
-
 sub_class::sub_class(int my_pos_x_,int my_pos_y_, int ini_status){
     pub_to_main.my_pos_x = my_pos_x_ ; 
     pub_to_main.my_pos_y = my_pos_y_ ; 
     status.data = ini_status;
-    pub_to_main.task_state=0;
 }
 
 void sub_class::ST1_sub_callback(const std_msgs::Int32MultiArray::ConstPtr& msg){
-    
     pub_to_main.my_pos_x = msg->data[0] ;
     pub_to_main.my_pos_y = msg->data[1] ;
     ROS_INFO("my_pos_x: %d", pub_to_main.my_pos_x);
@@ -69,21 +63,16 @@ void sub_class::ST1_sub_callback(const std_msgs::Int32MultiArray::ConstPtr& msg)
     ROS_INFO("ST1");
 }
 void sub_class::ST2_sub_callback(const std_msgs::Int32MultiArray::ConstPtr& msg){
-    
-    pub_to_main.cup_state = msg->data[0] ;
-    pub_to_main.left_stepper = msg->data[1] ;
-    pub_to_main.right_stepper = msg->data[2] ;
-    pub_to_main.hand = msg->data[3] ;
-    
+    pub_to_main.servo_state = msg->data[0] ;
+    pub_to_main.stepper = msg->data[1] ;
+    pub_to_main.hand = msg->data[2] ;    
 }
 
 void sub_class::lidarmsg_sub_callback(const lidar_2020::alert_range::ConstPtr& msg){
-
     pub_to_main.emergency={};
     if(msg->header.seq>2){
         for(int j=0 ;j<8;j++){
             pub_to_main.emergency.push_back(msg->alert[j]);
-            ROS_INFO("lidar[%d] in agent: %d",j, pub_to_main.emergency[j]);
         }  
     }
 }
@@ -93,18 +82,17 @@ void sub_class::publish_(float time ){
     agent_pub.publish(pub_to_main);
 }
 
-
 int main(int argc, char **argv){
     ros::init(argc,argv, "agent_add_status");
-    sub_class A;
+    sub_class temp;
     ros::Time::init();
     float begin_time =ros::Time::now().toSec();
     
     while(ros::ok()){
         float clustering_time = ros::Time::now().toSec () - begin_time ;
         
-        A.publish_(clustering_time);
-        A.status_publish();
+        temp.publish_(clustering_time);
+        temp.status_publish();
         ros::spinOnce();
      
     }

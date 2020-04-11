@@ -5,12 +5,14 @@ import rospy
 from setting import *
 
 class MyClass:
-    output_degree = -1  # --->
-    output_speed = 0  # --->
-    output = [0]*15  # --->
-    output_mode = -1  # --->
-    output_position = (0, 0)  # --->
-    action_done = False  # <----
+	action_done = True  # <----
+	my_pos = (3, 3)  # <----
+	output = [0]*15  # --->
+	output_speed = 0  # --->
+	output_mode = -1  # --->
+	output_degree = -1  # --->
+	output_position = (0, 0)  # --->
+	output_wait = True  # --->
 
 
 
@@ -75,18 +77,18 @@ def output_processor(output_action, left_side, right_side):
             output[12] = 0
             output[13] = 0
         if right_side is 1:
-            output[12] = 0
-            output[13] = 0  # lift layer 3
-        elif right_side is 2:
             output[12] = 1
-            output[13] = 1  # lift layer 2
+            output[13] = 1  # lift layer 3
+        elif right_side is 2:
+            output[12] = 2
+            output[13] = 2  # lift layer 2
     elif output_action.name is 'lift':
         if right_side is 0:
-            output[12] = 1
-            output[13] = 1
+            output[12] = 0
+            output[13] = 0
         if right_side is 1:
-            output[12] = 2
-            output[13] = 2  # lift layer 3
+            output[12] = 1
+            output[13] = 1  # lift layer 3
         elif right_side is 2:
             output[12] = 2
             output[13] = 2  # lift layer 2
@@ -97,28 +99,28 @@ def output_processor(output_action, left_side, right_side):
     if output_action.name is 'open':
         for p in output_action.preconditions:
             if p is '1':
-                claw_num = 2*left_side + 7  # use layer 2 - left_side + '1'
+                claw_num = 4*left_side   # use layer 2 - left_side + '1'
                 output[claw_num] = 0
             elif p is '2':
-                claw_num = 2*left_side + 6  # use layer 2 - left_side + '2'
+                claw_num = 4*left_side + 1  # use layer 2 - left_side + '2'
                 output[claw_num] = 0
             elif p is'3':
-                claw_num = 2*right_side + 1  # use layer 2 - right_side + '3'
+                claw_num = 4*right_side + 2  # use layer 2 - right_side + '3'
                 output[claw_num] = 0
             else:
-                claw_num = 2*right_side      # use layer 2 - right_side + '4'
+                claw_num = 4*right_side + 3  # use layer 2 - right_side + '4'
                 output[claw_num] = 0
     return output
             
 def handle_return_to_main(req):
 	MyClass.action_done = req.action_done  # <----
-	my_pos = (req.pos[0],req.pos[1])  # <----
+	MyClass.my_pos = (req.pos[0],req.pos[1])  # <----
 	rospy.loginfo(MyClass.output[12])
 	rospy.loginfo(MyClass.output[13])
 	rospy.loginfo(MyClass.action_done)
 	rospy.loginfo(MyClass.output_speed)
 	print "in goap_test.py"
-	return [MyClass.output_degree,MyClass.output_speed,MyClass.output_mode,MyClass.output_position,MyClass.output]
+	return [MyClass.output_degree,MyClass.output_speed,MyClass.output_mode,MyClass.output_position,MyClass.output,MyClass.output_wait]
 
 def add_two_ints_server():
 	global demo_path
@@ -137,6 +139,7 @@ def add_two_ints_server():
 		MyClass.output_speed = path.speed
 		MyClass.output_mode = path.grab_mode
 		MyClass.output_position = path.position
+		MyClass.output_wait = path.iswait
 
 		while path_done is False:
 			if MyClass.action_done is True:

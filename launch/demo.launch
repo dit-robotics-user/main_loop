@@ -5,7 +5,7 @@
 	<node pkg="main_loop" type="path_planning_" name="path_planning_" output="log" respawn="true">
 	</node>
 
-	<node pkg="main_loop" type="main_demo" name="main_demo" output="screen" respawn="true">
+	<node pkg="main_loop" type="main_demo_v2" name="main_demo_vs" output="screen" respawn="true">
 	</node>
 	<node pkg="main_loop" type="agent_add_status" name="agent_add_status" >
 	</node>

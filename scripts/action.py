@@ -41,7 +41,7 @@ def calculate_degree(start, goal):  # from vector then calculates the degree fro
 
 
 class Action:
-    def __init__(self, name, preconditions, effects, position, cost, degree, speed, mode, speed_mode_radius, number, iscup):
+    def __init__(self, name, preconditions, effects, position, cost, degree, speed, mode, speed_mode_radius, number, iscup, iswait):
         self.name = name
         self.preconditions = preconditions
         self.effects = effects
@@ -51,7 +51,7 @@ class Action:
         self.current_world_state = []
         self.cost = cost
         self.position = position
-        self.wait = False
+        self.iswait = iswait
         self.degree = degree
         self.number = number
         self.grab_mode = mode  # speed mode or position mode

@@ -1,6 +1,5 @@
 std_msgs/Header header
 bool[] emergency
-int32 task_state
 int32 my_pos_x
 int32 my_pos_y
 int32 my_degree
@@ -10,9 +9,8 @@ int32 enemy2_x
 int32 enemy2_y
 int32 ally_x
 int32 ally_y
-int32 cup_state
-int32 left_stepper
-int32 right_stepper
+int32 servo_state
+int32 stepper
 int32 hand
 int32 status
 float32 time 

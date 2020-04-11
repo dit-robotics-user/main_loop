@@ -2,36 +2,33 @@
 #include "ros/ros.h"
 #include "std_msgs/String.h"
 #include <std_msgs/Int32MultiArray.h>
-
 #include "main_loop/path.h"
 #include "main_loop/agent.h"
 #include "main_loop/goap_.h"
+#include <main_loop/from_goap.h>
+#include "main_loop/main_state.h"
+
 #include <iostream>
 #include <queue>
 #include <vector>
 #include <cmath>
 #include <stdlib.h>
 
-//initialize
-int my_pos_x_ = 300 ; 
-int my_pos_y_ = 300 ;
-
 using namespace std;
 
 class state{
 public:
     state(){};
-    state(int action_status, int my_x, int my_y, bool block, int tx0_){
-        status = action_status;
+    state(int my_x, int my_y, bool block, int tx0_, int tx1_, int tx2_){
         my_pos_x = my_x;
         my_pos_y = my_y;
         is_blocked = block;
-        tx0 = tx0_ ;
+        tx0 = tx0_;
+        tx1 = tx1_;
+        tx2 = tx2_;
     }
-    void ChangeActionStatus(int state){
-        status = state;
-        //1 = undergoing
-        //2 = finished
+    void ChangeActionDone(bool tf){
+        a_done = tf;
     }
     void ChangeKillMission(bool tf){
         kill_mission = tf;
@@ -45,11 +42,8 @@ public:
     void ChangeReplanPath(bool tf){
         replan_path = tf;
     }
-    void ChangeStateChange(bool tf){
-        state_change = tf;
-    }
-    int MyActionStatus(){
-        return status;
+    int MyActionDone(){
+        return a_done;
     }
     int MyPosX(){
         return my_pos_x;
@@ -75,8 +69,14 @@ public:
     int MyTx0(){
         return tx0;
     }
+    int MyTx1(){
+        return tx1;
+    }
+    int MyTx2(){
+        return tx2;
+    }
     void RefreshActionState(){
-        status = 1;
+        a_done;
         kill_mission = false;
         replan_mission = false;
         replan_path = false;
@@ -85,7 +85,7 @@ public:
     }
 
 private:
-    int status;
+    bool a_done;
     int my_pos_x;
     int my_pos_y;
     bool kill_mission;
@@ -93,8 +93,9 @@ private:
     bool replan_path;
     bool is_blocked;
     bool action_wait;
-    bool state_change;
     int tx0;
+    int tx1;
+    int tx2;
 };
 
 class action{
@@ -142,7 +143,7 @@ private:
     int mode;
 };
 
-enum class Mode {SPEED_MODE, POSITION_MODE};
+enum class ActionMode {SPEED_MODE, POSITION_MODE};
 enum class Status {SET_STRATEGY, RESET, SET_INITIAL_POS, STARTING_SCRIPT, READY, RUN, STOP, IDLE};
 enum class RobotState {AT_POS, ON_THE_WAY, BLOCKED};
 
@@ -154,10 +155,6 @@ class sub_state{
         bool lidar_be_blocked(float speed_degree,float car_degree);
 		bool emergency[8];
         int movement_from_goap[15];
-        int status;
-        int task_state;
-        float robot_degree;
-        main_loop::path srv_to_path;
         main_loop::agent from_agent;
 		
 	private:
@@ -173,18 +170,14 @@ sub_state::sub_state(){
 }
 
 void sub_state::callback(const main_loop::agent::ConstPtr& msg){
-    srv_to_path.request.my_pos_x = msg->my_pos_x ;
-    srv_to_path.request.my_pos_y = msg->my_pos_y ;
-    robot_degree = msg->my_degree ; 
-    task_state = msg->task_state;
-    status = msg->status;
-    from_agent.cup_state = msg->cup_state;
-    ROS_INFO("from_agent.cup_state: %d", from_agent.cup_state);
-    from_agent.left_stepper = msg -> left_stepper ;
-    from_agent.right_stepper = msg -> right_stepper ; 
+    from_agent.my_pos_x = msg->my_pos_x ;
+    from_agent.my_pos_y = msg->my_pos_y ;
+    from_agent.my_degree = msg->my_degree ; 
+    from_agent.status = msg->status;
+    from_agent.servo_state = msg->servo_state;
+    from_agent.stepper = msg -> stepper ;
     from_agent.hand = msg->hand ; 
   
-	ROS_INFO("lidar[0]: %d", msg->emergency[0]);
 	emergency[0]=msg->emergency[0];
     emergency[1]=msg->emergency[1];
     emergency[2]=msg->emergency[2];
@@ -214,102 +207,139 @@ bool sub_state::lidar_be_blocked(float speed_degree,float car_degree){
     }
 }
 
-int main(int argc, char **argv){        
 
-	//ros setting
- 	ros::init (argc, argv, "main_with_class");
+
+bool at_pos(int x, int y, int c_x, int c_y, int m){
+    bool at_p = false;
+    if(abs(x - c_x) < m && abs(y - c_y) < m){
+        at_p = true;
+    }
+    return at_p;
+}
+
+int main(int argc, char **argv)
+{
+
+    //ros setting
+ 	ros::init (argc, argv, "main_demo_v2");
 	ros::NodeHandle nh;    
 	
-
     ros::Publisher pub_st1 = nh.advertise<std_msgs::Int32MultiArray>("txST1", 1);
 	ros::Publisher pub_st2 = nh.advertise<std_msgs::Int32MultiArray>("txST2", 1);
+
+    ros::Publisher pub_goap_response = nh.advertise<main_loop::from_goap>("Goap_response", 1);
+    ros::Publisher pub_main_state = nh.advertise<main_loop::main_state>("Main_state", 1);
+
 	ros::ServiceClient client_path = nh.serviceClient<main_loop::path>("path_plan");
     ros::ServiceClient client_goap = nh.serviceClient<main_loop::goap_>("goap_test_v1");
     sub_state temp;
 	main_loop::path path_srv;
     main_loop::goap_ goap_srv;
-	path_srv.request.my_pos_x = my_pos_x_ ;
-    path_srv.request.my_pos_y = my_pos_y_ ;
-   
 
-	//loop parameter setting
-    int r0;
-    int r1;
-    int r2;
-    int r3;
-    int rx0;
-    int rx1;
-    int rx2;
+    // give default value here
+    long int r0;
+    long int r1;
+    long int r2;
+    long int r3;
+    long int rx0;
+    long int rx1;
+    long int rx2;
     long int rx3;
-    int out = 0;
+
     int goal_covered_counter = 0;
     int cover_limit = 20;
     int old_grab_status[12] = {0};
     int distance_square = 0;
-    bool a_done = false;
+    int action_done = false;
+    int kill_mission = false;
+    int replan_mission = false;
+    int margin = 30;
+    int switch_mode_distance = 100;
+    ActionMode m;
+    RobotState robot;
+
+    //ros defult value
     int now_my_pos_x;
     int now_my_pos_y;
-    int tem[12];
-    int margin=50;
-    
-
     float last_degree = 0 ;
     float now_degree = 0 ;
     path_srv.request.goal_pos_x = 1600;
     path_srv.request.goal_pos_y = 1800;
-	
-	while(ros::ok()){
+	path_srv.request.my_pos_x = 300 ;
+    path_srv.request.my_pos_y = 300 ;
+    path_srv.request.enemy1_x = 380 ;
+    path_srv.request.enemy1_y = 2400 ;
+    path_srv.request.enemy2_x = 380 ;
+    path_srv.request.enemy2_y = 2300 ;
+    path_srv.request.ally_x = 380 ;
+    path_srv.request.ally_y = 2200 ; 
+    goap_srv.request.replan=false;
+    goap_srv.request.action_done=false;
+    goap_srv.request.pos.push_back(300);
+    goap_srv.request.pos.push_back(300);
+    goap_srv.request.my_degree = 90 ; 
+
+
+    while(ros::ok()){
         //calculate time
 	    double begin_time =ros::Time::now().toSec();
-        //service and topic parameter setting 
-        std_msgs::Int32MultiArray for_st1 ;
-        std_msgs::Int32MultiArray for_st2 ;
-
-
-        int s = temp.status; //<----------get from command
+        //status update
+        int s = temp.from_agent.status; 
         Status stat  = static_cast<Status>(s);
-        bool lidar_blocked=temp.lidar_be_blocked(now_degree,temp.robot_degree);//<------------lidar
-
-        //PATH PLAN
-        path_srv.request.my_pos_x = temp.srv_to_path.request.my_pos_x;
-        path_srv.request.my_pos_y = temp.srv_to_path.request.my_pos_y ;
+        //service parameter update
+        //path plan
+        path_srv.request.my_pos_x = temp.from_agent.my_pos_x;
+        path_srv.request.my_pos_y = temp.from_agent.my_pos_y;
         path_srv.request.enemy1_x = 380 ;
         path_srv.request.enemy1_y = 2400 ;
         path_srv.request.enemy2_x = 380 ;
         path_srv.request.enemy2_y = 2300 ;
         path_srv.request.ally_x = 380 ;
         path_srv.request.ally_y = 2200 ; 
-        //GOAP
+        //goap
         goap_srv.request.replan=false;
-        goap_srv.request.action_done=a_done;
-        goap_srv.request.pos.push_back(temp.srv_to_path.request.my_pos_x);
-        goap_srv.request.pos.push_back(temp.srv_to_path.request.my_pos_y);
-        goap_srv.request.my_degree = temp.robot_degree ; 
+        goap_srv.request.action_done=action_done;
+        goap_srv.request.pos.push_back(temp.from_agent.my_pos_x);
+        goap_srv.request.pos.push_back(temp.from_agent.my_pos_y);
+        goap_srv.request.my_degree = temp.from_agent.my_degree ; 
+        //debug
+        main_loop::from_goap debug_1;
+        main_loop::main_state debug_2;
+
+
 
         switch(stat){
             case Status::SET_STRATEGY: //0
-                for_st1.data.push_back(0x6000);
-                for_st1.data.push_back(0);
-                for_st1.data.push_back(0);
-                for_st1.data.push_back(0);
+                r0 = 0x6000;
+                r1 = 0;
+                r2 = 0;
+                r3 = 0;
+
+                debug_1.desire_degree=0;
+                debug_1.desire_speed=0;
+                debug_1.desire_mode=r0;
+                debug_1.desire_pos={};
+                debug_1.desire_servo_state=0;
+                debug_1.desire_stepper=0;
+                debug_1.desire_hand=0;
+                debug_1.is_wait=0;
+                
                 break;
             case Status::RUN:{ //5
-                state current_state(1,temp.srv_to_path.request.my_pos_x,temp.srv_to_path.request.my_pos_y,false,temp.from_agent.cup_state);//<--------get undergoing, finish, my_x, my_y, block from other nodes ()********
-                state action_state(1,temp.srv_to_path.request.my_pos_x,temp.srv_to_path.request.my_pos_y,false,temp.from_agent.cup_state);
-
-                if(a_done = true){
-                    goal_covered_counter = 0;
+                state current_state(temp.from_agent.my_pos_x,temp.from_agent.my_pos_y,false,temp.from_agent.servo_state,temp.from_agent.stepper,temp.from_agent.hand);//<--------get undergoing, finish, my_x, my_y, block from other nodes ()********
+                state action_state(0,0,false,0,0,0);
+                action_state = current_state;
+                if(action_done){
+                    action_state.ChangeActionDone(true);
+                    action_done = false;
                 }
-                action_state = current_state;//----->goap subscribe action state, then cover it with current
-                //goap
+                if(kill_mission){
+                    action_state.ChangeKillMission(true);
+                    kill_mission = false;
+                }
+
+                //----------goap
                 if(client_goap.call(goap_srv)){
-                    path_srv.request.goal_pos_x = goap_srv.response.pos[0];
-                    path_srv.request.goal_pos_y = goap_srv.response.pos[1];
-                    ROS_INFO("test_goap: %ld", (long int)goap_srv.response.degree);
-                    ROS_INFO("test_goap: %ld", (long int)goap_srv.response.speed);
-                    ROS_INFO("test_goap: %ld", (long int)goap_srv.response.mode);
-                    ROS_INFO("from goap: %ld", (long int)goap_srv.response.pos[0]);
-                    ROS_INFO("from goap: %ld", (long int)goap_srv.response.pos[1]);
                     temp.movement_from_goap[0]=goap_srv.response.ST2[0];
                     temp.movement_from_goap[1]=goap_srv.response.ST2[1];
                     temp.movement_from_goap[2]=goap_srv.response.ST2[2];
@@ -325,43 +355,35 @@ int main(int argc, char **argv){
                     temp.movement_from_goap[12]=goap_srv.response.ST2[12];
                     temp.movement_from_goap[13]=goap_srv.response.ST2[13];
                     temp.movement_from_goap[14]=goap_srv.response.ST2[14];
+                    //for path plan
+                    path_srv.request.goal_pos_x = goap_srv.response.pos[0];
+                    path_srv.request.goal_pos_y = goap_srv.response.pos[1];
                 }else{
                     ROS_ERROR("Failed to call goap_test");
                 }
-                //goap end
-
-
-                action act(goap_srv.response.pos[0] ,goap_srv.response.pos[1] ,temp.movement_from_goap ,goap_srv.response.degree ,goap_srv.response.speed ,true ,goap_srv.response.mode);//<----------get from goap(x, y, movement_num, what_angle, how_fast, is_wait, what_mode)*********
-                int switch_mode_distance = 100;
+                //-------goap end               
+                action act(goap_srv.response.pos[0],goap_srv.response.pos[1],temp.movement_from_goap,goap_srv.response.degree,goap_srv.response.speed,goap_srv.response.is_wait,goap_srv.response.mode);
                 int desire_pos_x = act.PosX();
                 int desire_pos_y = act.PosY();
-                int * desire_movement;
-                desire_movement = act.Movement(); //[15]
+                int*desire_movement;
                 int desire_speed = act.Speed();
                 int desire_mode = act.Mode();
                 bool desire_wait = act.Wait();
                 double desire_angle = act.Angle();
-                action_state.RefreshActionState();
-                if((out==current_state.MyTx0()) && (temp.from_agent.left_stepper == desire_movement[12]) && (temp.from_agent.right_stepper == desire_movement[13]) && (temp.from_agent.hand == desire_movement[14])){
-                    a_done = true;
+                desire_movement = act.Movement();
+                if(at_pos(current_state.MyPosX(),current_state.MyPosY(), desire_pos_y, desire_pos_y, margin) && (desire_wait == false || ((rx0==current_state.MyTx0()) && (rx1 == current_state.MyTx1()) && (rx2 == current_state.MyTx1())))){
+                    action_done = true;
+                    goal_covered_counter = 0;
                 }
-                else{
-                    a_done = false;
-                }
-
-                Mode m;
                 if(desire_mode == 1){
-                    m = Mode::POSITION_MODE;
+                    m = ActionMode::POSITION_MODE;
                 }
                 else{
-                    m = Mode::SPEED_MODE;
+                    m = ActionMode::SPEED_MODE;
                 }
                 switch(m){
-                    case Mode::POSITION_MODE:
-                        ROS_INFO("State:POSITION_MODE");
-                        RobotState robot;
-
-                        if(abs(current_state.MyPosX()-desire_pos_x)<margin && abs(current_state.MyPosY()-desire_pos_y)<margin){
+                    case ActionMode::POSITION_MODE:
+                        if(at_pos(current_state.MyPosX(),current_state.MyPosY(), desire_pos_y, desire_pos_y, margin)){
                             robot = RobotState::AT_POS;
                         }
                         else{
@@ -373,18 +395,12 @@ int main(int argc, char **argv){
                             }
                         }
                         switch(robot){
-                            case RobotState::AT_POS:
-                                out = 0;
-                                ROS_INFO("State:AT_POS");
-                                // give orders to STM2
-                                for_st2.data.push_back(desire_movement[12]);
-                                for_st2.data.push_back(desire_movement[13]);
+                            case RobotState::AT_POS:{
+                                //rx0
+                                int out = 0;
                                 for(int i = 0; i < 12; i ++){
-                                    if(desire_movement[i] == 1){
-                                        old_grab_status[i] = 1;
-                                    }
-                                    else if(desire_movement[i] == 0){
-                                        old_grab_status[i] = 0;
+                                    if(desire_movement[i] != -1){
+                                        old_grab_status[i] = desire_movement[i];
                                     }
                                 }
                                 for(int i = 0; i < 12; i ++){
@@ -392,25 +408,88 @@ int main(int argc, char **argv){
                                     out = out << 2;
                                 }
                                 out = out << 6;
-                                rx3 = out ; 
-                                for_st2.data.push_back(rx3);
-                                for_st2.data.push_back(desire_movement[14]);
-
-                                /////////////////////////////////////////////////////////////////////////////************
-                                break;
+                                rx0 = out;
+                                //rx1
+                                int left_layer = 0;
+                                int right_layer = 0;
+                                left_layer = desire_movement[12];
+                                right_layer = desire_movement[13];
+                                rx1 = (left_layer << 30) + (right_layer << 28);
+                                //rx2
+                                rx2 = desire_movement[14];
+                                break;}
 
                             case RobotState::BLOCKED:
-                                ROS_INFO("State:BLOCKED");
                                 //return stop; //<-------------tell STM to stop
-                                for_st1.data.push_back(0x5000);
-                                for_st1.data.push_back(0);
-                                for_st1.data.push_back(0);
-                                for_st1.data.push_back(0);                    
+                                r0 = 0x5000;
+                                r1 = 0;
+                                r2 = 0;
+                                r3 = 0;
                                 action_state.ChangeReplanMission(true);   //---------------> GOAP replan == True
                                 break;
 
                             case RobotState::ON_THE_WAY:
-                                ROS_INFO("State:ON_THE_WAY");
+                                //---------path plan
+                                if(client_path.call(path_srv)){
+                                    double clustering_time = ros::Time::now().toSec () - begin_time; 
+                                    now_degree = path_srv.response.degree ; 
+                                }else{
+                                    ROS_ERROR("Failed to call service path plan");
+                                }
+                                if(now_degree<0){
+                                    now_degree = last_degree;
+                                } 
+                                //-----path plan end 
+                                distance_square = (current_state.MyPosX() - desire_pos_x)*(current_state.MyPosX() - desire_pos_x) + (current_state.MyPosY() - desire_pos_y)*(current_state.MyPosY() - desire_pos_y);
+                                if(distance_square < switch_mode_distance){
+                                    r0 = 0x4000;
+                                    r1 = desire_pos_x;
+                                    r2 = desire_pos_y;
+                                    r3 = desire_angle;
+                                    //return pos_mode; //<----------------
+                                }
+                                else{
+                                    r0 = 0x3000;
+                                    r1 = desire_speed;
+                                    r2 = now_degree;
+                                    r3 = 0;
+                                    if( path_srv.response.blocked == true){ 
+                                        goal_covered_counter ++;
+                                    }
+                                    if( path_srv.response.blocked == false){ 
+                                        goal_covered_counter = 0;
+                                    }
+                                    if(goal_covered_counter > cover_limit){
+                                        action_state.ChangeKillMission(true);
+                                        goal_covered_counter = 0;
+                                    }
+                                    //return speed_mode;//<-----------------
+                                }
+                                break;
+                        }
+                        break;
+
+                    case ActionMode::SPEED_MODE:{
+                        int out;
+                        rx0 = desire_movement[12];
+                        rx1 = desire_movement[13];
+                        for(int i = 0; i < 12; i ++){
+                            if(desire_movement[i] == 1){
+                                old_grab_status[i] = 2;
+                            }
+                            else if(desire_movement[i] == 0){
+                                old_grab_status[i] = 0;
+                            }
+                        }
+                        for(int i = 0; i < 12; i ++){
+                            out += old_grab_status[i];
+                            out = out << 2;
+                        }
+                        out = out << 6;
+                        rx2 = out;
+                        rx3 = desire_movement[14];
+                        if(current_state.MyPosX() != desire_pos_x && current_state.MyPosY() != desire_pos_y){
+                           if(current_state.MyActionDone() == 1){ //if not at pos and hasn't got cup, keep going
                                 //---------path plan
                                 if(client_path.call(path_srv)){
                                     double clustering_time = ros::Time::now().toSec () - begin_time; 
@@ -425,87 +504,19 @@ int main(int argc, char **argv){
                                     now_degree = last_degree;
                                 } 
                                 //-----path plan end 
-                                distance_square = (current_state.MyPosX() - desire_pos_x)*(current_state.MyPosX() - desire_pos_x) + (current_state.MyPosY() - desire_pos_y)*(current_state.MyPosY() - desire_pos_y);
-                                if(distance_square < switch_mode_distance){
-                                    for_st1.data.push_back(0x4000);
-                                    for_st1.data.push_back(desire_pos_x);
-                                    for_st1.data.push_back(desire_pos_y);
-                                    for_st1.data.push_back(desire_angle);
-                                    //return pos_mode; //<----------------
-                                }
-                                else{
-                                    for_st1.data.push_back(0x3000);
-                                    for_st1.data.push_back(desire_speed);
-                                    for_st1.data.push_back(path_srv.response.degree);;//<-----------------
-                                    for_st1.data.push_back(0);
-                                    /*
-                                    r0 = 0x3000;
-                                    r1 = desire_speed;
-                                    r2 = A*();//<-----------------
-                                    r3 = 0;
-                                    */
-                                    if( path_srv.response.blocked == true){ //<-------------
-                                        goal_covered_counter ++;
-                                    }
-                                    if( path_srv.response.blocked == false){ //<-------------
-                                        goal_covered_counter = 0;
-                                    }
-                                    if(goal_covered_counter > cover_limit){
-                                        action_state.ChangeKillMission(true);
-                                        goal_covered_counter = 0;
-                                    }   
-                                    //return speed_mode;//<-----------------
-                                }
-                                break;
-                        }
-                        break;
-
-                    case Mode::SPEED_MODE:
-                        ROS_INFO("State:SPEED_MODE");
-                        for_st2.data.push_back(desire_movement[12]);
-                        for_st2.data.push_back(desire_movement[13]);
-                        for(int i = 0; i < 12; i ++){
-                            if(desire_movement[i] == 1){
-                                old_grab_status[i] = 2;
-                            }
-                            else if(desire_movement[i] == 0){
-                                old_grab_status[i] = 0;
-                            }
-                        }
-                        for(int i = 0; i < 12; i ++){
-                            out += old_grab_status[i];
-                            out = out << 2;
-                        }
-                        out = out << 6;
-                        for_st2.data.push_back(out);
-                        for_st2.data.push_back(desire_movement[14]);
-                        if(current_state.MyPosX() != desire_pos_x && current_state.MyPosY() != desire_pos_y){
-                           if(current_state.MyActionStatus() == 1){ //if not at pos and hasn't got cup, keep going
-                                 if (client_path.call(path_srv)){
-                                    double clustering_time = ros::Time::now().toSec () - begin_time; 
-                                    ROS_INFO ("%f secs for path plan .", clustering_time);
-                                    ROS_INFO("next_pos_x: %ld", (long int)path_srv.response.next_pos_x);
-                                    ROS_INFO("next_pos_y: %ld", (long int)path_srv.response.next_pos_y);
-                                    now_degree = path_srv.response.degree ; 
-                                }else{
-                                    ROS_ERROR("Failed to call service path plan");
-                                }
-                                if(now_degree<0){
-                                    now_degree = last_degree;
-                                } 
-                                for_st1.data.push_back(0x3000);
-                                for_st1.data.push_back(desire_speed);
-                                for_st1.data.push_back(path_srv.response.degree);;//<-----------------
-                                for_st1.data.push_back(0);
-                                if( path_srv.response.blocked == true){ //<-------------
+                                r0 = 0x3000;
+                                r1 = desire_speed;
+                                r2 = now_degree;
+                                r3 = 0;
+                                if( path_srv.response.blocked == true){ 
                                     goal_covered_counter ++;
                                 }
-                                if( path_srv.response.blocked == false){ //<-------------
+                                if( path_srv.response.blocked == false){ 
                                     goal_covered_counter = 0;
                                 }
                                 if(goal_covered_counter > cover_limit){
                                     //action_state.ChangeKillMission(true);
-                                    action_state.ChangeActionStatus(2); //should kill mission but fuck that.. this should still work
+                                    action_state.ChangeActionDone(true); //should kill mission but fuck that.. this should still work
                                     goal_covered_counter = 0;
                                     for(int i = 0; i < 12; i ++){
                                        if(desire_movement[i] == 2){
@@ -524,30 +535,75 @@ int main(int argc, char **argv){
                         }
                         else{ //at pos, mission has failed..
                             //action_state.ChangeKillMission(true);
-                            action_state.ChangeActionStatus(2); //should kill mission but fuck that.. this should still work
+                            action_state.ChangeActionDone(true); //should kill mission but fuck that.. this should still work
                             for(int i = 0; i < 12; i ++){
                                if(desire_movement[i] == 2){
                                     old_grab_status[i] = 0;
                                 }
                             }
                         }
-                        break;
+                        break;}
                 }
+                debug_1.desire_degree=desire_angle;
+                debug_1.desire_speed=desire_speed;
+                debug_1.desire_mode=r0;
+                debug_1.desire_pos.push_back(desire_pos_x);  
+                debug_1.desire_pos.push_back(desire_pos_y); 
+                debug_1.desire_servo_state=rx1;
+                debug_1.desire_stepper=rx1;
+                debug_1.desire_hand=rx2;
+                debug_1.is_wait=desire_wait;
                 break;
                 }
             case Status::STOP: //6
-                for_st1.data.push_back(0x5000);
-                for_st1.data.push_back(0);
-                for_st1.data.push_back(0);
-                for_st1.data.push_back(0);
+                r0 = 0x5000;
+                r1 = 0;
+                r2 = 0;
+                r3 = 0;
+                debug_1.desire_degree=0;
+                debug_1.desire_speed=0;
+                debug_1.desire_mode=r0;
+                debug_1.desire_pos={};
+                debug_1.desire_servo_state=0;
+                debug_1.desire_stepper=0;
+                debug_1.desire_hand=0;
+                debug_1.is_wait=0;
                 break;
         }
+        //give ST
+        std_msgs::Int32MultiArray for_st1 ;
+        for_st1.data.push_back(r0);
+        for_st1.data.push_back(r1);
+        for_st1.data.push_back(r2);
+        for_st1.data.push_back(r3);
+        std_msgs::Int32MultiArray for_st2 ;
+        for_st2.data.push_back(rx0);
+        for_st2.data.push_back(rx1);
+        for_st2.data.push_back(rx2);
+        for_st2.data.push_back(rx3);
+
         pub_st1.publish(for_st1);
         pub_st2.publish(for_st2);
+
+        //debug
+
+        debug_2.status=temp.from_agent.status;
+        debug_2.robot_case=0;
+        debug_2.pos.push_back(temp.from_agent.my_pos_x);
+        debug_2.pos.push_back(temp.from_agent.my_pos_y);
+        debug_2.is_blocked=false;
+        debug_2.servo_state=temp.from_agent.servo_state;
+        debug_2.stepper_state=temp.from_agent.stepper;
+        debug_2.hand_state=temp.from_agent.hand;
+        debug_2.action_done=action_done;
+        debug_2.kill_mission=kill_mission;
+        debug_2.goal_covered_counter=goal_covered_counter;
+        pub_goap_response.publish(debug_1);
+        pub_main_state.publish(debug_2);
+
+
         last_degree = now_degree ; 
         ros::spinOnce();
-	}
-	return 0;
+    }
+    return 0;
 }
-
-

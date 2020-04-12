@@ -5,23 +5,23 @@ this .py file is the only place you will need to change
 """
 from action import *
 
-
+# name, preconditions, effects, position, cost, degree, speed, mode, speed_mode_radius, number, iscup, iswait
 def setting(mode):
-    if mode is 1:  # name, preconditions, effects, position, cost, degree, speed, mode, speed_mode_radius, number, iscup
-        c1 = Action("cup1",      ['2', '4'],   ['get_cup'], (455, 375), 3, 143, 150, 1, 0, 1, True, True)
-        c2 = Action("cup2",      ['1'],        ['get_cup'], (200, 670), 3, 90, 150, 1, 0, 2, True, True)
-        c3 = Action("cup3",      ['3'],        ['get_cup'], (300, 1010), 3, 60, 150, 1, 0, 3, True, True)
-        c4 = Action('lift',      [],           ['lift_left', '1', '2'], (300, 1010), 3, 60, 150, 1, 15, 6, False, True)
-        c5 = Action('hand_down', [],           [], (1800, 200), 3, 90, 150, 1, 15, 6, False, True)
-        c6 = Action('hand_up',   [],           [], (1800, 670), 3, 90, 150, 1, 15, 6, False, True)
-        c7 = Action('goto',      [],           [], (1650, 1265), 3, 270, 150, 1, 15, 6, False, True)
-        c8 = Action('lower',     [],           [], (1800, 270), 3, 60, 270, 1, 15, 6, False, True)
-        c9 = Action('open',      ['1', '2', '3', '4'], [], (1800, 270), 3, 270, 150, 1, 15, 6, True, True)
-        c10 = Action('goto',      [], [], (1650, 1265), 3, 270, 150, 1, 15, 6, False, True)
-        c11 = Action('goto', [], [], (600, 300), 3, 270, 150, 1, 15, 6, False, True)
+    if mode is 1:
+        c1 = Action("cup1",      ['1', '3'],   ['get_cup'], (500, 500), 3, 143, 150, 1, 0, 1, True, True)
+        c2 = Action("cup2",      ['1'],        ['get_cup'], (400, 700), 3, 90, 150, 1, 0, 1, True, True)
+        c3 = Action("cup3",      ['4'],        ['get_cup'], (400, 900), 3, 60, 150, 1, 0, 1, True, True)
+        c4 = Action('lift1',      [],           ['lift_left', '1', '2'], (700,300 ), 3, 90, 150, 1, 15, 2, False, True)
+        c5 = Action('lift2',      [], ['lift_left', '1', '2'], (500, 500), 3, 143, 150, 1, 15, 2, False, True)
+        c6 = Action('hand_up', [],           [], (1500, 700), 3, 90, 150, 1, 15, 3, False, True)
+        c7 = Action('hand_down',   [],           [], (1500, 1100), 3, 90, 150, 1, 15, 4, False, True)
+        c8 = Action('goto',      [],           [], (1000, 1700), 3, 0, 150, 1, 15, 5, False, True)
+        c9 = Action('lower1',     [],           [], (1500, 1700), 3, 0, 270, 1, 15, 6, False, True)
+        c10 = Action('lower2', [], [],               (1300, 1700), 3, 0, 270, 1, 15, 6, False, True)
+        c11 = Action('open1',      ['1', '2', '3', '4'], [], (1500, 1700), 3, 0, 150, 1, 15, 7, True, True)
+        c12 = Action('open2',      ['1', '2', '3', '4'], [], (1300, 1700), 3, 0, 150, 1, 15, 7, True, True)
 
-        demo_path = [c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11]
+        demo_path = [c4, c1, c5, c2, c3, c6, c7, c8, c11, c9, c12, c10]
 
     return demo_path
-
 

@@ -6,3 +6,4 @@ int32 desire_servo_state
 int32 desire_stepper
 int32 desire_hand
 int32 is_wait
+string mission_name 

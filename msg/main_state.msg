@@ -1,6 +1,6 @@
 int32 status
-int32 robot_state
-int32 robot_case
+string robot_state
+string robot_case
 int32[] pos
 bool is_blocked
 int32 servo_state

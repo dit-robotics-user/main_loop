@@ -22,7 +22,7 @@ class sub_class{
         void publish_(float time);
         void status_publish();   
         
-        sub_class(int my_pos_x_ = 300, int my_pos_y_ = 300, int ini_status = 0);
+        sub_class(int my_pos_x_ = 700, int my_pos_y_ = 300, int ini_status = 0);
         ~sub_class(){};
 
     private:

@@ -233,15 +233,15 @@ int main(int argc, char **argv){
    
 
 	//loop parameter setting
-    int r0;
-    int r1;
-    int r2;
-    int r3;
-    int rx0;
-    int rx1;
-    int rx2;
-    long int rx3;
-    int out = 0;
+    long int r0=0;
+    long int r1=0;
+    long int r2=0;
+    long int r3=0;
+    long int rx0=0;
+    long int rx1=0;
+    long int rx2=0;
+    long int rx3=0;
+    long int out = 0;
     int goal_covered_counter = 0;
     int cover_limit = 20;
     int old_grab_status[12] = {0};

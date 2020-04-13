@@ -58,6 +58,7 @@ sub_class::sub_class(int my_pos_x_,int my_pos_y_, int ini_status){
 void sub_class::ST1_sub_callback(const std_msgs::Int32MultiArray::ConstPtr& msg){
     pub_to_main.my_pos_x = msg->data[0] ;
     pub_to_main.my_pos_y = msg->data[1] ;
+    pub_to_main.my_degree = msg->data[2] ;
     ROS_INFO("my_pos_x: %d", pub_to_main.my_pos_x);
     ROS_INFO("my_pos_y: %d", pub_to_main.my_pos_y);
     ROS_INFO("ST1");

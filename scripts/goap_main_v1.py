@@ -91,9 +91,6 @@ def handle_return_to_main(req):
 	MyClass.action_done = req.action_done  # <----
 	MyClass.my_pos = (req.pos[0],req.pos[1])
 	MyClass.input_name = req.mission_name
-	rospy.loginfo(MyClass.input_name)
-	rospy.loginfo(MyClass.action_done)
-	print "in goap_test.py"
 	return [MyClass.output_degree,MyClass.output_speed,MyClass.output_mode,MyClass.output_position,MyClass.output,MyClass.output_wait,MyClass.output_mission_name]
 
 def add_two_ints_server():

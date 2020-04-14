@@ -16,8 +16,8 @@ def setting(mode):
         c6 = Action('hand_up', [],           [], (1500, 700), 3, 90, 150, 1, 15, 3, False, True)
         c7 = Action('hand_down',   [],           [], (1500, 950), 3, 90, 150, 1, 15, 4, False, True)
         c8 = Action('goto',      [],           [], (1300, 1250), 3, 0, 150, 1, 15, 5, False, True)
-        c9 = Action('lower1',     [],           [], (1600, 1250), 3, 0, 270, 1, 15, 6, False, True)
-        c10 = Action('lower2', [], [],               (1450, 1250), 3, 0, 270, 1, 15, 6, False, True)
+        c9 = Action('lower1',     [],           [], (1450, 1250), 3, 0, 270, 1, 15, 6, False, True)
+        c10 = Action('lower2', [], [],               (1000, 1250), 3, 0, 270, 1, 15, 6, False, True)
         c11 = Action('open1',      ['1', '2', '3', '4'], [], (1600, 1250), 3, 0, 150, 1, 15, 7, True, True)
         c12 = Action('open2',      ['1', '2', '3', '4'], [], (1450, 1250), 3, 0, 150, 1, 15, 7, True, True)
         

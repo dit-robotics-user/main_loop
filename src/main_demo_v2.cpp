@@ -174,6 +174,10 @@ class sub_state{
 };
 
 sub_state::sub_state(){
+    from_agent.servo_state = -2 ;
+    from_agent.stepper = -2 ;
+    from_agent.hand = -2 ;
+
 	Agent_sub = n.subscribe<main_loop::agent>("agent_msg", 1, &sub_state::callback,this);
 	for(int j=0;j<8;j++){
         emergency[j]=true;
@@ -264,7 +268,7 @@ int main(int argc, char **argv)
     int action_done = false;
     int kill_mission = false;
     int replan_mission = false;
-    int margin = 30;
+    int margin = 50;
     int angle_margin = 10;
     int switch_mode_distance = 4000000;//square
     int left_layer = 0;
@@ -296,10 +300,14 @@ int main(int argc, char **argv)
     goap_srv.request.mission_name = "setting" ;
     
     int count = 0 ;
+    int gogo = 0 ; 
     
 
 
     while(ros::ok()){
+    
+       
+        
         //calculate time
 	    double begin_time =ros::Time::now().toSec();
         //status update
@@ -343,6 +351,8 @@ int main(int argc, char **argv)
                 
                 break;
             case Status::RUN:{ //5
+                gogo ++;
+                
                 state current_state(temp.from_agent.my_pos_x,temp.from_agent.my_pos_y,temp.from_agent.my_degree,false,temp.from_agent.servo_state,temp.from_agent.stepper,temp.from_agent.hand);//<--------get undergoing, finish, my_x, my_y, block from other nodes ()********
                 state action_state(0,0,0,false,0,0,0);
                 action_state = current_state;
@@ -412,70 +422,31 @@ int main(int argc, char **argv)
                 bool desire_wait = act.Wait();
                 int desire_angle = act.Angle();
                 desire_movement = act.Movement();
+               
                 
-
+                //ROS_INFO("d = %d",d);
+                //ROS_INFO("c = %d",c);
+                //ROS_INFO("a = %d",a);
                 
-                if(at_pos(current_state.MyPosX(),current_state.MyPosY(),current_state.MyDegree(), desire_pos_x, desire_pos_y, desire_angle, margin, angle_margin) &&  ((rx0==current_state.MyTx0()) && (rx1 == current_state.MyTx1()) && (rx2 == current_state.MyTx2()))){
+                
+                //ROS_INFO("g = %d",g);
+                //ROS_INFO ("mission: %s ", goap_srv.response.mission_name.c_str());
+                
+                if(gogo<10){
+                    //ROS_INFO("gogo");
+                }
+              
+                /*if(gogo >1 && at_pos(current_state.MyPosX(),current_state.MyPosY(),current_state.MyDegree(), desire_pos_x, desire_pos_y, desire_angle, margin, angle_margin) &&  b && c && d){
                 ROS_INFO ("rx0:%ld ", rx0);                
                 ROS_INFO ("rx1:%ld ", rx1);
                 ROS_INFO ("rx2:%ld ", rx2);
-                bool a = at_pos(current_state.MyPosX(),current_state.MyPosY(),current_state.MyDegree(), desire_pos_x, desire_pos_y, desire_angle, margin, angle_margin);
-                ROS_INFO("a = %d",a);
-                bool b;
-                if(rx0==current_state.MyTx0()){
-                    b = true;
-                }
-                else{
-                    b = false;
-                }
-                ROS_INFO("b = %d",b);
-                bool c;
-                if(rx1==current_state.MyTx1()){
-                    c = true;
-                }
-                else{
-                    c = false;
-                }
-                ROS_INFO("c = %d",c);
-                bool d;
-                if(rx2==current_state.MyTx2()){
-                    d = true;
-                }
-                else{
-                    d = false;
-                }
-                ROS_INFO("d = %d",d);
-                bool e;
-                if(abs(current_state.MyPosX() - desire_pos_x) < margin){
-                    e = true;
-                }
-                else{
-                    e = false;
-                }
-                ROS_INFO("e = %d",e);
-                bool f;
-                if(abs(current_state.MyPosY() - desire_pos_y) < margin){
-                    f = true;
-                }
-                else{
-                    f = false;
-                }
-                ROS_INFO("f = %d",f);
-                bool g;
-                ROS_INFO("degree = %d",current_state.MyDegree());
-                if(abs(current_state.MyDegree() - desire_angle) < angle_margin){
-                    g = true;
-                }
-                else{
-                    g = false;
-                }
-                ROS_INFO("g = %d",g);
-                ROS_INFO ("mission: %s ", goap_srv.response.mission_name.c_str());
                 count ++ ;
                 ROS_INFO("complete:%d",count);
                     action_done = true;
                     goal_covered_counter = 0;
-                }
+                }*/
+               
+                
                 if(desire_mode == 1){
                     m = ActionMode::POSITION_MODE;
                 }
@@ -527,7 +498,9 @@ int main(int argc, char **argv)
                                 if(desire_movement[14]!=-1){
                                     rx2 = desire_movement[14];
                                 }
-                         
+                                
+                                
+                                
                                 break;}
 
                             case RobotState::BLOCKED:
@@ -664,7 +637,42 @@ int main(int argc, char **argv)
                 debug_1.desire_stepper=rx1;
                 debug_1.desire_hand=rx2;
                 debug_1.is_wait=desire_wait;
-                debug_1.mission_name = goap_srv.response.mission_name ; 
+                debug_1.mission_name = goap_srv.response.mission_name ;
+                
+                bool c;
+                if(rx1==current_state.MyTx1()){
+                    c = true;
+                }
+                else{
+                    c = false;
+                }
+               
+                bool b;
+                if(rx0==current_state.MyTx0()){
+                    b = true;
+                }
+                else{
+                    b = false;
+                }
+               
+                bool d;
+                if(rx2==current_state.MyTx2()){
+                    d = true;
+                }
+                else{
+                    d = false;
+                }
+                if(at_pos(current_state.MyPosX(),current_state.MyPosY(),current_state.MyDegree(), desire_pos_x, desire_pos_y, desire_angle, margin, angle_margin) && b && c && d){
+                    ROS_INFO ("rx0:%ld ", rx0);                
+                    ROS_INFO ("rx1:%ld ", rx1);
+                    ROS_INFO ("rx2:%ld ", rx2);
+                    count ++ ;
+                    ROS_INFO("complete:%d",count);
+                    ROS_INFO ("mission: %s ", goap_srv.response.mission_name.c_str());
+                        action_done = true;
+                        goal_covered_counter = 0;
+                    }
+                 
                 break;
                 }
             case Status::STOP: //6
@@ -721,4 +729,5 @@ int main(int argc, char **argv)
         ros::spinOnce();
     }
     return 0;
+    
 }

@@ -227,8 +227,6 @@ add_dependencies(main_demo_v2 main_loop_gencpp)
 target_link_libraries(main_demo_v2 ${catkin_LIBRARIES})
 
 add_dependencies(agent_add_status ${catkin_EXPORTED_TARGETS})
-
-
 target_link_libraries(main_demo_v2 ${catkin_LIBRARIES} python2.7)
 
 

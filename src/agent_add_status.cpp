@@ -4,7 +4,6 @@
 #include <cstdlib>
 #include "std_msgs/String.h"
 #include "std_msgs/Header.h"
-
 #include "main_loop/agent.h"
 #include "sensor_msgs/LaserScan.h"
 #include <std_msgs/Int32MultiArray.h>
@@ -50,8 +49,17 @@ void sub_class::status_publish(){
 }
 
 sub_class::sub_class(int my_pos_x_,int my_pos_y_, int ini_status){
-    pub_to_main.my_pos_x = my_pos_x_ ; 
-    pub_to_main.my_pos_y = my_pos_y_ ; 
+    pub_to_main.my_pos_x = 700 ; 
+    pub_to_main.my_pos_y = 300 ; 
+    pub_to_main.my_degree = 90 ; 
+	pub_to_main.my_pos_x = 700 ;
+    pub_to_main.my_pos_y = 300 ;
+    pub_to_main.enemy1_x = 380 ;
+    pub_to_main.enemy1_y = 2400 ;
+    pub_to_main.enemy2_x = 380 ;
+    pub_to_main.enemy2_y = 2300 ;
+    pub_to_main.ally_x = 380 ;
+    pub_to_main.ally_y = 2200 ; 
     status.data = ini_status;
 }
 

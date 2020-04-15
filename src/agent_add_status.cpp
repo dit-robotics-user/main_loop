@@ -72,9 +72,9 @@ void sub_class::ST1_sub_callback(const std_msgs::Int32MultiArray::ConstPtr& msg)
     ROS_INFO("ST1");
 }
 void sub_class::ST2_sub_callback(const std_msgs::Int32MultiArray::ConstPtr& msg){
-    pub_to_main.servo_state = msg->data[0] ;
-    pub_to_main.stepper = msg->data[1] ;
-    pub_to_main.hand = msg->data[2] ;    
+    pub_to_main.wrist = msg->data[0] ;
+    pub_to_main.hand = msg->data[1] ;
+    pub_to_main.finger = msg->data[2] ;    
 }
 
 void sub_class::lidarmsg_sub_callback(const lidar_2020::alert_range::ConstPtr& msg){

@@ -114,7 +114,7 @@ public:
     action(int x, int y, int movement_num[], int what_angle, int how_fast, bool is_wait, int what_mode){
         goal_pos_x = x;
         goal_pos_y = y;
-        for(int i = 0; i < 15; i ++){
+        for(int i = 0; i < 7; i ++){
             movement[i] = movement_num[i];
         }
         angle = what_angle;
@@ -147,7 +147,7 @@ public:
 private:
     int goal_pos_x;
     int goal_pos_y;
-    int movement[15];
+    int movement[7];
     int speed;
     int angle;
     bool wait;
@@ -165,7 +165,7 @@ class sub_state{
 		void callback(const main_loop::agent::ConstPtr& msg);
         bool lidar_be_blocked(float speed_degree,float car_degree);
 		bool emergency[8];
-        int movement_from_goap[15];
+        int movement_from_goap[7];
         main_loop::agent from_agent;
 		
 	private:
@@ -173,10 +173,10 @@ class sub_state{
 		ros::Subscriber Agent_sub ;		 
 };
 
-sub_state::sub_state(){
-    from_agent.servo_state = -2 ;
-    from_agent.stepper = -2 ;
+sub_state::sub_state(){ //***********************************************
+    from_agent.wrist = -2 ;
     from_agent.hand = -2 ;
+    from_agent.finger = -2 ;
 
 	Agent_sub = n.subscribe<main_loop::agent>("agent_msg", 1, &sub_state::callback,this);
 	for(int j=0;j<8;j++){
@@ -189,10 +189,11 @@ void sub_state::callback(const main_loop::agent::ConstPtr& msg){
     from_agent.my_pos_y = msg->my_pos_y ;
     from_agent.my_degree = msg->my_degree ; 
     from_agent.status = msg->status;
-    from_agent.servo_state = msg->servo_state;
-    from_agent.stepper = msg -> stepper ;
-    from_agent.hand = msg->hand ; 
-  
+    from_agent.wrist = msg->wrist;
+    from_agent.hand = msg -> hand ; //***********************************************
+    from_agent.finger = msg->finger ; 
+//ROS_INFO("%d",from_agent.status) ; 
+/*  
 	emergency[0]=msg->emergency[0];
     emergency[1]=msg->emergency[1];
     emergency[2]=msg->emergency[2];
@@ -201,7 +202,7 @@ void sub_state::callback(const main_loop::agent::ConstPtr& msg){
     emergency[5]=msg->emergency[5];
     emergency[6]=msg->emergency[6];
     emergency[7]=msg->emergency[7];
-   	
+*/   	
 }
 
 bool sub_state::lidar_be_blocked(float speed_degree,float car_degree){
@@ -226,7 +227,15 @@ bool sub_state::lidar_be_blocked(float speed_degree,float car_degree){
 
 bool at_pos(int x, int y, int deg, int c_x, int c_y, int c_deg, int m, int angle_m){
     bool at_p = false;
-    if(abs(x - c_x) < m && abs(y - c_y) < m && abs(deg - c_deg) < angle_m){
+    int exact_angle_difference=0 ;
+    int angle_difference_1=abs(c_deg-deg);
+    int angle_difference_2=360-abs(c_deg-deg);
+    if(angle_difference_1 > angle_difference_2){
+        exact_angle_difference = angle_difference_2;
+    }else{
+        exact_angle_difference = angle_difference_1;
+    }    
+    if(abs(x - c_x) < m && abs(y - c_y) < m && exact_angle_difference < angle_m){
         at_p = true;
     }
     return at_p;
@@ -263,7 +272,7 @@ int main(int argc, char **argv)
 
     int goal_covered_counter = 0;
     int cover_limit = 20;
-    int old_grab_status[12] = {0};
+    int old_grab_status[5] = {0};
     int distance_square = 0;
     int action_done = false;
     int kill_mission = false;
@@ -271,8 +280,6 @@ int main(int argc, char **argv)
     int margin = 50;
     int angle_margin = 10;
     int switch_mode_distance = 4000000;//square
-    int left_layer = 0;
-    int right_layer = 0;
     ActionMode m;
     RobotState robot;
 
@@ -300,7 +307,6 @@ int main(int argc, char **argv)
     goap_srv.request.mission_name = "setting" ;
     
     int count = 0 ;
-    int gogo = 0 ; 
     
 
 
@@ -341,16 +347,16 @@ int main(int argc, char **argv)
                 debug_1.desire_speed=0;
                 debug_1.desire_mode=r0;
                 debug_1.desire_pos={};
-                debug_1.desire_servo_state=0;
-                debug_1.desire_stepper=0;
-                debug_1.desire_hand=0;
+                debug_1.desire_servo_state=0; //***********************************************
+                debug_1.desire_stepper=0;     //***********************************************
+                debug_1.desire_hand=0;        //***********************************************
                 debug_1.is_wait=0;
                 debug_1.mission_name= "setting";
                 
                 break;
             case Status::RUN:{ //5
                
-                state current_state(temp.from_agent.my_pos_x,temp.from_agent.my_pos_y,temp.from_agent.my_degree,false,temp.from_agent.servo_state,temp.from_agent.stepper,temp.from_agent.hand);//<--------get undergoing, finish, my_x, my_y, block from other nodes ()********
+                state current_state(temp.from_agent.my_pos_x,temp.from_agent.my_pos_y,temp.from_agent.my_degree,false,temp.from_agent.wrist,temp.from_agent.hand,temp.from_agent.finger);//<--------get undergoing, finish, my_x, my_y, block from other nodes ()********
                 state action_state(0,0,0,false,0,0,0);
                 action_state = current_state;
                 if(action_done){
@@ -376,14 +382,6 @@ int main(int argc, char **argv)
                     temp.movement_from_goap[4]=goap_srv.response.ST2[4];
                     temp.movement_from_goap[5]=goap_srv.response.ST2[5];
                     temp.movement_from_goap[6]=goap_srv.response.ST2[6];
-                    temp.movement_from_goap[7]=goap_srv.response.ST2[7];
-                    temp.movement_from_goap[8]=goap_srv.response.ST2[8];
-                    temp.movement_from_goap[9]=goap_srv.response.ST2[9];
-                    temp.movement_from_goap[10]=goap_srv.response.ST2[10];
-                    temp.movement_from_goap[11]=goap_srv.response.ST2[11];
-                    temp.movement_from_goap[12]=goap_srv.response.ST2[12];
-                    temp.movement_from_goap[13]=goap_srv.response.ST2[13];
-                    temp.movement_from_goap[14]=goap_srv.response.ST2[14];
                     //for path plan
                     path_srv.request.goal_pos_x = goap_srv.response.pos[0];
                     path_srv.request.goal_pos_y = goap_srv.response.pos[1];
@@ -428,32 +426,26 @@ int main(int argc, char **argv)
                         switch(robot){
                             case RobotState::AT_POS:{
                                 debug_2.robot_case="AT_POS";
-                                //rx0
+                                //rx2
                                 long int out = 0;
-                                for(int i = 0; i < 12; i ++){
-                                    if(desire_movement[i] != -1){
-                                        old_grab_status[i] = desire_movement[i];
+                                for(int i = 0; i < 5; i ++){
+                                    if(desire_movement[i+2] != -1){
+                                        old_grab_status[i] = desire_movement[i+2];
                                     }
                                 }
-                                for(int i = 11; i >= 0; i --){
+                                for(int i = 4; i >= 0; i --){
                                     out = out << 2;
                                     out += old_grab_status[i];
                                 }
-                                rx0 = out;
+                                rx2 = out;
                                 //rx1
-                                if(desire_movement[12]!=-1){
-                                    left_layer = desire_movement[12];
+                                if(desire_movement[1]!=-1){
+                                    rx1 = desire_movement[1];
                                 }
-                                if(desire_movement[13]!=-1){
-                                    right_layer = desire_movement[13];
+                                //rx0
+                                if(desire_movement[0]!=-1){
+                                    rx0 = desire_movement[0];
                                 }
-                           
-                                rx1 = (left_layer << 2) + (right_layer << 6);
-                                //rx2
-                                if(desire_movement[14]!=-1){
-                                    rx2 = desire_movement[14];
-                                }
-                                
                                 break;}
 
                             case RobotState::BLOCKED:
@@ -619,7 +611,9 @@ int main(int argc, char **argv)
                     ROS_INFO ("rx1:%ld ", rx1);
                     ROS_INFO ("rx2:%ld ", rx2);
                     ROS_INFO("complete:%d",count);
-                    ROS_INFO ("mission: %s ", goap_srv.response.mission_name.c_str());
+                    ROS_INFO ("debug_2.robot_case: %s ", debug_2.robot_case.c_str());
+		    ROS_INFO ("mission: %s ", goap_srv.response.mission_name.c_str());
+		    ROS_INFO("action done in action state: %d" , action_state.MyActionDone());
                         action_done = true;
                         goal_covered_counter = 0;
                     }
@@ -663,9 +657,9 @@ int main(int argc, char **argv)
         debug_2.pos.push_back(temp.from_agent.my_pos_x);
         debug_2.pos.push_back(temp.from_agent.my_pos_y);
         debug_2.is_blocked=false;
-        debug_2.servo_state=temp.from_agent.servo_state;
-        debug_2.stepper_state=temp.from_agent.stepper;
-        debug_2.hand_state=temp.from_agent.hand;
+        debug_2.servo_state=temp.from_agent.wrist;
+        debug_2.stepper_state=temp.from_agent.hand;
+        debug_2.hand_state=temp.from_agent.finger;
         debug_2.kill_mission=kill_mission;
         debug_2.goal_covered_counter=goal_covered_counter;
         pub_goap_response.publish(debug_1);

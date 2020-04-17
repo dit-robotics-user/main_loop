@@ -31,7 +31,7 @@ public:
         kill_mission = false;
         replan_mission = false;
         replan_path = false;
-        is_blocked = false;
+        is_blocked = block;
         action_wait = false;
     }
     void ChangeActionDone(bool tf){
@@ -192,7 +192,7 @@ void sub_state::callback(const main_loop::agent::ConstPtr& msg){
     from_agent.servo_state = msg->servo_state;
     from_agent.stepper = msg -> stepper ;
     from_agent.hand = msg->hand ; 
-  
+
 	emergency[0]=msg->emergency[0];
     emergency[1]=msg->emergency[1];
     emergency[2]=msg->emergency[2];
@@ -201,10 +201,11 @@ void sub_state::callback(const main_loop::agent::ConstPtr& msg){
     emergency[5]=msg->emergency[5];
     emergency[6]=msg->emergency[6];
     emergency[7]=msg->emergency[7];
-   	
+  	
 }
 
 bool sub_state::lidar_be_blocked(float speed_degree,float car_degree){
+/*
     if(car_degree>speed_degree){
         if(car_degree-speed_degree<90){
             if( emergency[1]==true || emergency[2]==true || emergency[3]==true ){
@@ -220,13 +221,30 @@ bool sub_state::lidar_be_blocked(float speed_degree,float car_degree){
             }            
         }
     }
+*/
+    bool blockk=false;
+    for(int i=0;i<8;i++){
+        if(emergency[i]==true){
+            blockk=true;
+        }
+    }
+    return blockk;
+    
 }
 
 
 
 bool at_pos(int x, int y, int deg, int c_x, int c_y, int c_deg, int m, int angle_m){
     bool at_p = false;
-    if(abs(x - c_x) < m && abs(y - c_y) < m && abs(deg - c_deg) < angle_m){
+    int exact_angle_difference=0 ;
+    int angle_difference_1=abs(c_deg-deg);
+    int angle_difference_2=360-abs(c_deg-deg);
+    if(angle_difference_1 > angle_difference_2){
+        exact_angle_difference = angle_difference_2;
+    }else{
+        exact_angle_difference = angle_difference_1;
+    }    
+    if(abs(x - c_x) < m && abs(y - c_y) < m && exact_angle_difference < angle_m){
         at_p = true;
     }
     return at_p;
@@ -270,7 +288,7 @@ int main(int argc, char **argv)
     int replan_mission = false;
     int margin = 50;
     int angle_margin = 10;
-    int switch_mode_distance = 4000000;//square
+    int switch_mode_distance = 250000;//square
     int left_layer = 0;
     int right_layer = 0;
     ActionMode m;
@@ -286,11 +304,11 @@ int main(int argc, char **argv)
     path_srv.request.goal_pos_y = 1800;
 	path_srv.request.my_pos_x = 700 ;
     path_srv.request.my_pos_y = 300 ;
-    path_srv.request.enemy1_x = 380 ;
+    path_srv.request.enemy1_x = 1800 ;
     path_srv.request.enemy1_y = 2400 ;
-    path_srv.request.enemy2_x = 380 ;
+    path_srv.request.enemy2_x = 1800 ;
     path_srv.request.enemy2_y = 2300 ;
-    path_srv.request.ally_x = 380 ;
+    path_srv.request.ally_x = 1800 ;
     path_srv.request.ally_y = 2200 ; 
     goap_srv.request.replan=false;
     goap_srv.request.action_done=false;
@@ -300,7 +318,6 @@ int main(int argc, char **argv)
     goap_srv.request.mission_name = "setting" ;
     
     int count = 0 ;
-    int gogo = 0 ; 
     
 
 
@@ -317,11 +334,11 @@ int main(int argc, char **argv)
         //path plan
         path_srv.request.my_pos_x = temp.from_agent.my_pos_x;
         path_srv.request.my_pos_y = temp.from_agent.my_pos_y;
-        path_srv.request.enemy1_x = 380 ;
+        path_srv.request.enemy1_x = 1800 ;
         path_srv.request.enemy1_y = 2400 ;
-        path_srv.request.enemy2_x = 380 ;
-        path_srv.request.enemy2_y = 2300 ;
-        path_srv.request.ally_x = 380 ;
+        path_srv.request.enemy2_x = 300 ;
+        path_srv.request.enemy2_y = 1800 ;
+        path_srv.request.ally_x = 300 ;
         path_srv.request.ally_y = 2200 ; 
         //goap
         
@@ -349,8 +366,10 @@ int main(int argc, char **argv)
                 
                 break;
             case Status::RUN:{ //5
-               
-                state current_state(temp.from_agent.my_pos_x,temp.from_agent.my_pos_y,temp.from_agent.my_degree,false,temp.from_agent.servo_state,temp.from_agent.stepper,temp.from_agent.hand);//<--------get undergoing, finish, my_x, my_y, block from other nodes ()********
+                count ++;
+                state            
+                current_state(temp.from_agent.my_pos_x,temp.from_agent.my_pos_y,temp.from_agent.my_degree,temp.lidar_be_blocked(0,temp.from_agent.my_degree),
+                temp.from_agent.servo_state,temp.from_agent.stepper,temp.from_agent.hand);//<--------get undergoing, finish, my_x, my_y, block from other nodes ()********
                 state action_state(0,0,0,false,0,0,0);
                 action_state = current_state;
                 if(action_done){
@@ -411,20 +430,24 @@ int main(int argc, char **argv)
                 }
                 debug_2.action_done=action_state.MyActionDone();
                 
+                ROS_INFO("current_state.IsBlocked():%d",current_state.IsBlocked());
+                
                 switch(m){
                     case ActionMode::POSITION_MODE:
                         debug_2.robot_state="ActionMode::POSITION_MODE";
-                        if(at_pos(current_state.MyPosX(),current_state.MyPosY(),current_state.MyDegree(), desire_pos_x, desire_pos_y, desire_angle, margin, angle_margin)){
-                            robot = RobotState::AT_POS;
+
+                        if(current_state.IsBlocked()){
+                            robot = RobotState::BLOCKED;
                         }
                         else{
-                            if(current_state.IsBlocked()){
-                                robot = RobotState::BLOCKED;
+                            if(at_pos(current_state.MyPosX(),current_state.MyPosY(),current_state.MyDegree(), desire_pos_x, desire_pos_y, desire_angle, margin, angle_margin)){
+                                robot = RobotState::AT_POS;
                             }
                             else{
                                 robot = RobotState::ON_THE_WAY;
                             }
                         }
+                        
                         switch(robot){
                             case RobotState::AT_POS:{
                                 debug_2.robot_case="AT_POS";
@@ -613,16 +636,16 @@ int main(int argc, char **argv)
                 else{
                     d = false;
                 }
-                if(at_pos(current_state.MyPosX(),current_state.MyPosY(),current_state.MyDegree(), desire_pos_x, desire_pos_y, desire_angle, margin, angle_margin) && b && c && d){
-                    count ++ ;
+                if(count > 3 && at_pos(current_state.MyPosX(),current_state.MyPosY(),current_state.MyDegree(), desire_pos_x, desire_pos_y, desire_angle, margin, angle_margin) && b && c && d){
+                    count = 0;
                     ROS_INFO ("rx0:%ld ", rx0);                
                     ROS_INFO ("rx1:%ld ", rx1);
                     ROS_INFO ("rx2:%ld ", rx2);
                     ROS_INFO("complete:%d",count);
                     ROS_INFO ("mission: %s ", goap_srv.response.mission_name.c_str());
-                        action_done = true;
-                        goal_covered_counter = 0;
-                    }
+                    action_done = true;
+                    goal_covered_counter = 0;
+                }
                  
                 break;
                 }
@@ -662,7 +685,7 @@ int main(int argc, char **argv)
         debug_2.status=temp.from_agent.status;
         debug_2.pos.push_back(temp.from_agent.my_pos_x);
         debug_2.pos.push_back(temp.from_agent.my_pos_y);
-        debug_2.is_blocked=false;
+        debug_2.is_blocked=temp.lidar_be_blocked(0,temp.from_agent.my_degree);
         debug_2.servo_state=temp.from_agent.servo_state;
         debug_2.stepper_state=temp.from_agent.stepper;
         debug_2.hand_state=temp.from_agent.hand;

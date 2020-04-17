@@ -355,7 +355,7 @@ int main(int argc, char **argv)
                 
                 break;
             case Status::RUN:{ //5
-               
+               	count ++;
                 state current_state(temp.from_agent.my_pos_x,temp.from_agent.my_pos_y,temp.from_agent.my_degree,false,temp.from_agent.wrist,temp.from_agent.hand,temp.from_agent.finger);//<--------get undergoing, finish, my_x, my_y, block from other nodes ()********
                 state action_state(0,0,0,false,0,0,0);
                 action_state = current_state;
@@ -446,6 +446,49 @@ int main(int argc, char **argv)
                                 if(desire_movement[0]!=-1){
                                     rx0 = desire_movement[0];
                                 }
+
+				bool c;
+				if(rx1==current_state.MyTx1()){
+				    c = true;
+				}
+				else{
+				    c = false;
+				}               
+				bool b;
+				if(rx0==current_state.MyTx0()){
+				ROS_INFO("b=%d , mission ",b);
+				    b = true;
+				}
+				else{
+				    b = false;
+				}
+				bool d;
+				if(rx2==current_state.MyTx2()){
+				    d = true;
+				}
+				else{
+				    d = false;
+				}
+				if(count>3 && at_pos(current_state.MyPosX(),current_state.MyPosY(),current_state.MyDegree(), desire_pos_x, desire_pos_y, desire_angle, margin, angle_margin) && b && c && d){
+				    //count ++ ;
+				    ROS_INFO ("rx0:%ld ", rx0);                
+				    ROS_INFO ("rx1:%ld ", rx1);
+				    ROS_INFO ("rx2:%ld ", rx2);
+				    ROS_INFO("complete:%d",count);
+				    ROS_INFO ("debug_2.robot_case: %s ", debug_2.robot_case.c_str());
+				    ROS_INFO ("mission: %s ", goap_srv.response.mission_name.c_str());
+				    ROS_INFO("action done in action state: %d" , action_state.MyActionDone());
+				    action_done = true;
+				    goal_covered_counter = 0;
+				    count = 0; 
+                		}
+
+
+
+
+
+
+
                                 break;}
 
                             case RobotState::BLOCKED:
@@ -584,39 +627,6 @@ int main(int argc, char **argv)
                 debug_1.is_wait=desire_wait;
                 debug_1.mission_name = goap_srv.response.mission_name;
 
-                bool c;
-                if(rx1==current_state.MyTx1()){
-                    c = true;
-                }
-                else{
-                    c = false;
-                }               
-                bool b;
-                if(rx0==current_state.MyTx0()){
-                    b = true;
-                }
-                else{
-                    b = false;
-                }
-                bool d;
-                if(rx2==current_state.MyTx2()){
-                    d = true;
-                }
-                else{
-                    d = false;
-                }
-                if(at_pos(current_state.MyPosX(),current_state.MyPosY(),current_state.MyDegree(), desire_pos_x, desire_pos_y, desire_angle, margin, angle_margin) && b && c && d){
-                    count ++ ;
-                    ROS_INFO ("rx0:%ld ", rx0);                
-                    ROS_INFO ("rx1:%ld ", rx1);
-                    ROS_INFO ("rx2:%ld ", rx2);
-                    ROS_INFO("complete:%d",count);
-                    ROS_INFO ("debug_2.robot_case: %s ", debug_2.robot_case.c_str());
-		    ROS_INFO ("mission: %s ", goap_srv.response.mission_name.c_str());
-		    ROS_INFO("action done in action state: %d" , action_state.MyActionDone());
-                        action_done = true;
-                        goal_covered_counter = 0;
-                    }
                  
                 break;
                 }

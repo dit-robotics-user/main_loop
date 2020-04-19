@@ -429,9 +429,7 @@ int main(int argc, char **argv)
                     m = ActionMode::SPEED_MODE;
                 }
                 debug_2.action_done=action_state.MyActionDone();
-                
-                ROS_INFO("current_state.IsBlocked():%d",current_state.IsBlocked());
-                
+                            
                 switch(m){
                     case ActionMode::POSITION_MODE:
                         debug_2.robot_state="ActionMode::POSITION_MODE";
@@ -636,7 +634,7 @@ int main(int argc, char **argv)
                 else{
                     d = false;
                 }
-                if(count > 3 && at_pos(current_state.MyPosX(),current_state.MyPosY(),current_state.MyDegree(), desire_pos_x, desire_pos_y, desire_angle, margin, angle_margin) && b && c && d){
+                if( at_pos(current_state.MyPosX(),current_state.MyPosY(),current_state.MyDegree(), desire_pos_x, desire_pos_y, desire_angle, margin, angle_margin) && b && c && d){
                     count = 0;
                     ROS_INFO ("rx0:%ld ", rx0);                
                     ROS_INFO ("rx1:%ld ", rx1);
@@ -644,6 +642,8 @@ int main(int argc, char **argv)
                     ROS_INFO("complete:%d",count);
                     ROS_INFO ("mission: %s ", goap_srv.response.mission_name.c_str());
                     action_done = true;
+                    ROS_INFO ("action_state.MyActionDone(): %d ", action_state.MyActionDone());
+                    ROS_INFO ("action_done: %d ", action_done);
                     goal_covered_counter = 0;
                 }
                  

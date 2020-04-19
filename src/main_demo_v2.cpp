@@ -254,8 +254,8 @@ int main(int argc, char **argv)
     ros::Publisher pub_goap_response = nh.advertise<main_loop::from_goap>("Goap_response", 1);
     ros::Publisher pub_main_state = nh.advertise<main_loop::main_state>("Main_state", 1);
 
-	ros::ServiceClient client_path = nh.serviceClient<main_loop::path>("path_plan");
-    ros::ServiceClient client_goap = nh.serviceClient<main_loop::goap_>("goap_test_v1");
+	ros::ServiceClient client_path = nh.serviceClient<main_loop::path>("/small/path_plan");
+    ros::ServiceClient client_goap = nh.serviceClient<main_loop::goap_>("/small/goap_test_v1");
     sub_state temp;
 	main_loop::path path_srv;
     main_loop::goap_ goap_srv;

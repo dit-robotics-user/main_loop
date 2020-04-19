@@ -89,8 +89,8 @@ def main_state_callback(data):
 
 
 
-txST1_sub = rospy.Subscriber('/Goap_response', from_goap, from_goap_callback)
-rxST1_sub = rospy.Subscriber('/Main_state', main_state, main_state_callback)
+txST1_sub = rospy.Subscriber('/small/Goap_response', from_goap, from_goap_callback)
+rxST1_sub = rospy.Subscriber('/small/Main_state', main_state, main_state_callback)
 
    
 def listener():

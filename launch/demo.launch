@@ -2,20 +2,20 @@
 <launch>
 
 
-	<node pkg="main_loop" type="path_planning_" name="path_planning_" output="log" respawn="true">
+	<node pkg="main_loop" type="path_planning_" name="path_planning_" output="log" respawn="true" ns="small">
 	</node>
 
-	<node pkg="main_loop" type="main_demo_v2" name="main_demo_vs" output="screen" respawn="true">
+	<node pkg="main_loop" type="main_demo_v2" name="main_demo_vs" output="screen" respawn="true" ns="small">
 	</node>
-	<node pkg="main_loop" type="agent_add_status" name="agent_add_status" >
+	<node pkg="main_loop" type="agent_add_status" name="agent_add_status" ns="small">
 	</node>
-	<node pkg="serial_port" type="serial_port_node" name="serial_port_node" output="log" respawn="true">
+	<node pkg="serial_port" type="serial_port_node" name="serial_port_node" output="log" respawn="true" ns="small">
 	</node>
-	<node pkg="serial_port" type="serial_port_node_2" name="serial_port_node_2" output="log" respawn="true">
+	<node pkg="serial_port" type="serial_port_node_2" name="serial_port_node_2" output="log" respawn="true" ns="small">
 	</node>
-	<node pkg="main_loop" type="goap_main_v1.py" name="goap_main_v1" respawn="true" >
+	<node pkg="main_loop" type="goap_main_v1.py" name="goap_main_v1" respawn="true" ns="small">
 	</node>
-	<node pkg="eurobot_gui" type="eurobot_gui.py" name="eurobot_gui" output="screen" respawn="true" >
+	<node pkg="eurobot_gui" type="eurobot_gui.py" name="eurobot_gui" output="screen" respawn="true" ns="small">
 	</node>
 	
 	

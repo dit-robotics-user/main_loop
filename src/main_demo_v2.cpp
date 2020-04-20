@@ -431,7 +431,7 @@ int main(int argc, char **argv)
                 debug_2.action_done=action_state.MyActionDone();
                             
                 switch(m){
-                    case ActionMode::POSITION_MODE:
+                    case ActionMode::POSITION_MODE:{
                         debug_2.robot_state="ActionMode::POSITION_MODE";
 
                         if(current_state.IsBlocked()){
@@ -527,80 +527,148 @@ int main(int argc, char **argv)
                                 }
                                 break;
                         }
+                        bool c;
+                        if(rx1==current_state.MyTx1()){
+                            c = true;
+                        }
+                        else{
+                            c = false;
+                        }               
+                        bool b;
+                        if(rx0==current_state.MyTx0()){
+                            b = true;
+                        }
+                        else{
+                            b = false;
+                        }
+                        bool d;
+                        if(rx2==current_state.MyTx2()){
+                            d = true;
+                        }
+                        else{
+                            d = false;
+                        }
+                        if(count>3 && at_pos(current_state.MyPosX(),current_state.MyPosY(),current_state.MyDegree(), desire_pos_x, desire_pos_y, desire_angle, margin, angle_margin) && b && c && d){
+        				    ROS_INFO ("rx0:%ld ", rx0);                
+                            ROS_INFO ("rx1:%ld ", rx1);
+                            ROS_INFO ("rx2:%ld ", rx2);
+                            ROS_INFO("complete:%d",count);
+                            ROS_INFO ("debug_2.robot_case: %s ", debug_2.robot_case.c_str());
+                            ROS_INFO ("mission: %s ", goap_srv.response.mission_name.c_str());
+                            ROS_INFO("action done in action state: %d" , action_state.MyActionDone());
+                            action_done = true;
+                            goal_covered_counter = 0;
+                            count = 0; 
+                        }
                         break;
+                    }
+
 
                     case ActionMode::SPEED_MODE:{
-                        debug_2.robot_state="ActionMode::SPEED_MODE";
-                        long int out=0;
-                        rx0 = desire_movement[12];
-                        rx1 = desire_movement[13];
+                        debug_2.robot_state="ActionMode::POSITION_MODE";
+                        //==被阻擋則停車==
+                        if(current_state.IsBlocked()){
+                            r0 = 0x5000;
+                            r1 = 0;
+                            r2 = 0;
+                            r3 = 0;
+                            action_state.ChangeReplanMission(true);
+                        }
+
+                        //==給任務及位置==
+                        //基本上手跟平台都不需要給新指令，可以直接刪rx1,rx2
+                        //rx0 <- desire movement
+                        long int out = 0;
                         for(int i = 0; i < 12; i ++){
-                            if(desire_movement[i] == 1){
+                            if(desire_movement[i] == 2){//自動夾給２
                                 old_grab_status[i] = 2;
                             }
-                            else if(desire_movement[i] == 0){
-                                old_grab_status[i] = 0;
-                            }
+                        }
+                        for(int i = 11; i >= 0; i --){
+                            out = out << 2;
+                            out += old_grab_status[i];
+                        }
+                        rx0 = out;
+
+                        //==任務完成轉換器===
+                        //這邊需要稍微調整動作的完成，因為自動夾的指令是２但完成後會變１吧？
+                        long int finished_out = 0;
+                        int copy_old_status[12] = {0};
+                        for(int i = 0; i < 12; i ++){
+                            copy_old_status[i] = old_grab_status[i];
                         }
                         for(int i = 0; i < 12; i ++){
-                            out += old_grab_status[i];
-                            out = out << 2;
-                        }
-                        out = out << 6;
-                        rx2 = out;
-                        rx3 = desire_movement[14];
-                        if(current_state.MyPosX() != desire_pos_x && current_state.MyPosY() != desire_pos_y){
-                           if(current_state.MyActionDone() == 1){ //if not at pos and hasn't got cup, keep going
-                                //---------path plan
-                                if(client_path.call(path_srv)){
-                                    double clustering_time = ros::Time::now().toSec () - begin_time; 
-                                    now_degree = path_srv.response.degree ; 
-                                }else{
-                                    ROS_ERROR("Failed to call service path plan");
-                                }
-                                if(now_degree<0){
-                                    now_degree = last_degree;
-                                } 
-                                //-----path plan end 
-                                r0 = 0x3000;
-                                r1 = desire_speed;
-                                r2 = now_degree;
-                                r3 = 0;
-                                if( path_srv.response.blocked == true){ 
-                                    goal_covered_counter ++;
-                                }
-                                if( path_srv.response.blocked == false){ 
-                                    goal_covered_counter = 0;
-                                }
-                                if(goal_covered_counter > cover_limit){
-                                    //action_state.ChangeKillMission(true);
-                                    action_state.ChangeActionDone(true); //should kill mission but fuck that.. this should still work
-                                    goal_covered_counter = 0;
-                                    for(int i = 0; i < 12; i ++){
-                                       if(desire_movement[i] == 2){
-                                            old_grab_status[i] = 0;
-                                        }
-                                    }
-                            	} //if get cup, action_done is then true(MyActionStatus()==2), GOAP will automatically give next action
-                           }
-                            else{
-                                for(int i = 0; i < 12; i ++){
-                                       if(desire_movement[i] == 2){
-                                            old_grab_status[i] = 1;
-                                        }
-                                    }
+                            if(desire_movement[i] == 2){//自動夾給２
+                                copy_old_status[i] = 1;//轉換成已完成時會變成的１
                             }
                         }
-                        else{ //at pos, mission has failed..
-                            //action_state.ChangeKillMission(true);
-                            action_state.ChangeActionDone(true); //should kill mission but fuck that.. this should still work
+                        for(int i = 11; i >= 0; i --){
+                            finished_out = finished_out << 2;
+                            finished_out += copy_old_status[i];
+                        }
+
+                        //==任務完成==
+                        //若自動夾完成則action_done
+                        if(count>3 &&current_state.MyTx0()== finished_out){
+                            action_done = true;
+                            //把old_grab_status中有２的換成１（自動夾完成）
                             for(int i = 0; i < 12; i ++){
-                               if(desire_movement[i] == 2){
+                            if(desire_movement[i] == 2){
+                                    old_grab_status[i] = 1;
+                                }
+                            }
+                            count = 0;
+                        }
+
+                        //==到點==
+                        //若到點則代表沒完成任務（任務已被他人完成或失敗）
+                        if(at_pos(current_state.MyPosX(),current_state.MyPosY(), current_state.MyDegree(), desire_pos_x, desire_pos_y, desire_angle, margin, angle_margin)){
+                            action_state.ChangeKillMission(true);
+                            //把old_grab_status中有２的換回０（自動夾取消）
+                            for(int i = 0; i < 12; i ++){
+                                if(desire_movement[i] == 2){
                                     old_grab_status[i] = 0;
                                 }
                             }
                         }
-                        break;}
+                        //==未到點==
+                        //不然算路徑給速度角度
+                        else{
+                            if(client_path.call(path_srv)){
+                                double clustering_time = ros::Time::now().toSec () - begin_time; 
+                                now_degree = path_srv.response.degree ; 
+                            }else{
+                                ROS_ERROR("Failed to call service path plan");
+                            }
+                            if(now_degree<0){
+                                now_degree = last_degree;
+                            }    
+                            r0 = 0x3000;
+                            r1 = desire_speed;
+                            r2 = now_degree;
+                            r3 = 0;
+                            if( path_srv.response.blocked == true){ 
+                                goal_covered_counter ++;
+                            }
+                            if( path_srv.response.blocked == false){ 
+                                goal_covered_counter = 0;
+                            }
+                            //==終點被阻攔過久==
+                            if(goal_covered_counter > cover_limit){
+                                action_state.ChangeKillMission(true);
+                                goal_covered_counter = 0;
+                                //把old_grab_status中有２的換回０（自動夾取消）
+                                for(int i = 0; i < 12; i ++){
+                                if(desire_movement[i] == 2){
+                                        old_grab_status[i] = 0;
+                                    }
+                                }
+                            }
+                        }
+                        break;
+                    }
+
+
                 }
                 debug_1.desire_degree=desire_angle;
                 debug_1.desire_speed=desire_speed;
@@ -613,39 +681,7 @@ int main(int argc, char **argv)
                 debug_1.is_wait=desire_wait;
                 debug_1.mission_name = goap_srv.response.mission_name;
 
-                bool c;
-                if(rx1==current_state.MyTx1()){
-                    c = true;
-                }
-                else{
-                    c = false;
-                }               
-                bool b;
-                if(rx0==current_state.MyTx0()){
-                    b = true;
-                }
-                else{
-                    b = false;
-                }
-                bool d;
-                if(rx2==current_state.MyTx2()){
-                    d = true;
-                }
-                else{
-                    d = false;
-                }
-                if( at_pos(current_state.MyPosX(),current_state.MyPosY(),current_state.MyDegree(), desire_pos_x, desire_pos_y, desire_angle, margin, angle_margin) && b && c && d){
-                    count = 0;
-                    ROS_INFO ("rx0:%ld ", rx0);                
-                    ROS_INFO ("rx1:%ld ", rx1);
-                    ROS_INFO ("rx2:%ld ", rx2);
-                    ROS_INFO("complete:%d",count);
-                    ROS_INFO ("mission: %s ", goap_srv.response.mission_name.c_str());
-                    action_done = true;
-                    ROS_INFO ("action_state.MyActionDone(): %d ", action_state.MyActionDone());
-                    ROS_INFO ("action_done: %d ", action_done);
-                    goal_covered_counter = 0;
-                }
+
                  
                 break;
                 }

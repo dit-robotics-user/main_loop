@@ -26,7 +26,7 @@ def setting(mode):
 		c13 = Action('hand_up2', [],           [], (1200, 900), 3, 90, 150, 1, 15, 3, False, True)
 		c14 = Action("cup4",      ['4'],   ['get_cup'], (500, 500), 3, 143, 150, 1, 0, 1, True, True)     
 		c15 = Action('lift3',      [], ['lift_left', '1', '2'], (700, 2000), 3, 143, 150, 1, 15, 2, False, True)
-		c3 = Action("cup3",      ['4'],        ['get_cup'], (400, 1200), 3, 60, 150, 2, 0, 1, True, True)
+		c3 = Action("cup3",      ['2'],        ['get_cup'], (400, 1200), 3, 60, 150, 2, 0, 1, True, True)
 		#c8 = Action('goto',      [],           [], (700, 300), 3, 0, 150, 1, 15, 5, False, True)
 		demo_path = [c15,c9]
 		demo_path = [c4, c1, c5, c2, c3, c6, c7, c8, c11, c9, c12, c10,c16]

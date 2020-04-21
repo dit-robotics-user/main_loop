@@ -31,7 +31,7 @@ right_side = 0
 '''
 def output_processor(output_action, left_side, right_side):
     output = [-1]*15
-    if output_action.iscup is True:
+    if output_action.iscup is True and output_action.grab_mode is 1:
         for p in output_action.preconditions:
             if p is '1':
                 claw_num = 2*left_side + 0  # use layer 2 - left_side + '1'
@@ -45,6 +45,20 @@ def output_processor(output_action, left_side, right_side):
             else:
                 claw_num = 2*right_side + 7  # use layer 2 - right_side + '4'
                 output[claw_num] = 1
+    if output_action.iscup is True and output_action.grab_mode is 2:
+        for p in output_action.preconditions:
+            if p is '1':
+                claw_num = 2*left_side + 0  # use layer 2 - left_side + '1'
+                output[claw_num] = 2
+            elif p is '2':
+                claw_num = 2*left_side + 1  # use layer 2 - left_side + '2'
+                output[claw_num] = 2
+            elif p is'3':
+                claw_num = 2*right_side + 6  # use layer 2 - right_side + '3'
+                output[claw_num] = 2
+            else:
+                claw_num = 2*right_side + 7  # use layer 2 - right_side + '4'
+                output[claw_num] = 2
 
     elif output_action.number is 6:  # lower 6
         if right_side is 0:
@@ -103,9 +117,9 @@ def add_two_ints_server():
 
 		path_done = False
 		path = demo_path[0]
-		if path.iscup is True:
-			if path.grab_mode is 2:  # speed mode
-				path.tangent_point_calculation(MyClass.my_pos, stretch_factor=5)
+		#if path.iscup is True:
+			#if path.grab_mode is 2:  # speed mode
+				#path.tangent_point_calculation(MyClass.my_pos, stretch_factor=5)
 		MyClass.output = output_processor(path, left_side, right_side)
 		MyClass.output_degree = path.degree
 		MyClass.output_speed = path.speed

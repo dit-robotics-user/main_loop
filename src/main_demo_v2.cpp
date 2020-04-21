@@ -287,7 +287,9 @@ int main(int argc, char **argv)
     int kill_mission = false;
     int replan_mission = false;
     int margin = 50;
+    int speed_mode_margin = 100;
     int angle_margin = 10;
+    int speed_mode_angle_margin = 360;
     int switch_mode_distance = 250000;//square
     int left_layer = 0;
     int right_layer = 0;
@@ -565,15 +567,9 @@ int main(int argc, char **argv)
 
 
                     case ActionMode::SPEED_MODE:{
+                        ROS_INFO("speed mode !");
                         debug_2.robot_state="ActionMode::POSITION_MODE";
-                        //==被阻擋則停車==
-                        if(current_state.IsBlocked()){
-                            r0 = 0x5000;
-                            r1 = 0;
-                            r2 = 0;
-                            r3 = 0;
-                            action_state.ChangeReplanMission(true);
-                        }
+                        
 
                         //==給任務及位置==
                         //基本上手跟平台都不需要給新指令，可以直接刪rx1,rx2
@@ -582,13 +578,16 @@ int main(int argc, char **argv)
                         for(int i = 0; i < 12; i ++){
                             if(desire_movement[i] == 2){//自動夾給２
                                 old_grab_status[i] = 2;
+                                ROS_INFO("000!");
                             }
+                         
                         }
                         for(int i = 11; i >= 0; i --){
                             out = out << 2;
                             out += old_grab_status[i];
                         }
                         rx0 = out;
+                        ROS_INFO("rx0:%ld",rx0);
 
                         //==任務完成轉換器===
                         //這邊需要稍微調整動作的完成，因為自動夾的指令是２但完成後會變１吧？
@@ -611,9 +610,10 @@ int main(int argc, char **argv)
                         //若自動夾完成則action_done
                         if(count>3 &&current_state.MyTx0()== finished_out){
                             action_done = true;
+                            ROS_INFO("action done");
                             //把old_grab_status中有２的換成１（自動夾完成）
                             for(int i = 0; i < 12; i ++){
-                            if(desire_movement[i] == 2){
+                            if(old_grab_status[i] == 2){
                                     old_grab_status[i] = 1;
                                 }
                             }
@@ -622,8 +622,10 @@ int main(int argc, char **argv)
 
                         //==到點==
                         //若到點則代表沒完成任務（任務已被他人完成或失敗）
-                        if(at_pos(current_state.MyPosX(),current_state.MyPosY(), current_state.MyDegree(), desire_pos_x, desire_pos_y, desire_angle, margin, angle_margin)){
+                        if(at_pos(current_state.MyPosX(),current_state.MyPosY(), current_state.MyDegree(), desire_pos_x, desire_pos_y, desire_angle, speed_mode_margin, speed_mode_angle_margin)){
                             action_state.ChangeKillMission(true);
+                            action_done = true;
+                            ROS_INFO("speed mode action done");
                             //把old_grab_status中有２的換回０（自動夾取消）
                             for(int i = 0; i < 12; i ++){
                                 if(desire_movement[i] == 2){
@@ -642,7 +644,19 @@ int main(int argc, char **argv)
                             }
                             if(now_degree<0){
                                 now_degree = last_degree;
-                            }    
+                            } 
+                            //-----path plan end 
+                            distance_square = (current_state.MyPosX() - desire_pos_x)*(current_state.MyPosX() - desire_pos_x) + (current_state.MyPosY() - desire_pos_y)*(current_state.MyPosY() - desire_pos_y);
+                            /*
+                            if(distance_square < switch_mode_distance){
+                                r0 = 0x4000;
+                                r1 = desire_pos_x;
+                                r2 = desire_pos_y;
+                                r3 = desire_angle;
+                                //return pos_mode; //<----------------
+                            }
+                            else{
+                            */
                             r0 = 0x3000;
                             r1 = desire_speed;
                             r2 = now_degree;
@@ -653,17 +667,26 @@ int main(int argc, char **argv)
                             if( path_srv.response.blocked == false){ 
                                 goal_covered_counter = 0;
                             }
-                            //==終點被阻攔過久==
+                            //return speed_mode;//<-----------------
                             if(goal_covered_counter > cover_limit){
                                 action_state.ChangeKillMission(true);
                                 goal_covered_counter = 0;
                                 //把old_grab_status中有２的換回０（自動夾取消）
                                 for(int i = 0; i < 12; i ++){
-                                if(desire_movement[i] == 2){
+                                    if(desire_movement[i] == 2){
                                         old_grab_status[i] = 0;
                                     }
                                 }
                             }
+                        }
+                        //==被阻擋則停車==
+                        if(current_state.IsBlocked()){
+                        ROS_INFO("speed mode block");
+                            r0 = 0x5000;
+                            r1 = 0;
+                            r2 = 0;
+                            r3 = 0;
+                            action_state.ChangeReplanMission(true);
                         }
                         break;
                     }

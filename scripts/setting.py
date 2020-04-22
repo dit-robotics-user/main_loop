@@ -16,7 +16,7 @@ def setting(mode):
 
 		c6 = Action('hand_up', [],           [], (1500, 700), 3, 90, 150, 1, 15, 3, False, True)
 		c7 = Action('hand_down',   [],           [], (1500, 950), 3, 90, 150, 1, 15, 4, False, True)
-		c8 = Action('goto',      [],           [], (1300, 1250), 3, 0, 150, 1, 15, 5, False, True)
+		c8 = Action('goto',      [],           [], (700, 1900), 3, 0, 150, 1, 15, 5, False, True)
 		c16 = Action('goto1',      [],           [], (700, 500), 3, 0, 150, 1, 15, 5, False, True)
 		c9 = Action('lower1',     [],           [], (1550, 1250), 3, 0, 270, 1, 15, 6, False, True)
 		c10 = Action('lower2', [], [],               (1300, 1250), 3, 0, 270, 1, 15, 6, False, True)
@@ -30,7 +30,7 @@ def setting(mode):
 		#c8 = Action('goto',      [],           [], (700, 300), 3, 0, 150, 1, 15, 5, False, True)
 		demo_path = [c15,c9]
 		demo_path = [c4, c1, c5, c2, c3, c6, c7, c8, c11, c9, c12, c10,c16]
-		demo_path = [c3, c6, c7, c8, c11, c9, c12, c10,c16]
+		demo_path = [c8]
 
     return demo_path
 

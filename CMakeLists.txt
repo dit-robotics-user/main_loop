@@ -55,7 +55,7 @@ add_message_files(
    from_goap.msg
    agent.msg
    string_with_header.msg
-   
+   position.msg
 )
 
 ## Generate services in the 'srv' folder

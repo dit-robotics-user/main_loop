@@ -192,6 +192,10 @@ void sub_state::callback(const main_loop::agent::ConstPtr& msg){
     from_agent.servo_state = msg->servo_state;
     from_agent.stepper = msg -> stepper ;
     from_agent.hand = msg->hand ; 
+    from_agent.enemy1_x = msg->enemy1_x ;
+    from_agent.enemy1_y = msg->enemy1_y ;
+    from_agent.enemy2_x = msg->enemy2_x ;
+    from_agent.enemy2_y = msg->enemy2_y ;
 
 	emergency[0]=msg->emergency[0];
     emergency[1]=msg->emergency[1];
@@ -336,12 +340,20 @@ int main(int argc, char **argv)
         //path plan
         path_srv.request.my_pos_x = temp.from_agent.my_pos_x;
         path_srv.request.my_pos_y = temp.from_agent.my_pos_y;
-        path_srv.request.enemy1_x = 1800 ;
-        path_srv.request.enemy1_y = 2400 ;
-        path_srv.request.enemy2_x = 300 ;
-        path_srv.request.enemy2_y = 1800 ;
+        if(temp.from_agent.enemy1_x!=0){
+            path_srv.request.enemy1_x = temp.from_agent.enemy1_x ;
+        }
+        if(temp.from_agent.enemy1_y!=0){
+            path_srv.request.enemy1_y = temp.from_agent.enemy1_y ;
+        }
+        if(temp.from_agent.enemy2_x!=0){
+            path_srv.request.enemy2_x = temp.from_agent.enemy2_x ;
+        }
+        if(temp.from_agent.enemy2_y!=0){
+            path_srv.request.enemy2_y = temp.from_agent.enemy2_y ;
+        }
         path_srv.request.ally_x = 300 ;
-        path_srv.request.ally_y = 2200 ; 
+        path_srv.request.ally_y = 2200 ;          
         //goap
         
         //debug
@@ -744,6 +756,10 @@ int main(int argc, char **argv)
         debug_2.status=temp.from_agent.status;
         debug_2.pos.push_back(temp.from_agent.my_pos_x);
         debug_2.pos.push_back(temp.from_agent.my_pos_y);
+        debug_2.enemy1_x=path_srv.request.enemy1_x;
+        debug_2.enemy1_y=path_srv.request.enemy1_y;
+        debug_2.enemy2_x=path_srv.request.enemy2_x;
+        debug_2.enemy2_y=path_srv.request.enemy2_y;
         debug_2.is_blocked=temp.lidar_be_blocked(0,temp.from_agent.my_degree);
         debug_2.servo_state=temp.from_agent.servo_state;
         debug_2.stepper_state=temp.from_agent.stepper;

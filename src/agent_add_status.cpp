@@ -106,6 +106,12 @@ void sub_class::lidarmsg_sub_callback(const lidar_2020::alert_range::ConstPtr& m
 
 void sub_class::publish_(float time ){
     pub_to_main.time =time ; 
+    if(status.data!=5){
+        pub_to_main.emergency={};
+        for(int j=0 ;j<8;j++){
+            pub_to_main.emergency.push_back(false);
+        }  
+    }
     agent_pub.publish(pub_to_main);
 }
 

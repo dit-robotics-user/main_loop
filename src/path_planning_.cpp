@@ -12,7 +12,7 @@ using namespace std;
 
 #define mazeSizeX 41
 #define mazeSizeY 61
-#define robotSize 20
+#define robotSize 9
 
 void build_maze(int maze[mazeSizeX][mazeSizeY])
 {

@@ -29,6 +29,10 @@ robot_state = ""
 robot_case = ""
 pos_x = ""
 pos_y = ""
+enemy1_x = ""
+enemy1_y = ""
+enemy2_x = ""
+enemy2_y = ""
 is_blocked = ""
 servo_state = ""
 stepper_state = ""
@@ -62,30 +66,38 @@ def from_goap_callback(data):
 	mission_name  = "mission_name:" + str(data.mission_name)
 
 def main_state_callback(data):
-	global status
-	global robot_state
-	global robot_case 
-	global pos_x 
-	global pos_y
-	global is_blocked 
-	global servo_state 
-	global stepper_state
-	global hand_state
-	global action_done 
-	global kill_mission 
-	global goal_covered_counter 
- 	status = "status:" + str(data.status) 
-	robot_state = "robot_state:" + str(data.robot_state)
-	robot_case = "robot_case:" + str(data.robot_case)
-	pos_x = "pos_x:" + str(data.pos[0])
-	pos_y = "pos_y:" + str(data.pos[1]) 
-	is_blocked = "is_blocked:" + str(data.is_blocked)
-	servo_state = "servo_state:" + str(data.servo_state)
-	stepper_state = "stepper_state:" + str(data.stepper_state)
-	hand_state = "hand_state:" + str(data.hand_state)
-	action_done  = "action_done:" + str(data.action_done)
-	kill_mission = "kill_mission:" + str(data.kill_mission)
-	goal_covered_counter = "goal_covered_counter:" + str(data.goal_covered_counter)
+    global status
+    global robot_state
+    global robot_case 
+    global pos_x 
+    global pos_y
+    global is_blocked 
+    global servo_state 
+    global enemy1_x
+    global enemy1_y
+    global enemy2_x
+    global enemy2_y
+    global stepper_state
+    global hand_state
+    global action_done 
+    global kill_mission 
+    global goal_covered_counter 
+    status = "status:" + str(data.status) 
+    robot_state = "robot_state:" + str(data.robot_state)
+    robot_case = "robot_case:" + str(data.robot_case)
+    pos_x = "pos_x:" + str(data.pos[0])
+    pos_y = "pos_y:" + str(data.pos[1]) 
+    enemy1_x = "enemy1_x:" + str(data.enemy1_x)
+    enemy1_y = "enemy1_y:" + str(data.enemy1_y)
+    enemy2_x = "enemy2_x:" + str(data.enemy2_x)
+    enemy2_y = "enemy2_y:" + str(data.enemy2_y)
+    is_blocked = "is_blocked:" + str(data.is_blocked)
+    servo_state = "servo_state:" + str(data.servo_state)
+    stepper_state = "stepper_state:" + str(data.stepper_state)
+    hand_state = "hand_state:" + str(data.hand_state)
+    action_done  = "action_done:" + str(data.action_done)
+    kill_mission = "kill_mission:" + str(data.kill_mission)
+    goal_covered_counter = "goal_covered_counter:" + str(data.goal_covered_counter)
 
 
 
@@ -139,6 +151,10 @@ def listener():
 		print(robot_case)
 		print(pos_x)
 		print(pos_y)
+		print(enemy1_x)
+		print(enemy1_y)
+		print(enemy2_x)
+		print(enemy2_y)
 		print(is_blocked)
 		print(servo_state)
 		print(stepper_state)

@@ -1,0 +1,140 @@
+<launch>
+
+	<!--Machine Definition-->
+
+    	<machine name="small"              
+    	address="10.42.0.1"                       
+    	                            
+   	ssh-port = "22"                            
+   	env-loader="~/env.sh"                       
+   	timeout="20" />         
+
+    	<machine name="master"
+    	address="10.42.0.235"
+    	
+    	ssh-port = "22"
+    	env-loader="~/env.sh"
+    	timeout="20" />
+
+
+	<!--small-->
+
+	<node pkg="main_loop" type="path_planning_" name="path_planning_" output="log" respawn="true" ns="small" machine="small">
+	<remap from="path_plan" to="/small/path_plan"/>
+	</node>
+
+	<node pkg="main_loop" type="main_demo_v2" name="main_demo_vs" output="screen" respawn="true" ns="small" machine="small">
+	<remap from="path_plan" to="/small/path_plan"/>
+	<remap from="goap_test_v1" to="/small/goap_test_v1"/>
+	<remap from="agent_msg" to="/small/agent_msg"/>
+	</node>
+
+	<node pkg="main_loop" type="agent_add_status" name="agent_add_status" ns="small" machine="small">
+	<remap from="update_status" to="/small/update_status"/>
+	<remap from="rxST1" to="/small/rxST1"/>
+	<remap from="rxST2" to="/small/rxST2"/>
+	<remap from="ranging_alert" to="/small/ranging_alert"/>
+	</node>
+
+	<node pkg="serial_port" type="serial_port_node" name="serial_port_node" output="log" respawn="true" ns="small" machine="small">
+	<remap from="write" to="/small/write"/>
+	<remap from="txST1" to="/small/txST1"/>
+	</node>
+
+	<node pkg="serial_port" type="serial_port_node_2" name="serial_port_node_2" output="log" respawn="true" ns="small" machine="small">
+	<remap from="write_2" to="/small/write_2"/>
+	<remap from="txST2" to="/small/txST2"/>
+	</node>
+
+	<node pkg="main_loop" type="goap_main_v1.py" name="goap_main_v1" respawn="true" ns="small" machine="small">
+	<remap from="goap_test_v1" to="/small/goap_test_v1"/>
+	</node>
+
+	
+	
+	<node name="rplidarNode"          pkg="rplidar_ros"  type="rplidarNode" output="log" ns="small" machine="small">
+        <param name="serial_port"         type="string" value="/dev/ttyUSB0"/>
+        <param name="serial_baudrate"     type="int"    value="115200"/><!--A1/A2 -->
+        <!--param name="serial_baudrate"     type="int"    value="256000"--><!--A3 -->
+        <param name="frame_id"            type="string" value="laser"/>
+        <param name="inverted"            type="bool"   value="false"/>
+        <param name="angle_compensate"    type="bool"   value="true"/>
+    	</node>
+
+    	<node pkg="lidar_2020" type="set_octagonal_range" name="set_octagonal_range" output="log" ns="small" machine="small">
+	<remap from="scan" to="/small/scan"/>
+        <param name="alert_range" type="double" value="0.3"/>
+        <param name="forget_rate" type="double" value="0.9"/>
+        <param name="num_point" type="double" value="40"/>
+        
+        <param name="front_range" type="double" value="0.3"/>
+        <param name="front_left_range" type="double" value="0.3"/>
+        <param name="left_range" type="double" value="0.3"/>
+        <param name="back_left_range" type="double" value="0.3"/>
+        <param name="back_range" type="double" value="0.3"/>
+        <param name="back_right_range" type="double" value="0.3"/>
+        <param name="right_range" type="double" value="0.3"/>
+        <param name="front_right_range" type="double" value="0.3"/>
+        </node>
+
+    	<node pkg="lidar_2020" type="sub_lidarmsg" name="sub_lidarmsg" output="log" ns="small" machine="small">
+    	</node>
+
+
+
+
+	<!--master-->
+
+	<node pkg="main_loop" type="path_planning_" name="path_planning_" output="log" respawn="true" machine="master">
+	</node>
+
+	<node pkg="main_loop" type="main_demo_v2" name="main_demo_vs" output="screen" respawn="true" machine="master">
+	</node>
+
+	<node pkg="main_loop" type="agent_add_status" name="agent_add_status" machine="master">
+	</node>
+
+	<node pkg="serial_port" type="serial_port_node" name="serial_port_node" output="log" respawn="true" machine="master">
+	</node>
+
+	<node pkg="serial_port" type="serial_port_node_2" name="serial_port_node_2" output="log" respawn="true" machine="master">
+	</node>
+
+	<node pkg="main_loop" type="goap_main_v1.py" name="goap_main_v1" respawn="true" machine="master">
+	</node>
+
+	<node pkg="eurobot_gui" type="eurobot_gui.py" name="eurobot_gui" output="screen" respawn="true" machine="master">
+	</node>
+	
+	<node name="rplidarNode"          pkg="rplidar_ros"  type="rplidarNode" output="log" machine="master">
+        <param name="serial_port"         type="string" value="/dev/ttyUSB0"/>
+        <param name="serial_baudrate"     type="int"    value="115200"/><!--A1/A2 -->
+        <!--param name="serial_baudrate"     type="int"    value="256000"--><!--A3 -->
+        <param name="frame_id"            type="string" value="laser"/>
+        <param name="inverted"            type="bool"   value="false"/>
+        <param name="angle_compensate"    type="bool"   value="true"/>
+    	</node>
+
+    	<node pkg="lidar_2020" type="set_octagonal_range" name="set_octagonal_range" output="log" machine="master">
+	<remap from="scan" to="/small/scan"/>
+        <param name="alert_range" type="double" value="0.3"/>
+        <param name="forget_rate" type="double" value="0.9"/>
+        <param name="num_point" type="double" value="40"/>
+        
+        <param name="front_range" type="double" value="0.3"/>
+        <param name="front_left_range" type="double" value="0.3"/>
+        <param name="left_range" type="double" value="0.3"/>
+        <param name="back_left_range" type="double" value="0.3"/>
+        <param name="back_range" type="double" value="0.3"/>
+        <param name="back_right_range" type="double" value="0.3"/>
+        <param name="right_range" type="double" value="0.3"/>
+        <param name="front_right_range" type="double" value="0.3"/>
+        </node>
+
+    	<node pkg="lidar_2020" type="sub_lidarmsg" name="sub_lidarmsg" output="log" machine="master">
+    	</node>
+	
+    
+
+
+</launch>

@@ -11,8 +11,6 @@
 #include "lidar_2020/alert_range.h"
 #include <main_loop/position.h>
 
-
-
 class sub_class{
     public:
         void ST1_sub_callback(const std_msgs::Int32MultiArray::ConstPtr& msg);
@@ -22,6 +20,7 @@ class sub_class{
         void status_sub_callback(const std_msgs::Int32::ConstPtr& msg);
         void publish_(float time);
         void status_publish();   
+        int exact_status;
         
         sub_class(int my_pos_x_ = 700, int my_pos_y_ = 300, int ini_status = 0);
         ~sub_class(){};
@@ -35,26 +34,24 @@ class sub_class{
 		ros::Subscriber ST1_sub = n.subscribe<std_msgs::Int32MultiArray>("rxST1", 1, &sub_class::ST1_sub_callback,this);
         ros::Subscriber ST2_sub = n.subscribe<std_msgs::Int32MultiArray>("rxST2", 1, &sub_class::ST2_sub_callback,this);
         ros::Subscriber camera_sub= n.subscribe<main_loop::position>("enemy_pose", 1, &sub_class::camera_sub_callback,this);
-        ros::Subscriber lidarmsg_sub= n.subscribe<lidar_2020::alert_range>("ranging_alert", 10, &sub_class::lidarmsg_sub_callback,this);
+        ros::Subscriber lidarmsg_sub= n.subscribe<lidar_2020::alert_range>("ranging_alert", 1, &sub_class::lidarmsg_sub_callback,this);
         
+        int sub_GUI_status;
         std_msgs::Int32 status;
         main_loop::agent pub_to_main;
 };
-
-
 void sub_class::status_sub_callback(const std_msgs::Int32::ConstPtr& msg){
-	status.data = msg->data ;
-    pub_to_main.status = msg->data ;
-	pub_to_main.enemy1_x = 0;
-    pub_to_main.enemy1_y = 0;
-	pub_to_main.enemy2_x = 0;
-	pub_to_main.enemy2_y = 0; 
+	sub_GUI_status = msg->data;
+    if(sub_GUI_status<4){
+        status.data = sub_GUI_status;
+        exact_status = sub_GUI_status;
+    }
+    pub_to_main.status = exact_status ;
 }
 void sub_class::status_publish(){
-    pub_to_main.status = status.data ;
+    exact_status = status.data ;
 	status_pub.publish(status);
 }
-
 sub_class::sub_class(int my_pos_x_,int my_pos_y_, int ini_status){
     pub_to_main.my_pos_x = 700 ; 
     pub_to_main.my_pos_y = 300 ; 
@@ -70,31 +67,21 @@ sub_class::sub_class(int my_pos_x_,int my_pos_y_, int ini_status){
     status.data = ini_status;
 }
 void sub_class::camera_sub_callback(const main_loop::position::ConstPtr& msg){
-	ROS_INFO("enemy1_x:%d",msg->enemy1_x);
-	ROS_INFO("enemy1_y:%d",msg->enemy1_y);
-	ROS_INFO("enemy2_x:%d",msg->enemy2_x);
-	ROS_INFO("enemy2_y:%d",msg->enemy2_y);
 	pub_to_main.enemy1_x = msg->enemy1_x;
     pub_to_main.enemy1_y = msg->enemy1_y;
 	pub_to_main.enemy2_x = msg->enemy2_x;
 	pub_to_main.enemy2_y = msg->enemy2_y;
-	
-
 }
 void sub_class::ST1_sub_callback(const std_msgs::Int32MultiArray::ConstPtr& msg){
     pub_to_main.my_pos_x = msg->data[0] ;
     pub_to_main.my_pos_y = msg->data[1] ;
     pub_to_main.my_degree = msg->data[2] ;
-    ROS_INFO("my_pos_x: %d", pub_to_main.my_pos_x);
-    ROS_INFO("my_pos_y: %d", pub_to_main.my_pos_y);
-    ROS_INFO("ST1");
 }
 void sub_class::ST2_sub_callback(const std_msgs::Int32MultiArray::ConstPtr& msg){
     pub_to_main.servo_state = msg->data[0] ;
     pub_to_main.stepper = msg->data[1] ;
     pub_to_main.hand = msg->data[2] ;    
 }
-
 void sub_class::lidarmsg_sub_callback(const lidar_2020::alert_range::ConstPtr& msg){
     pub_to_main.emergency={};
     if(msg->header.seq>2){
@@ -103,7 +90,6 @@ void sub_class::lidarmsg_sub_callback(const lidar_2020::alert_range::ConstPtr& m
         }  
     }
 }
-
 void sub_class::publish_(float time ){
     pub_to_main.time =time ; 
     if(status.data!=5){
@@ -120,14 +106,28 @@ int main(int argc, char **argv){
     sub_class temp;
     ros::Time::init();
     float begin_time =ros::Time::now().toSec();
+    int count = 0 ; 
     
     while(ros::ok()){
         float clustering_time = ros::Time::now().toSec () - begin_time ;
-        
+        //when status = a ,timer reset 
+        if(temp.exact_status==4){
+            begin_time = 0 ;
+        }
+        //when status = 5 ,timer start 
+        if(temp.exact_status==5&&count==0){
+            begin_time = 0 ; 
+            count = 1 ;
+        }
+        //timer > 100s  
+        if(clustering_time>100&&temp.exact_status==5){
+            temp.exact_status=6;
+        }
+        if(clustering_time>105&&temp.exact_status==6){
+            temp.exact_status=7;
+        }
         temp.publish_(clustering_time);
         temp.status_publish();
         ros::spinOnce();
-     
     }
-
 }

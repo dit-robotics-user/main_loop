@@ -7,7 +7,7 @@
 
 	<node pkg="main_loop" type="main_demo_v2" name="main_demo_vs" output="screen" respawn="true">
 	</node>
-	<node pkg="main_loop" type="agent_add_status" name="agent_add_status" output="screen" respawn="true" >
+	<node pkg="main_loop" type="agent_add_status" name="agent_add_status" >
 	</node>
 	<node pkg="serial_port" type="serial_port_node" name="serial_port_node" output="log" respawn="true">
 	</node>

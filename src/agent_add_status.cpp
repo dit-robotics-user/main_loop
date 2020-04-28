@@ -20,7 +20,7 @@ class sub_class{
         void status_sub_callback(const std_msgs::Int32::ConstPtr& msg);
         void publish_(float time);
         void status_publish();   
-        int exact_status;
+        int exact_status = 0 ;
         
         sub_class(int my_pos_x_ = 700, int my_pos_y_ = 300, int ini_status = 0);
         ~sub_class(){};
@@ -41,15 +41,19 @@ class sub_class{
         main_loop::agent pub_to_main;
 };
 void sub_class::status_sub_callback(const std_msgs::Int32::ConstPtr& msg){
+    int status_dominate=0;
 	sub_GUI_status = msg->data;
     if(sub_GUI_status<4){
         status.data = sub_GUI_status;
+        exact_status = sub_GUI_status;
+    }else if(sub_GUI_status==4&&status_dominate==0){
+        status_dominate=1;
         exact_status = sub_GUI_status;
     }
     pub_to_main.status = exact_status ;
 }
 void sub_class::status_publish(){
-    exact_status = status.data ;
+    status.data = exact_status ;
 	status_pub.publish(status);
 }
 sub_class::sub_class(int my_pos_x_,int my_pos_y_, int ini_status){
@@ -105,27 +109,50 @@ int main(int argc, char **argv){
     ros::init(argc,argv, "agent_add_status");
     sub_class temp;
     ros::Time::init();
-    float begin_time =ros::Time::now().toSec();
+    double begin_time ;
+    begin_time =ros::Time::now().toSec();
     int count = 0 ; 
+    ROS_INFO("count= %f ",begin_time);
+    float last_clustering_time = 0 ;
+
     
     while(ros::ok()){
-        float clustering_time = ros::Time::now().toSec () - begin_time ;
+        ros::Time::init();
+        float clustering_time = ros::Time::now().toSec() - begin_time ;
         //when status = a ,timer reset 
-        if(temp.exact_status==4){
-            begin_time = 0 ;
+        if(temp.exact_status==4&&count==0){
+            double begin_time ;
+            begin_time = ros::Time::now().toSec();
+            count = 1;
+            ROS_INFO("status=4");
+            ROS_INFO("now time= %f ",begin_time);
+            clustering_time = ros::Time::now().toSec() - begin_time ;
+            continue;
+        }
+        if(last_clustering_time>10&&temp.exact_status==4&&count==1){
+            temp.exact_status=5;
+            ROS_INFO("turn to status = 5");
+            ROS_INFO("count = %d ",count);
+            count = 2 ;
         }
         //when status = 5 ,timer start 
-        if(temp.exact_status==5&&count==0){
-            begin_time = 0 ; 
-            count = 1 ;
+        if(temp.exact_status==5&&count==2){
+            double begin_time ;
+            begin_time = ros::Time::now().toSec(); 
+            ROS_INFO("in the status=5");
+            ROS_INFO("now time = %f ",begin_time);
+            count = 3 ;
+            continue;
         }
         //timer > 100s  
-        if(clustering_time>100&&temp.exact_status==5){
+        if(last_clustering_time>100&&temp.exact_status==5){
             temp.exact_status=6;
         }
-        if(clustering_time>105&&temp.exact_status==6){
+        if(last_clustering_time>105&&temp.exact_status==6){
             temp.exact_status=7;
         }
+        clustering_time = ros::Time::now().toSec() - begin_time ;
+        last_clustering_time=clustering_time;
         temp.publish_(clustering_time);
         temp.status_publish();
         ros::spinOnce();

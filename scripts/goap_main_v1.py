@@ -2,7 +2,7 @@
 
 from main_loop.srv import *
 import rospy
-from setting import *
+from setting_demo import *
 
 class MyClass:
 	action_done = False  # <----

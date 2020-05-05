@@ -245,7 +245,7 @@ int main(int argc, char **argv)
 {
 
     //ros setting
- 	ros::init (argc, argv, "main_demo_v2");
+ 	ros::init (argc, argv, "main_v1");
 	ros::NodeHandle nh;    
 	
     ros::Publisher pub_st1 = nh.advertise<std_msgs::Int32MultiArray>("txST1", 1);
@@ -305,6 +305,10 @@ int main(int argc, char **argv)
     goap_srv.request.pos.push_back(300);
     goap_srv.request.my_degree = 90 ; 
     goap_srv.request.mission_name = "setting" ;
+    goap_srv.request.time = 50 ;
+    goap_srv.request.direction = true ; 
+    goap_srv.request.kill_mission = false ; 
+    goap_srv.request.cup_color = 55 ; 
     
     int count = 0 ;
     
@@ -368,6 +372,8 @@ int main(int argc, char **argv)
                     kill_mission = false;
                 }
                 goap_srv.request.replan=false;
+                goap_srv.request.kill_mission=false;
+                goap_srv.request.my_degree = temp.from_agent.my_degree;
                 goap_srv.request.action_done=action_state.MyActionDone();
                 goap_srv.request.pos.push_back(action_state.MyPosX());
                 goap_srv.request.pos.push_back(action_state.MyPosY()); 
@@ -447,43 +453,43 @@ int main(int argc, char **argv)
                                     rx0 = desire_movement[0];
                                 }
 
-				bool c;
-				if(rx1==current_state.MyTx1()){
-				    c = true;
-				}
-				else{
-				    c = false;
-				}               
-				bool b;
-				if(rx0==current_state.MyTx0()){
-				ROS_INFO("b=%d , mission ",b);
-				    b = true;
-				}
-				else{
-				    b = false;
-				}
-				bool d;
-				if(rx2==current_state.MyTx2()){
-				    d = true;
-				}
-				else{
-				    d = false;
-				}
-				if(count>3 && at_pos(current_state.MyPosX(),current_state.MyPosY(),current_state.MyDegree(), desire_pos_x, desire_pos_y, desire_angle, margin, angle_margin) && b && c && d){
-				    //count ++ ;
-				    ROS_INFO ("rx0:%ld ", rx0);                
-				    ROS_INFO ("rx1:%ld ", rx1);
-				    ROS_INFO ("rx2:%ld ", rx2);
-				    ROS_INFO("complete:%d",count);
-				    ROS_INFO ("debug_2.robot_case: %s ", debug_2.robot_case.c_str());
-				    ROS_INFO ("mission: %s ", goap_srv.response.mission_name.c_str());
-				    ROS_INFO("action done in action state: %d" , action_state.MyActionDone());
-				    action_done = true;
-				    goal_covered_counter = 0;
-				    count = 0; 
-                }
-                break;
-            }
+                                bool c;
+                                if(rx1==current_state.MyTx1()){
+                                    c = true;
+                                }
+                                else{
+                                    c = false;
+                                }               
+                                bool b;
+                                if(rx0==current_state.MyTx0()){
+                                ROS_INFO("b=%d , mission ",b);
+                                    b = true;
+                                }
+                                else{
+                                    b = false;
+                                }
+                                bool d;
+                                if(rx2==current_state.MyTx2()){
+                                    d = true;
+                                }
+                                else{
+                                    d = false;
+                                }
+                                if(count>3 && at_pos(current_state.MyPosX(),current_state.MyPosY(),current_state.MyDegree(), desire_pos_x, desire_pos_y, desire_angle, margin, angle_margin) && b && c && d){
+                                    //count ++ ;
+                                    ROS_INFO ("rx0:%ld ", rx0);                
+                                    ROS_INFO ("rx1:%ld ", rx1);
+                                    ROS_INFO ("rx2:%ld ", rx2);
+                                    ROS_INFO("complete:%d",count);
+                                    ROS_INFO ("debug_2.robot_case: %s ", debug_2.robot_case.c_str());
+                                    ROS_INFO ("mission: %s ", goap_srv.response.mission_name.c_str());
+                                    ROS_INFO("action done in action state: %d" , action_state.MyActionDone());
+                                    action_done = true;
+                                    goal_covered_counter = 0;
+                                    count = 0; 
+                                }
+                                break;
+                            }
 
                             case RobotState::BLOCKED:
                                 debug_2.robot_case="BLOCKED";

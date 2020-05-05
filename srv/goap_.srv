@@ -3,6 +3,10 @@ bool action_done
 int32[] pos
 int32 my_degree
 string mission_name
+int32 cup_color
+float32 time
+int32 direction 
+bool kill_mission
 ---
 int32 degree
 int32 speed

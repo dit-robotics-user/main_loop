@@ -1,146 +1,143 @@
-from setting import *
-'''
-1 2  3  4
-5 6  7  8
-9 10 11 12
-'''
-def output_processor(output_action, left_side, right_side):
-    output = [0]*15
-    if output_action.iscup is True:
-        for p in output_action.preconditions:
-            if p is '1':
-                claw_num = 2*left_side + 7  # use layer 2 - left_side + '1'
-                output[claw_num] = 1
-            elif p is '2':
-                claw_num = 2*left_side + 6  # use layer 2 - left_side + '2'
-                output[claw_num] = 1
-            elif p is'3':
-                claw_num = 2*right_side + 1  # use layer 2 - right_side + '3'
-                output[claw_num] = 1
-            else:
-                claw_num = 2*right_side      # use layer 2 - right_side + '4'
-                output[claw_num] = 1
-    if output_action.name is 'lift_left':
-        if left_side is 0:
-            output[12] = 0
-        elif left_side is 1:
-            output[12] = 1  # lift layer 3
-        elif left_side is 2:
-            output[12] = 2  # lift layer 2
-    elif output_action.name is 'lift_right':
-        if right_side is 0:
-            output[13] = 0
-        if right_side is 1:
-            output[13] = 1  # lift layer 3
-        elif right_side is 2:
-            output[13] = 2  # lift layer 2
-    elif output_action.name is 'lower_right':
-        if right_side is 0:
-            output[12] = 0
-        if right_side is 1:
-            output[12] = 1  # lift layer 3
-        elif right_side is 2:
-            output[12] = 2  # lift layer 2
-    elif output_action.name is 'lower_right':
-        if right_side is 0:
-            output[13] = 0
-        if right_side is 1:
-            output[13] = 1  # lift layer 3
-        elif right_side is 2:
-            output[13] = 2  # lift layer 2
-    elif output_action.name is 'lower':
-        if right_side is 0:
-            output[12] = 0
-            output[13] = 0
-        if right_side is 1:
-            output[12] = 1
-            output[13] = 1  # lift layer 3
-        elif right_side is 2:
-            output[12] = 2
-            output[13] = 2  # lift layer 2
-    elif output_action.name is 'lift':
-        if right_side is 0:
-            output[12] = 0
-            output[13] = 0
-        if right_side is 1:
-            output[12] = 1
-            output[13] = 1  # lift layer 3
-        elif right_side is 2:
-            output[12] = 2
-            output[13] = 2  # lift layer 2
-    elif output_action.name is 'hand_down':
-        output[14] = 2
-    elif output_action.name is 'hand_up':
-        output[14] = 0
-    if output_action.name is 'open':
-        for p in output_action.preconditions:
-            if p is '1':
-                claw_num = 4*left_side   # use layer 2 - left_side + '1'
-                output[claw_num] = 0
-            elif p is '2':
-                claw_num = 4*left_side + 1  # use layer 2 - left_side + '2'
-                output[claw_num] = 0
-            elif p is'3':
-                claw_num = 4*right_side + 2  # use layer 2 - right_side + '3'
-                output[claw_num] = 0
-            else:
-                claw_num = 4*right_side + 3  # use layer 2 - right_side + '4'
-                output[claw_num] = 0
+from goap import *
+
+
+def penalty(current_action, penalty_cost, penalty_turns, action_list):
+    for action in action_list:
+        if action.name == current_action.name:
+            action.cost += penalty_cost
+            penalty_action = action
+            break
+    return penalty_turns, penalty_action
+
+
+def lift_penalty(penalty_action, penalty_cost, action_list):
+    for action in action_list:
+        if action.name == penalty_action.name:
+            action.cost -= penalty_cost
+
+
+def output_processor_small_chicken(output_action):
+    output = [-1]*7
+    if output_action.type_number is 1:  # wrist
+        output[0] = output_action.effects[0]
+    elif output_action.type_number is 2:  # hand
+        output[1] = output_action.effects[0]
+    elif output_action.type_number is 3:  # finger open
+        for p in output_action.effects:
+            output[int(p)+1] = 1
+    elif output_action.type_number is 4:  # finger open
+        for p in output_action.effects:
+            output[int(p)+1] = 0
+    #elif output_action.type_number is 5:  # windsock hand
+        #output[0] = output_action.effects[0]
+    '''print(output_action.name)
+    print(output)
+    print('------------')'''
     return output
 
 
-action_done = True  # <----
-my_pos = (3, 3)  # <----
-output = [0]*15  # --->
-output_speed = 0  # --->
-output_mode = -1  # --->
-output_degree = -1  # --->
-output_position = (0, 0)  # --->
-output_wait = True  # --->
-demo_path = setting(1)
-goal = []
+def kill_action(killed_action, action_list):
+    if killed_action.type_number != 1:  # don't delete cup prepare / cup hold
+        for action in action_list:
+            if action.name == killed_action.name:
+                action_list.remove(action)
+
+
+def calculate_mission_priority(m_list, time, go_home_time):
+    # calculate the missions priority according to current state and return the best mission
+    for m in m_list:
+        m.calculate_priority(time, go_home_time)
+    m_list = sorted(m_list, key=attrgetter('priority'))
+    return m_list
+
+# ==收MAIN的資料==
+action_done = True
+replan_mission = False
+kill_mission = True
+my_pos = (3, 3)
+my_degree = 0
+setting_number = 1
+time = 100
+cup_color = 0
+direction = 0
+
+# ==GOAP自己的變數==
+go_home_time = 2000
+action_list = []
+current_world_state = []
+mission_list = []
+output = [-1]*7  # 小雞用(大雞則為[-1]*15)
+output_speed = 0
+output_mode = -1
+output_degree = -1
+output_position = (0, 0)
+output_wait = True
+output_mission_name = "start"
 path_done = False
-left_side = 0
-right_side = 0
+penalty_cost = 2000
+penalty_turns = 1
+penalty_timer = -1
+penalty_undergoing = False
+penalty_action = 0
+path = []
 
-while len(demo_path) > 0:
+# ==設定任務及動作==
+action_list, current_world_state, mission_list = setting(setting_number, action_list, current_world_state, mission_list, my_pos, my_degree, cup_color, direction)
 
+while 1:
     path_done = False
-    path = demo_path[0]
-    if path.iscup is True:
-        if path.grab_mode is 2:  # speed mode
-            path.tangent_point_calculation(my_pos, stretch_factor=5)
-    output = output_processor(path, left_side, right_side)
-    output_degree = path.degree
-    output_speed = path.speed
-    output_mode = path.grab_mode
-    output_position = path.position
-    output_wait = path.iswait
+    for actions in action_list:
+        actions.refresh()
+    mission_list = calculate_mission_priority(mission_list, time, go_home_time)  # <---
+    new_current_world_state = copy.deepcopy(current_world_state)
+    path = goap([mission_list[0].name], new_current_world_state, my_pos, action_list)
+
+    if len(path) == 0:
+        continue
 
     while path_done is False:
-        if action_done is True:
-            print(path.name)
-            print(path.position)
-            print(path.degree)
-            print()
-            if path.name is 'lift_left':
-                left_side += 1
-            elif path.name is 'lift_right':
-                right_side += 1
-            elif path.name is 'lower_left':
-                left_side -= 1
-            elif path.name is 'lower_right':
-                right_side -= 1
-            elif path.name is 'lower':
-                left_side -= 1
-                right_side -= 1
-            elif path.name is 'lift':
-                left_side += 1
-                right_side += 1
+        # ==MAIN判定重算路徑==
+        if replan_mission is True:
+            penalty_timer, penalty_action = penalty(path[0], penalty_cost, penalty_turns,
+                        action_list)  # 給予當下被REPLAN的動作一個COST上的懲罰，並懲罰幾回合(任務)
+            penalty_undergoing = True
+            path_done = True  # 跳出WHILE並重算
+            continue
+
+        # ==懲罰回合已到==
+        if penalty_timer == 0:
+            lift_penalty(penalty_action, penalty_cost, action_list)  # 解除COST上加諸的懲罰
+            penalty_undergoing = False
+
+        # ==MAIN判定刪除當下動作(任務?)==
+        if kill_mission is True:
+            kill_action(path[0], action_list)
+            path_done = True  # 跳出WHILE並重算
+            continue
+
+        if len(path) != 0:
+            top_path = path[0]
+
+            if top_path.mode == 2:
+                top_path.tangent_point_calculation(my_pos, 3)
+
+            while len(top_path.child_action) != 0:
+                top_child = top_path.child_action[0]
+                output_name = top_child.name
+                output_degree = top_child.degree
+                output_speed = top_child.speed
+                output_mode = top_child.mode
+                output_position = top_child.position
+                output_wait = top_child.wait
+                output = output_processor_small_chicken(top_child)
+
+                if action_done is True:
+                    top_path.child_action.remove(top_child)
+
+            current_world_state = top_path.result_world_state
+            kill_action(top_path, action_list)
+            path.remove(top_path)
+        else:
+            if penalty_undergoing is True:  # PENALTY回合減1
+                penalty_timer -= 1
             path_done = True
-            if len(demo_path) > 1:
-                demo_path.remove(demo_path[0])
-
-
-
-

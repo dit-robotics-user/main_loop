@@ -211,6 +211,7 @@ include_directories(
 
 ## Add folders to be run by python nosetests
 # catkin_add_nosetests(test)
+catkin_package()
 
 add_executable(path_planning_ src/path_planning_.cpp)
 add_dependencies(path_planning_ main_loop_gencpp)
@@ -225,6 +226,10 @@ target_link_libraries(agent_add_status ${catkin_LIBRARIES})
 add_executable(main_demo_v2 src/main_demo_v2.cpp)
 add_dependencies(main_demo_v2 main_loop_gencpp)
 target_link_libraries(main_demo_v2 ${catkin_LIBRARIES})
+
+add_executable(main_v1 src/main_v1.cpp)
+add_dependencies(main_v1 main_loop_gencpp)
+target_link_libraries(main_v1 ${catkin_LIBRARIES})
 
 add_dependencies(agent_add_status ${catkin_EXPORTED_TARGETS})
 target_link_libraries(main_demo_v2 ${catkin_LIBRARIES} python2.7)

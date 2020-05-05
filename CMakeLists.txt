@@ -216,12 +216,6 @@ add_executable(path_planning_ src/path_planning_.cpp)
 add_dependencies(path_planning_ main_loop_gencpp)
 target_link_libraries(path_planning_ ${catkin_LIBRARIES})
 
-
-add_executable(agent_add_status src/agent_add_status.cpp)
-add_dependencies(agent_add_status main_loop_gencpp)
-target_link_libraries(agent_add_status ${catkin_LIBRARIES})
-
-
 add_executable(agent_new src/agent_new.cpp)
 add_dependencies(agent_new main_loop_gencpp)
 target_link_libraries(agent_new ${catkin_LIBRARIES})
@@ -230,7 +224,7 @@ add_executable(main_demo_v2 src/main_demo_v2.cpp)
 add_dependencies(main_demo_v2 main_loop_gencpp)
 target_link_libraries(main_demo_v2 ${catkin_LIBRARIES})
 
-add_dependencies(agent_add_status ${catkin_EXPORTED_TARGETS})
+add_dependencies(agent_new ${catkin_EXPORTED_TARGETS})
 target_link_libraries(main_demo_v2 ${catkin_LIBRARIES} python2.7)
 
 

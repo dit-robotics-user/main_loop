@@ -105,16 +105,17 @@ void sub_class::publish_(float time ){
 }
 
 int main(int argc, char **argv){
-    ros::init(argc,argv, "agent_add_status");
+    ros::init(argc,argv, "agent_new");
     sub_class temp;
-    float begin_time ;
+    ros::Time begin_time ;
+    ros::Time now_time ;
     int count = 0 ; 
     float last_clustering_time = 0 ;
     float clustering_time = 0 ; 
-    float temp_timer = 0;
-
+    float temp_timer ;
     while(ros::ok()){
         //when status = a ,timer reset 
+
         switch(temp.exact_status){
             case 4:
                 if(count==0){
@@ -132,8 +133,7 @@ int main(int argc, char **argv){
             case 5:
                 if(count==0){
                     ROS_INFO("status=5");
-                    begin_time =ros::Time::now().toSec();
-                    ROS_INFO("begin time= %f ",begin_time);
+                    begin_time =ros::Time::now();
                     count =1;                    
                 }else{
                     if(last_clustering_time>100){
@@ -141,7 +141,8 @@ int main(int argc, char **argv){
                         count=0;
                     }
                 }
-                clustering_time = ros::Time::now().toSec() - begin_time ;
+                now_time = ros::Time::now();
+                clustering_time = (now_time - begin_time).toSec();
                 break;
 
             case 6:

@@ -113,9 +113,9 @@ int main(int argc, char **argv){
     float last_clustering_time = 0 ;
     float clustering_time = 0 ; 
     float temp_timer ;
+
     while(ros::ok()){
         //when status = a ,timer reset 
-
         switch(temp.exact_status){
             case 4:
                 if(count==0){
@@ -154,7 +154,7 @@ int main(int argc, char **argv){
                 break;
 
             default :
-
+            
                 break;
        }
         last_clustering_time=clustering_time;

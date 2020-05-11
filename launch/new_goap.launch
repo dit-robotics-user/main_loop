@@ -7,10 +7,10 @@
 
 	<node pkg="main_loop" type="main_v1" name="main_v1" output="screen" respawn="true">
 	</node>
-	<node pkg="main_loop" type="agent_add_status" name="agent_add_status">
+	<node pkg="main_loop" type="agent_new" name="agent_new">
 	</node>
 
-	<node pkg="main_loop" type="main_1.py" name="main_1" output="screen" respawn="true">
+	<node pkg="main_loop" type="main_1.py" name="main_1" respawn="true">
 	</node>
 
 	<node pkg="eurobot_gui" type="eurobot_gui.py" name="eurobot_gui" output="screen" respawn="true">

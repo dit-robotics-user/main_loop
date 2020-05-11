@@ -191,7 +191,8 @@ void sub_state::callback(const main_loop::agent::ConstPtr& msg){
     from_agent.status = msg->status;
     from_agent.wrist = msg->wrist;
     from_agent.hand = msg -> hand ; //***********************************************
-    from_agent.finger = msg->finger ; 
+    from_agent.finger = msg->finger ;
+    from_agent.time = msg->time ;   
 //ROS_INFO("%d",from_agent.status) ; 
 /*  
 	emergency[0]=msg->emergency[0];
@@ -305,7 +306,7 @@ int main(int argc, char **argv)
     goap_srv.request.pos.push_back(300);
     goap_srv.request.my_degree = 90 ; 
     goap_srv.request.mission_name = "setting" ;
-    goap_srv.request.time = 50 ;
+    goap_srv.request.time = 0 ;
     goap_srv.request.direction = true ; 
     goap_srv.request.kill_mission = false ; 
     goap_srv.request.cup_color = 55 ; 
@@ -374,6 +375,7 @@ int main(int argc, char **argv)
                 goap_srv.request.replan=false;
                 goap_srv.request.kill_mission=false;
                 goap_srv.request.my_degree = temp.from_agent.my_degree;
+                goap_srv.request.time = temp.from_agent.time;
                 goap_srv.request.action_done=action_state.MyActionDone();
                 goap_srv.request.pos.push_back(action_state.MyPosX());
                 goap_srv.request.pos.push_back(action_state.MyPosY()); 

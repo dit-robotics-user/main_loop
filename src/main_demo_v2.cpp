@@ -579,7 +579,6 @@ int main(int argc, char **argv)
 
 
                     case ActionMode::SPEED_MODE:{
-                        ROS_INFO("speed mode !");
                         debug_2.robot_state="ActionMode::POSITION_MODE";
                         
 
@@ -590,7 +589,7 @@ int main(int argc, char **argv)
                         for(int i = 0; i < 12; i ++){
                             if(desire_movement[i] == 2){//自動夾給２
                                 old_grab_status[i] = 2;
-                                ROS_INFO("000!");
+                 
                             }
                          
                         }
@@ -599,8 +598,7 @@ int main(int argc, char **argv)
                             out += old_grab_status[i];
                         }
                         rx0 = out;
-                        ROS_INFO("rx0:%ld",rx0);
-
+                  
                         //==任務完成轉換器===
                         //這邊需要稍微調整動作的完成，因為自動夾的指令是２但完成後會變１吧？
                         long int finished_out = 0;

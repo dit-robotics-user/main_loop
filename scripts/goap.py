@@ -67,6 +67,7 @@ def dominant_processor(output_path, dominant_name):
     dominant_pos = (0, 0)
     dominant_degree = 0
     dominant_change = False
+    shift_rate = 150
     for child in output_path:
         if child.name[:len(dominant_name)] == dominant_name:
             dominant_pos = child.position
@@ -76,12 +77,12 @@ def dominant_processor(output_path, dominant_name):
         for child in output_path:
             if child.name[:len(dominant_name)] != dominant_name:
                 if child.name == 'cup_prepare':
-                    child.position = (dominant_pos[0] - 20*int(math.cos(dominant_degree*3.1415926535/180)), dominant_pos[1]
-                                      - 20*int(math.sin(dominant_degree*3.1415926535/180)))
+                    child.position = (dominant_pos[0] - shift_rate*int(math.cos(dominant_degree*3.1415926535/180)), dominant_pos[1]
+                                      - shift_rate*int(math.sin(dominant_degree*3.1415926535/180)))
                     child.degree = dominant_degree
                 elif child.name == 'cup_hold':
-                    child.position = (dominant_pos[0] - 20*int(math.cos(dominant_degree*3.1415926535/180)), dominant_pos[1]
-                                      - 20*int(math.sin(dominant_degree*3.1415926535/180)))
+                    child.position = (dominant_pos[0] - shift_rate*int(math.cos(dominant_degree*3.1415926535/180)), dominant_pos[1]
+                                      - shift_rate*int(math.sin(dominant_degree*3.1415926535/180)))
 
                     child.degree = dominant_degree
                 else:

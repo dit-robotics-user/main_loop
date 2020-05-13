@@ -35,7 +35,7 @@ cup_color = 0
 direction = 0
 
 # ==GOAP自己的變數==
-go_home_time = 2000
+go_home_time = 80000
 action_list = []
 current_world_state = []
 mission_list = []
@@ -111,6 +111,7 @@ def handle_return_to_main(req):
 	MyClass.my_pos = (req.pos[0],req.pos[1])
 	MyClass.input_name = req.mission_name
 	MyClass.kill_mission = req.kill_mission 
+	MyClass.time = req.time
 	return [MyClass.output_degree,MyClass.output_speed,MyClass.output_mode,MyClass.output_position,MyClass.output,MyClass.output_wait,MyClass.output_mission_name]
 
 def add_two_ints_server():
@@ -118,6 +119,7 @@ def add_two_ints_server():
 	global penalty_timer
 	global new_current_world_state
 	global current_world_state
+	global penalty_undergoing
 	rospy.init_node('main_1')
 	rospy.Service('goap_test_v1', goap_, handle_return_to_main)
 	while True:
@@ -128,6 +130,7 @@ def add_two_ints_server():
 		new_current_world_state = copy.deepcopy(current_world_state)
 		path = goap([mission_list[0].name], new_current_world_state, MyClass.my_pos, action_list)
 
+		
 		if len(path) == 0:
 			continue
 
@@ -166,8 +169,11 @@ def add_two_ints_server():
 					MyClass.output_position = top_child.position
 					MyClass.output_wait = top_child.wait
 					MyClass.output = output_processor_small_chicken(top_child)
+					
+					
+					print(top_path.name + " " + top_child.name)
 
-					if MyClass.action_done is True:
+					if MyClass.action_done is True and MyClass.output_mission_name == MyClass.input_name:
 						top_path.child_action.remove(top_child)
 
 				current_world_state = top_path.result_world_state

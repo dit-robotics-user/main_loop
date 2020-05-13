@@ -57,7 +57,7 @@ void sub_class::status_publish(){
 }
 sub_class::sub_class(int my_pos_x_,int my_pos_y_, int ini_status){
     pub_to_main.my_pos_x = 700 ; 
-    pub_to_main.my_pos_y = 300 ; 
+    pub_to_main.my_pos_y = 2200 ; 
     pub_to_main.my_degree = 90 ; 
 	pub_to_main.my_pos_x = 700 ;
     pub_to_main.my_pos_y = 300 ;
@@ -67,7 +67,15 @@ sub_class::sub_class(int my_pos_x_,int my_pos_y_, int ini_status){
     pub_to_main.enemy2_y = 2300 ;
     pub_to_main.ally_x = 380 ;
     pub_to_main.ally_y = 2200 ; 
+    pub_to_main.wrist = 0 ;
+    pub_to_main.hand = 0 ;
+    pub_to_main.finger = 0 ; 
+    pub_to_main.time = 0 ;  
     status.data = ini_status;
+    pub_to_main.emergency={};
+    for(int j=0 ;j<8;j++){
+        pub_to_main.emergency.push_back(false);
+    }  
 }
 void sub_class::camera_sub_callback(const main_loop::position::ConstPtr& msg){
 	pub_to_main.enemy1_x = msg->enemy1_x;
@@ -95,7 +103,7 @@ void sub_class::lidarmsg_sub_callback(const lidar_2020::alert_range::ConstPtr& m
 }
 void sub_class::publish_(float time ){
     pub_to_main.time =time ; 
-    if(status.data!=5){
+    if(status.data<=5){
         pub_to_main.emergency={};
         for(int j=0 ;j<8;j++){
             pub_to_main.emergency.push_back(false);
@@ -112,7 +120,7 @@ int main(int argc, char **argv){
     int count = 0 ; 
     float last_clustering_time = 0 ;
     float clustering_time = 0 ; 
-    float temp_timer ;
+    float temp_timer = 0;
 
     while(ros::ok()){
         //when status = a ,timer reset 
@@ -129,23 +137,25 @@ int main(int argc, char **argv){
                 }
                 temp_timer++;
                 break;
+
             case 5:
                 if(count==0){
                     ROS_INFO("status=5");
                     begin_time =ros::Time::now();
                     count =1;                    
                 }else{
-                    if(last_clustering_time>100){
+                    if(last_clustering_time>102){
                         temp.exact_status=6;
-                        count=0;
+						count = 0 ;
                     }
                 }
-                now_time = ros::Time::now();
-                clustering_time = (now_time - begin_time).toSec();
                 break;
 
             case 6:
-
+				temp.exact_status = 6 ; 
+                if(last_clustering_time>102){
+                    temp.exact_status=7;
+                }
                 break;
 
             case 7:
@@ -153,13 +163,13 @@ int main(int argc, char **argv){
                 break;
 
             default :
-            
                 break;
-       }
+       	}
+        now_time = ros::Time::now();
+        clustering_time = (now_time - begin_time).toSec();
         last_clustering_time=clustering_time;
         temp.publish_(clustering_time);
         temp.status_publish();
         ros::spinOnce();
     }
 }
-

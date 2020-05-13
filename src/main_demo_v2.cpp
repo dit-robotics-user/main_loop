@@ -31,7 +31,6 @@ public:
         kill_mission = false;
         replan_mission = false;
         replan_path = false;
-        is_blocked = false;
         action_wait = false;
     }
     void ChangeActionDone(bool tf){
@@ -195,7 +194,7 @@ void sub_state::callback(const main_loop::agent::ConstPtr& msg){
     from_agent.time = msg->time ;
 
 //ROS_INFO("%d",from_agent.status) ; 
-/*  
+  
 	emergency[0]=msg->emergency[0];
     emergency[1]=msg->emergency[1];
     emergency[2]=msg->emergency[2];
@@ -204,10 +203,11 @@ void sub_state::callback(const main_loop::agent::ConstPtr& msg){
     emergency[5]=msg->emergency[5];
     emergency[6]=msg->emergency[6];
     emergency[7]=msg->emergency[7];
-*/   	
+   	
 }
 
 bool sub_state::lidar_be_blocked(float speed_degree,float car_degree){
+/*
     if(car_degree>speed_degree){
         if(car_degree-speed_degree<90){
             if( emergency[1]==true || emergency[2]==true || emergency[3]==true ){
@@ -223,6 +223,15 @@ bool sub_state::lidar_be_blocked(float speed_degree,float car_degree){
             }            
         }
     }
+*/
+    bool blockk=false;
+    for(int i=0;i<8;i++){
+        if(emergency[i]==true){
+            blockk=true;
+        }
+    }
+    return blockk;
+    
 }
 
 bool at_pos(int x, int y, int deg, int c_x, int c_y, int c_deg, int m, int angle_m){
@@ -357,7 +366,7 @@ int main(int argc, char **argv)
                 break;
             case Status::RUN:{ //5
                	count ++;
-                state current_state(temp.from_agent.my_pos_x,temp.from_agent.my_pos_y,temp.from_agent.my_degree,false,temp.from_agent.wrist,temp.from_agent.hand,temp.from_agent.finger);//<--------get undergoing, finish, my_x, my_y, block from other nodes ()********
+                state current_state(temp.from_agent.my_pos_x,temp.from_agent.my_pos_y,temp.from_agent.my_degree,temp.lidar_be_blocked(0,temp.from_agent.my_degree),temp.from_agent.wrist,temp.from_agent.hand,temp.from_agent.finger);//<--------get undergoing, finish, my_x, my_y, block from other nodes ()********
                 state action_state(0,0,0,false,0,0,0);
                 action_state = current_state;
                 if(action_done){
@@ -458,7 +467,7 @@ int main(int argc, char **argv)
 				}               
 				bool b;
 				if(rx0==current_state.MyTx0()){
-				ROS_INFO("b=%d , mission ",b);
+	
 				    b = true;
 				}
 				else{

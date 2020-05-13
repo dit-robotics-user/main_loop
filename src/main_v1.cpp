@@ -31,7 +31,6 @@ public:
         kill_mission = false;
         replan_mission = false;
         replan_path = false;
-        is_blocked = false;
         action_wait = false;
     }
     void ChangeActionDone(bool tf){
@@ -190,11 +189,11 @@ void sub_state::callback(const main_loop::agent::ConstPtr& msg){
     from_agent.my_degree = msg->my_degree ; 
     from_agent.status = msg->status;
     from_agent.wrist = msg->wrist;
-    from_agent.hand = msg -> hand ; //***********************************************
+    from_agent.hand = msg -> hand ; 
     from_agent.finger = msg->finger ;
     from_agent.time = msg->time ;   
-//ROS_INFO("%d",from_agent.status) ; 
-/*  
+
+ 
 	emergency[0]=msg->emergency[0];
     emergency[1]=msg->emergency[1];
     emergency[2]=msg->emergency[2];
@@ -203,10 +202,11 @@ void sub_state::callback(const main_loop::agent::ConstPtr& msg){
     emergency[5]=msg->emergency[5];
     emergency[6]=msg->emergency[6];
     emergency[7]=msg->emergency[7];
-*/   	
+ 	
 }
 
 bool sub_state::lidar_be_blocked(float speed_degree,float car_degree){
+/*
     if(car_degree>speed_degree){
         if(car_degree-speed_degree<90){
             if( emergency[1]==true || emergency[2]==true || emergency[3]==true ){
@@ -222,8 +222,16 @@ bool sub_state::lidar_be_blocked(float speed_degree,float car_degree){
             }            
         }
     }
+*/
+    bool blockk=false;
+    for(int i=0;i<8;i++){
+        if(emergency[i]==true){
+            blockk=true;
+        }
+    }
+    return blockk;
+    
 }
-
 
 
 bool at_pos(int x, int y, int deg, int c_x, int c_y, int c_deg, int m, int angle_m){
@@ -361,7 +369,7 @@ int main(int argc, char **argv)
                 break;
             case Status::RUN:{ //5
                	count ++;
-                state current_state(temp.from_agent.my_pos_x,temp.from_agent.my_pos_y,temp.from_agent.my_degree,false,temp.from_agent.wrist,temp.from_agent.hand,temp.from_agent.finger);//<--------get undergoing, finish, my_x, my_y, block from other nodes ()********
+                state current_state(temp.from_agent.my_pos_x,temp.from_agent.my_pos_y,temp.from_agent.my_degree,temp.lidar_be_blocked(0,temp.from_agent.my_degree),temp.from_agent.wrist,temp.from_agent.hand,temp.from_agent.finger);//<--------get undergoing, finish, my_x, my_y, block from other nodes ()********
                 state action_state(0,0,0,false,0,0,0);
                 action_state = current_state;
                 if(action_done){
@@ -409,12 +417,8 @@ int main(int argc, char **argv)
                 int desire_angle = act.Angle();
                 desire_movement = act.Movement();
                                     
-                if(desire_mode == 1){
+ 
                     m = ActionMode::POSITION_MODE;
-                }
-                else{
-                    m = ActionMode::SPEED_MODE;
-                }
                 debug_2.action_done=action_state.MyActionDone();
                 
                 switch(m){
@@ -464,7 +468,7 @@ int main(int argc, char **argv)
                                 }               
                                 bool b;
                                 if(rx0==current_state.MyTx0()){
-                                ROS_INFO("b=%d , mission ",b);
+                   
                                     b = true;
                                 }
                                 else{
@@ -545,78 +549,6 @@ int main(int argc, char **argv)
                         }
                         break;
 
-                    case ActionMode::SPEED_MODE:{
-                        debug_2.robot_state="ActionMode::SPEED_MODE";
-                        long int out=0;
-                        rx0 = desire_movement[12];
-                        rx1 = desire_movement[13];
-                        for(int i = 0; i < 12; i ++){
-                            if(desire_movement[i] == 1){
-                                old_grab_status[i] = 2;
-                            }
-                            else if(desire_movement[i] == 0){
-                                old_grab_status[i] = 0;
-                            }
-                        }
-                        for(int i = 0; i < 12; i ++){
-                            out += old_grab_status[i];
-                            out = out << 2;
-                        }
-                        out = out << 6;
-                        rx2 = out;
-                        rx3 = desire_movement[14];
-                        if(current_state.MyPosX() != desire_pos_x && current_state.MyPosY() != desire_pos_y){
-                           if(current_state.MyActionDone() == 1){ //if not at pos and hasn't got cup, keep going
-                                //---------path plan
-                                if(client_path.call(path_srv)){
-                                    double clustering_time = ros::Time::now().toSec () - begin_time; 
-                                    now_degree = path_srv.response.degree ; 
-                                }else{
-                                    ROS_ERROR("Failed to call service path plan");
-                                }
-                                if(now_degree<0){
-                                    now_degree = last_degree;
-                                } 
-                                //-----path plan end 
-                                r0 = 0x3000;
-                                r1 = desire_speed;
-                                r2 = now_degree;
-                                r3 = 0;
-                                if( path_srv.response.blocked == true){ 
-                                    goal_covered_counter ++;
-                                }
-                                if( path_srv.response.blocked == false){ 
-                                    goal_covered_counter = 0;
-                                }
-                                if(goal_covered_counter > cover_limit){
-                                    //action_state.ChangeKillMission(true);
-                                    action_state.ChangeActionDone(true); //should kill mission but fuck that.. this should still work
-                                    goal_covered_counter = 0;
-                                    for(int i = 0; i < 12; i ++){
-                                       if(desire_movement[i] == 2){
-                                            old_grab_status[i] = 0;
-                                        }
-                                    }
-                            	} //if get cup, action_done is then true(MyActionStatus()==2), GOAP will automatically give next action
-                           }
-                            else{
-                                for(int i = 0; i < 12; i ++){
-                                       if(desire_movement[i] == 2){
-                                            old_grab_status[i] = 1;
-                                        }
-                                    }
-                            }
-                        }
-                        else{ //at pos, mission has failed..
-                            //action_state.ChangeKillMission(true);
-                            action_state.ChangeActionDone(true); //should kill mission but fuck that.. this should still work
-                            for(int i = 0; i < 12; i ++){
-                               if(desire_movement[i] == 2){
-                                    old_grab_status[i] = 0;
-                                }
-                            }
-                        }
-                        break;}
                 }
                 debug_1.desire_degree=desire_angle;
                 debug_1.desire_speed=desire_speed;

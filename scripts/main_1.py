@@ -10,14 +10,16 @@ class MyClass:
 	output = [-1]*7  # --->
 	output_speed = 0  # --->
 	output_mode = -1  # --->
-	output_degree = -1  # --->
+	output_degree = 0  # --->
 	output_position = (0, 0)  # --->
 	output_wait = True  # --->
 	output_mission_name = "start"
+	output_task_name = "start"
 	last_action_done_ = False
 	input_name = " "
 	replan_mission = False
 	kill_mission = True
+	task_mission = " " 
 	setting_number = 1
 	time = 50
 	cup_color = 0
@@ -46,6 +48,7 @@ output_degree = -1
 output_position = (0, 0)
 output_wait = True
 output_mission_name = "start"
+output_task_name = " "
 path_done = False
 penalty_cost = 2000
 penalty_turns = 1
@@ -112,7 +115,7 @@ def handle_return_to_main(req):
 	MyClass.input_name = req.mission_name
 	MyClass.kill_mission = req.kill_mission 
 	MyClass.time = req.time
-	return [MyClass.output_degree,MyClass.output_speed,MyClass.output_mode,MyClass.output_position,MyClass.output,MyClass.output_wait,MyClass.output_mission_name]
+	return [MyClass.output_degree,MyClass.output_speed,MyClass.output_mode,MyClass.output_position,MyClass.output,MyClass.output_wait,MyClass.output_mission_name,MyClass.output_task_name]
 
 def add_two_ints_server():
 	global mission_list

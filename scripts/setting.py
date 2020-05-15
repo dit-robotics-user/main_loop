@@ -31,7 +31,7 @@ def setting(mode, action_list, current_world_state, mission_list, my_pos, my_deg
         a16 = Action('flag', [], [1], [], (0, 0), 0, 0, 0, 0, 0, 6, 0, True)
 
         #   get cup
-        c1 = Action('cup_prepare', ['no_cups'], ['cup_prepare'], [a6, a2, a8], (0, 0), 90, 150, 3, 1, 15, 1, 4, True)
+        c1 = Action('cup_prepare', ['no_cups'], ['cup_prepare'], [a6, a2, a8], (300, 300), 90, 150, 3, 1, 15, 1, 4, True)
         c2 = Action('cup_get1', ['cup_prepare'], ['cup_get'], [a3, a7, a6], (400, 1800), 180, 150, 3, 1, 15, 4, 4, True)
         c3 = Action('cup_get2', ['cup_prepare'], ['cup_get'], [a3, a7, a6], (400, 500), 180, 150, 3, 1, 15, 4, 4, True)
         c4 = Action('cup_get3', ['cup_prepare'], ['cup_get'], [a3, a7, a6], (1000, 600), 90, 150, 3, 1, 15, 4, 4, True)

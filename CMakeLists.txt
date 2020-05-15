@@ -49,14 +49,14 @@ find_package(catkin REQUIRED COMPONENTS
 ##   * add every package in MSG_DEP_SET to generate_messages(DEPENDENCIES ...)
 
 add_message_files(
-   FILES
-   agent.msg
-   main_state.msg
-   from_goap.msg
-   agent.msg
-   string_with_header.msg
-   position.msg
-   
+	FILES
+	agent.msg
+	main_state.msg
+	from_goap.msg
+	agent.msg
+	string_with_header.msg
+	position.msg
+	world_state.msg
 )
 
 ## Generate services in the 'srv' folder

@@ -7,6 +7,7 @@
 #include "main_loop/goap_.h"
 #include <main_loop/from_goap.h>
 #include "main_loop/main_state.h"
+#include "main_loop/world_state.h"
 
 #include <iostream>
 #include <queue>
@@ -92,7 +93,6 @@ public:
         is_blocked = false;
         action_wait = false;
     }
-
 private:
     bool a_done;
     int my_pos_x;
@@ -162,25 +162,46 @@ class sub_state{
     	sub_state();
 		~sub_state(){};
 		void callback(const main_loop::agent::ConstPtr& msg);
+        void sub_world_state_callback(const main_loop::world_state::ConstPtr& msg);
         bool lidar_be_blocked(float speed_degree,float car_degree);
 		bool emergency[8];
+        bool lighthouse_done ;
+        bool flag_done ; 
         int movement_from_goap[7];
         main_loop::agent from_agent;
+
 		
 	private:
 		ros::NodeHandle n ;
-		ros::Subscriber Agent_sub ;		 
+		ros::Subscriber Agent_sub ;		
+        ros::Subscriber world_state_sub ;	 
 };
 
-sub_state::sub_state(){ //***********************************************
-    from_agent.wrist = -2 ;
-    from_agent.hand = -2 ;
-    from_agent.finger = -2 ;
-
-	Agent_sub = n.subscribe<main_loop::agent>("agent_msg", 1, &sub_state::callback,this);
-	for(int j=0;j<8;j++){
+sub_state::sub_state(){ 
+    from_agent.my_pos_x = 700 ; 
+    from_agent.my_pos_y = 2200 ; 
+    from_agent.my_degree = 90 ; 
+	from_agent.my_pos_x = 700 ;
+    from_agent.my_pos_y = 300 ;
+    from_agent.enemy1_x = 380 ;
+    from_agent.enemy1_y = 2400 ;
+    from_agent.enemy2_x = 380 ;
+    from_agent.enemy2_y = 2300 ;
+    from_agent.ally_x = 380 ;
+    from_agent.ally_y = 2200 ; 
+    from_agent.wrist = 0 ;
+    from_agent.hand = 0 ;
+    from_agent.finger = 0 ; 
+    from_agent.time = 0 ;  
+    from_agent.emergency={};
+    for(int j=0 ;j<8;j++){
+        from_agent.emergency.push_back(false);
+    }  
+    for(int j=0;j<8;j++){
         emergency[j]=false;
     }
+	Agent_sub = n.subscribe<main_loop::agent>("agent_msg", 1, &sub_state::callback,this);
+	world_state_sub = n.subscribe<main_loop::world_state>("now_world_state", 1, &sub_state::sub_world_state_callback,this);
 }
 
 void sub_state::callback(const main_loop::agent::ConstPtr& msg){
@@ -192,8 +213,6 @@ void sub_state::callback(const main_loop::agent::ConstPtr& msg){
     from_agent.hand = msg -> hand ; 
     from_agent.finger = msg->finger ;
     from_agent.time = msg->time ;   
-
- 
 	emergency[0]=msg->emergency[0];
     emergency[1]=msg->emergency[1];
     emergency[2]=msg->emergency[2];
@@ -201,8 +220,12 @@ void sub_state::callback(const main_loop::agent::ConstPtr& msg){
     emergency[4]=msg->emergency[4];
     emergency[5]=msg->emergency[5];
     emergency[6]=msg->emergency[6];
-    emergency[7]=msg->emergency[7];
- 	
+    emergency[7]=msg->emergency[7];	
+}
+void sub_state::sub_world_state_callback(const main_loop::world_state::ConstPtr& msg){
+    lighthouse_done = msg->lighthouse_done;
+    flag_done = msg->flag_done;
+    
 }
 
 bool sub_state::lidar_be_blocked(float speed_degree,float car_degree){
@@ -230,9 +253,7 @@ bool sub_state::lidar_be_blocked(float speed_degree,float car_degree){
         }
     }
     return blockk;
-    
 }
-
 
 bool at_pos(int x, int y, int deg, int c_x, int c_y, int c_deg, int m, int angle_m){
     bool at_p = false;
@@ -259,15 +280,15 @@ int main(int argc, char **argv)
 	
     ros::Publisher pub_st1 = nh.advertise<std_msgs::Int32MultiArray>("txST1", 1);
 	ros::Publisher pub_st2 = nh.advertise<std_msgs::Int32MultiArray>("txST2", 1);
-
+    ros::Publisher little_pub = nh.advertise<main_loop::world_state>("tx_little", 1);
     ros::Publisher pub_goap_response = nh.advertise<main_loop::from_goap>("Goap_response", 1);
     ros::Publisher pub_main_state = nh.advertise<main_loop::main_state>("Main_state", 1);
-
 	ros::ServiceClient client_path = nh.serviceClient<main_loop::path>("path_plan");
     ros::ServiceClient client_goap = nh.serviceClient<main_loop::goap_>("goap_test_v1");
     sub_state temp;
 	main_loop::path path_srv;
     main_loop::goap_ goap_srv;
+    main_loop::world_state little_ws; 
 
     // give default value here
     long int r0=0x6000;
@@ -318,6 +339,9 @@ int main(int argc, char **argv)
     goap_srv.request.direction = true ; 
     goap_srv.request.kill_mission = false ; 
     goap_srv.request.cup_color = 55 ; 
+    goap_srv.request.task_name = "" ; 
+    little_ws.lighthouse_done = false ; 
+    little_ws.flag_done = false ; 
     
     int count = 0 ;
     
@@ -360,9 +384,9 @@ int main(int argc, char **argv)
                 debug_1.desire_speed=0;
                 debug_1.desire_mode=r0;
                 debug_1.desire_pos={};
-                debug_1.desire_servo_state=0; //***********************************************
-                debug_1.desire_stepper=0;     //***********************************************
-                debug_1.desire_hand=0;        //***********************************************
+                debug_1.desire_servo_state=0;
+                debug_1.desire_stepper=0;     
+                debug_1.desire_hand=0;        
                 debug_1.is_wait=0;
                 debug_1.mission_name= "setting";
                 
@@ -375,6 +399,14 @@ int main(int argc, char **argv)
                 if(action_done){
                     action_state.ChangeActionDone(true);
                     action_done = false;
+                    /*
+                    if(goap_srv.request.mission_name == "light_house"){
+                        little_ws.lighthouse_done = true ; 
+                    }
+                    if(goap_srv.request.mission_name == "flag_up"){
+                        little_ws.flag_done = true ; 
+                    }
+                    */
                 }
                 if(kill_mission){
                     action_state.ChangeKillMission(true);
@@ -608,6 +640,7 @@ int main(int argc, char **argv)
         debug_2.goal_covered_counter=goal_covered_counter;
         pub_goap_response.publish(debug_1);
         pub_main_state.publish(debug_2);
+        little_pub.publish(little_ws);
 
 
         last_degree = now_degree ; 

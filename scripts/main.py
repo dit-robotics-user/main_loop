@@ -54,7 +54,7 @@ def calculate_mission_priority(m_list, time, go_home_time):
 action_done = True
 replan_mission = False
 kill_mission = True
-my_pos = (3, 3)
+my_pos = (0,0)
 my_degree = 0
 setting_number = 1
 time = 100
@@ -82,7 +82,7 @@ penalty_action = 0
 path = []
 
 # ==設定任務及動作==
-action_list, current_world_state, mission_list = setting(setting_number, action_list, current_world_state, mission_list, my_pos, my_degree, cup_color, direction)
+action_list, current_world_state, mission_list, my_pos = setting(setting_number, action_list, current_world_state, mission_list, my_pos, my_degree, cup_color, direction)
 
 while 1:
     path_done = False

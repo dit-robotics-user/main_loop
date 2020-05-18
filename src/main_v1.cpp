@@ -181,14 +181,12 @@ sub_state::sub_state(){
     from_agent.my_pos_x = 700 ; 
     from_agent.my_pos_y = 2200 ; 
     from_agent.my_degree = 90 ; 
-	from_agent.my_pos_x = 700 ;
-    from_agent.my_pos_y = 300 ;
-    from_agent.enemy1_x = 380 ;
-    from_agent.enemy1_y = 2400 ;
-    from_agent.enemy2_x = 380 ;
-    from_agent.enemy2_y = 2300 ;
-    from_agent.ally_x = 380 ;
-    from_agent.ally_y = 2200 ; 
+    from_agent.enemy1_x = 1 ;
+    from_agent.enemy1_y = 1 ;
+    from_agent.enemy2_x = 1 ;
+    from_agent.enemy2_y = 1 ;
+    from_agent.ally_x = 1 ;
+    from_agent.ally_y = 1 ; 
     from_agent.wrist = 0 ;
     from_agent.hand = 0 ;
     from_agent.finger = 0 ; 
@@ -212,7 +210,12 @@ void sub_state::callback(const main_loop::agent::ConstPtr& msg){
     from_agent.wrist = msg->wrist;
     from_agent.hand = msg -> hand ; 
     from_agent.finger = msg->finger ;
-    from_agent.time = msg->time ;   
+    from_agent.time = msg->time ;  
+	from_agent.enemy1_x = msg->enemy1_x;
+	from_agent.enemy1_y = msg->enemy1_y;
+	from_agent.enemy2_x = msg->enemy2_x;
+	from_agent.enemy2_y = msg->enemy2_y;
+
 	emergency[0]=msg->emergency[0];
     emergency[1]=msg->emergency[1];
     emergency[2]=msg->emergency[2];
@@ -319,20 +322,20 @@ int main(int argc, char **argv)
     int now_my_pos_y;
     float last_degree = 0 ;
     float now_degree = 0 ;
-    path_srv.request.goal_pos_x = 1600;
-    path_srv.request.goal_pos_y = 1800;
-	path_srv.request.my_pos_x = 700 ;
-    path_srv.request.my_pos_y = 300 ;
-    path_srv.request.enemy1_x = 380 ;
-    path_srv.request.enemy1_y = 2400 ;
-    path_srv.request.enemy2_x = 380 ;
-    path_srv.request.enemy2_y = 2300 ;
-    path_srv.request.ally_x = 380 ;
-    path_srv.request.ally_y = 2200 ; 
+    path_srv.request.goal_pos_x = 1;
+    path_srv.request.goal_pos_y = 1;
+	path_srv.request.my_pos_x = 1 ;
+    path_srv.request.my_pos_y = 1 ;
+    path_srv.request.enemy1_x = 1 ;
+    path_srv.request.enemy1_y = 1 ;
+    path_srv.request.enemy2_x = 1 ;
+    path_srv.request.enemy2_y = 1 ;
+    path_srv.request.ally_x = 1 ;
+    path_srv.request.ally_y = 1 ; 
     goap_srv.request.replan=false;
     goap_srv.request.action_done=false;
-    goap_srv.request.pos.push_back(300);
-    goap_srv.request.pos.push_back(300);
+    goap_srv.request.pos.push_back(0);
+    goap_srv.request.pos.push_back(0);
     goap_srv.request.my_degree = 90 ; 
     goap_srv.request.mission_name = "setting" ;
     goap_srv.request.time = 0 ;
@@ -360,12 +363,12 @@ int main(int argc, char **argv)
         //path plan
         path_srv.request.my_pos_x = temp.from_agent.my_pos_x;
         path_srv.request.my_pos_y = temp.from_agent.my_pos_y;
-        path_srv.request.enemy1_x = 380 ;
-        path_srv.request.enemy1_y = 2400 ;
-        path_srv.request.enemy2_x = 380 ;
-        path_srv.request.enemy2_y = 2300 ;
-        path_srv.request.ally_x = 380 ;
-        path_srv.request.ally_y = 2200 ; 
+        path_srv.request.enemy1_x = 400 ;
+        path_srv.request.enemy1_y = 1800 ;
+        path_srv.request.enemy2_x = 550 ;
+        path_srv.request.enemy2_y = 500 ;
+        path_srv.request.ally_x = 1 ;
+        path_srv.request.ally_y = 1 ; 
         //goap
         
         //debug
@@ -546,6 +549,11 @@ int main(int argc, char **argv)
                                     double clustering_time = ros::Time::now().toSec () - begin_time; 
                                     now_degree = path_srv.response.degree ; 
                                 }else{
+                                    ROS_INFO ("mission: %s ", goap_srv.response.mission_name.c_str());
+									ROS_INFO("desire_pos_x=%d",desire_pos_x);
+									ROS_INFO("desire_pos_y=%d",desire_pos_y);
+									ROS_INFO("action_state.MyPosX()=%d",action_state.MyPosX());
+									ROS_INFO("action_state.MyPosY()=%d",action_state.MyPosY());
                                     ROS_ERROR("Failed to call service path plan");
                                 }
                                 if(now_degree<0){
@@ -632,6 +640,13 @@ int main(int argc, char **argv)
         debug_2.status=temp.from_agent.status;
         debug_2.pos.push_back(temp.from_agent.my_pos_x);
         debug_2.pos.push_back(temp.from_agent.my_pos_y);
+        debug_2.enemy1_pos.push_back(temp.from_agent.enemy1_x);
+        debug_2.enemy1_pos.push_back(temp.from_agent.enemy1_y);
+        debug_2.enemy2_pos.push_back(temp.from_agent.enemy2_x);
+        debug_2.enemy2_pos.push_back(temp.from_agent.enemy2_x);
+        debug_2.ally_pos.push_back(temp.from_agent.ally_x);
+        debug_2.ally_pos.push_back(temp.from_agent.ally_y);
+
         debug_2.is_blocked=false;
         debug_2.servo_state=temp.from_agent.wrist;
         debug_2.stepper_state=temp.from_agent.hand;

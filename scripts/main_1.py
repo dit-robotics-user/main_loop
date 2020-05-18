@@ -6,7 +6,7 @@ from goap import *
 
 class MyClass:
 	action_done = False  # <----
-	my_pos = (3, 3)  # <----
+	my_pos = (400, 1800)  # <----
 	output = [-1]*7  # --->
 	output_speed = 0  # --->
 	output_mode = -1  # --->
@@ -24,17 +24,8 @@ class MyClass:
 	time = 50
 	cup_color = 0
 	direction = 0
+	my_degree = 0
 
-# ==收MAIN的資料==
-action_done = True
-replan_mission = False
-kill_mission = True
-my_pos = (3, 3)
-my_degree = 0
-setting_number = 1
-time = 100
-cup_color = 0
-direction = 0
 
 # ==GOAP自己的變數==
 go_home_time = 80000
@@ -58,7 +49,7 @@ penalty_action = 0
 path = []
 
 # ==設定任務及動作==
-action_list, current_world_state, mission_list = setting(setting_number, action_list, current_world_state, mission_list, my_pos, my_degree, cup_color, direction)	
+action_list, current_world_state, mission_list, MyClass.my_pos= setting(MyClass.setting_number, action_list, current_world_state, mission_list, MyClass.my_pos, MyClass.my_degree, MyClass.cup_color, MyClass.direction)	
 
 def penalty(current_action, penalty_cost, penalty_turns, action_list):
     for action in action_list:
@@ -131,6 +122,7 @@ def add_two_ints_server():
 			actions.refresh()
 		mission_list = calculate_mission_priority(mission_list, MyClass.time, go_home_time)  # <---
 		new_current_world_state = copy.deepcopy(current_world_state)
+		rospy.loginfo(MyClass.my_pos)
 		path = goap([mission_list[0].name], new_current_world_state, MyClass.my_pos, action_list)
 
 		
@@ -161,7 +153,7 @@ def add_two_ints_server():
 				top_path = path[0]
 
 				if top_path.mode == 2:
-					top_path.tangent_point_calculation(my_pos, 3)
+					top_path.tangent_point_calculation(MyClass.my_pos, 3)
 
 				while len(top_path.child_action) != 0:
 					top_child = top_path.child_action[0]

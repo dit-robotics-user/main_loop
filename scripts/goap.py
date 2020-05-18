@@ -28,11 +28,13 @@ def get_successors(required_states, action_list):  # linking actions by examinin
     return successors
 
 
-def calculate_successor_priority(top, successor):
+def calculate_successor_priority(top, successor, my_pos):
     magic_number = 20
     cost_of_cup_movement = 10
     if successor.name == 'cup_prepare':
         successor.priority = top.priority + cost_of_cup_movement + magic_number
+    elif successor.name[:7] == 'cup_get':
+		successor.priority = top.priority + cost_of_cup_movement + distance(my_pos, successor.position) + magic_number
     else:
         successor.priority = top.priority + distance(top.position, successor.position) + magic_number
 
@@ -127,7 +129,7 @@ def goap(goal, cws, my_pos, action_list):
         top.path.append(top)
         for successor in get_successors(top.required_world_state, action_list):
             successor.req_world_state_change(cws, top.required_world_state, goal)
-            calculate_successor_priority(top, successor)
+            calculate_successor_priority(top, successor, my_pos)
             successor.path = top.path
             '''if 'stop' in successor.required_world_state:
                 successor.path.append(successor)

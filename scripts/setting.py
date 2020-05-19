@@ -27,9 +27,8 @@ def setting(mode, action_list, current_world_state, mission_list, my_pos, my_deg
 		a11 = Action('finger_open_green2', [], [2,4], [], (0, 0), 0, 0, 0, 0, 3, 0, 0, True)
 		a12 = Action('finger_open_red2', [], [1,3,5], [], (0, 0), 0, 0, 0, 0, 0, 3, 0, True)
 		a13 = Action('goto', [], [], [], (0, 0), 0, 0, 0, 0, 0, 7, 0, True)
-		a14 = Action('windsock_hand_up', [], [1], [], (0, 0), 0, 0, 0, 0, 0, 5, 0, True)
-		a15 = Action('windsock_hand_down', [], [2], [], (0, 0), 0, 0, 0, 0, 0, 5, 0, True)
-		a16 = Action('flag', [], [1], [], (0, 0), 0, 0, 0, 0, 0, 6, 0, True)
+		a14 = Action('windsock_hand_up', [], [3], [], (0, 0), 0, 0, 0, 0, 0, 2, 0, True)
+		a15 = Action('windsock_hand_down', [], [4], [], (0, 0), 0, 0, 0, 0, 0, 2, 0, True)
 
 		#   get cup
 		c1 = Action('cup_prepare', ['no_cups'], ['cup_prepare'], [a6, a2, a8], (300, 300), 90, 150, 3, 1, 15, 1, 4, True)
@@ -59,10 +58,9 @@ def setting(mode, action_list, current_world_state, mission_list, my_pos, my_deg
 
 		#  go home
 		c17 = Action('go_home', [], ['at_home'], [a13], (700, 2200), 270, 150, 3, 1, 15, 4, 4, True)
-		c18 = Action('raise_flag', ['at_home'], ['go_home', 'flag_raised'], [a16], (700, 2200), 270, 150, 3, 1, 15, 4, 4, True)
 
-		action_list = [c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14, c15, c16, c17, c18]
-		action_list = [c1, c2, c3, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14, c17, c18]
+		action_list = [c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14, c15, c16, c17]
+		action_list = [c1, c2, c3, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14, c17]
 
 		current_world_state = ['no_cups', 'hand_down', 'first_time', 'lighthouse_unactivated', 'windsocks_unpushed']
 

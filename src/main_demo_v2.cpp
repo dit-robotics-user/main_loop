@@ -4,7 +4,7 @@
 #include <std_msgs/Int32MultiArray.h>
 #include "main_loop/path.h"
 #include "main_loop/agent.h"
-#include "main_loop/goap_.h"
+#include "main_loop/goap_demo.h"
 #include <main_loop/from_goap.h>
 #include "main_loop/main_state.h"
 
@@ -264,10 +264,10 @@ int main(int argc, char **argv)
     ros::Publisher pub_main_state = nh.advertise<main_loop::main_state>("Main_state", 1);
 
 	ros::ServiceClient client_path = nh.serviceClient<main_loop::path>("path_plan");
-    ros::ServiceClient client_goap = nh.serviceClient<main_loop::goap_>("goap_test_v1");
+    ros::ServiceClient client_goap = nh.serviceClient<main_loop::goap_demo>("goap_test_v1");
     sub_state temp;
 	main_loop::path path_srv;
-    main_loop::goap_ goap_srv;
+    main_loop::goap_demo goap_srv;
 
     // give default value here
     long int r0=0x6000;

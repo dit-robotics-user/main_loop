@@ -25,6 +25,7 @@ class MyClass:
 	cup_color = 0
 	direction = 0
 	my_degree = 0
+	output_mission_child_name = " start "
 
 
 # ==GOAP自己的變數==
@@ -106,7 +107,7 @@ def handle_return_to_main(req):
 	MyClass.input_name = req.mission_name
 	MyClass.kill_mission = req.kill_mission 
 	MyClass.time = req.time
-	return [MyClass.output_degree,MyClass.output_speed,MyClass.output_mode,MyClass.output_position,MyClass.output,MyClass.output_wait,MyClass.output_mission_name,MyClass.output_task_name]
+	return [MyClass.output_degree,MyClass.output_speed,MyClass.output_mode,MyClass.output_position,MyClass.output,MyClass.output_wait,MyClass.output_mission_child_name,MyClass.output_task_name]
 
 def add_two_ints_server():
 	global mission_list
@@ -157,7 +158,8 @@ def add_two_ints_server():
 
 				while len(top_path.child_action) != 0:
 					top_child = top_path.child_action[0]
-					MyClass.output_mission_name = top_child.name
+					MyClass.output_mission_name = top_path.name
+					MyClass.output_mission_child_name = top_child.name
 					MyClass.output_degree = top_child.degree
 					MyClass.output_speed = top_child.speed
 					MyClass.output_mode = top_child.mode

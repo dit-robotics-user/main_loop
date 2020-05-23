@@ -4,9 +4,12 @@
 #include <std_msgs/Int32MultiArray.h>
 #include "main_loop/path.h"
 #include "main_loop/agent.h"
-#include "main_loop/goap_demo.h"
+#include "main_loop/goap_.h"
 #include <main_loop/from_goap.h>
 #include "main_loop/main_state.h"
+#include <main_loop/goap_debug.h>
+#include "main_loop/main_debug.h"
+#include "main_loop/world_state.h"
 
 #include <iostream>
 #include <queue>
@@ -196,6 +199,7 @@ void sub_state::callback(const main_loop::agent::ConstPtr& msg){
     from_agent.enemy1_y = msg->enemy1_y ;
     from_agent.enemy2_x = msg->enemy2_x ;
     from_agent.enemy2_y = msg->enemy2_y ;
+    from_agent.time = msg->time ; 
 
 	emergency[0]=msg->emergency[0];
     emergency[1]=msg->emergency[1];
@@ -258,21 +262,21 @@ int main(int argc, char **argv)
 {
 
     //ros setting
- 	ros::init (argc, argv, "main_demo_v2");
+ 	ros::init (argc, argv, "main_v1");
 	ros::NodeHandle nh;    
 	
     ros::Publisher pub_st1 = nh.advertise<std_msgs::Int32MultiArray>("txST1", 1);
 	ros::Publisher pub_st2 = nh.advertise<std_msgs::Int32MultiArray>("txST2", 1);
 
-    ros::Publisher pub_goap_response = nh.advertise<main_loop::from_goap>("Goap_response", 1);
-    ros::Publisher pub_main_state = nh.advertise<main_loop::main_state>("Main_state", 1);
+    ros::Publisher pub_goap_response = nh.advertise<main_loop::goap_debug>("Goap_response", 1);
+    ros::Publisher pub_main_state = nh.advertise<main_loop::main_debug>("Main_state", 1);
 
 	ros::ServiceClient client_path = nh.serviceClient<main_loop::path>("path_plan");
-    ros::ServiceClient client_goap = nh.serviceClient<main_loop::goap_demo>("goap_test_v1");
-
+    ros::ServiceClient client_goap = nh.serviceClient<main_loop::goap_>("goap_test_v1");
     sub_state temp;
 	main_loop::path path_srv;
-    main_loop::goap_demo goap_srv;
+    main_loop::goap_ goap_srv;
+    main_loop::world_state little_ws; 
 
     // give default value here
     long int r0=0x6000;
@@ -323,7 +327,14 @@ int main(int argc, char **argv)
     goap_srv.request.pos.push_back(300);
     goap_srv.request.my_degree = 90 ; 
     goap_srv.request.mission_name = "setting" ;
-    
+    goap_srv.request.time = 0 ;
+    goap_srv.request.direction = true ; 
+    goap_srv.request.kill_mission = false ; 
+    goap_srv.request.cup_color = 55 ; 
+    goap_srv.request.mission_child_name = "" ; 
+    little_ws.lighthouse_done = false ; 
+    little_ws.flag_done = false ; 
+
     int count = 0 ;
     
 
@@ -358,8 +369,8 @@ int main(int argc, char **argv)
         //goap
         
         //debug
-        main_loop::from_goap debug_1;
-        main_loop::main_state debug_2;
+        main_loop::goap_debug debug_1;
+        main_loop::main_debug debug_2;
        
 
         switch(stat){
@@ -390,6 +401,14 @@ int main(int argc, char **argv)
                 if(action_done){
                     action_state.ChangeActionDone(true);
                     action_done = false;
+
+                    if(goap_srv.request.mission_name == "lighthouse" && goap_srv.request.mission_child_name == "goto" ){
+                        little_ws.lighthouse_done = true ; 
+                    }
+                    if(goap_srv.request.mission_name == "hand_push" && goap_srv.request.mission_child_name == "windsock_hand_down"){
+                        little_ws.flag_done = true ; 
+                    }
+                
                 }
                 if(kill_mission){
                     action_state.ChangeKillMission(true);
@@ -418,6 +437,7 @@ int main(int argc, char **argv)
                     temp.movement_from_goap[12]=goap_srv.response.ST2[12];
                     temp.movement_from_goap[13]=goap_srv.response.ST2[13];
                     temp.movement_from_goap[14]=goap_srv.response.ST2[14];
+                    temp.movement_from_goap[15]=goap_srv.response.ST2[15];
                     //for path plan
                     path_srv.request.goal_pos_x = goap_srv.response.pos[0];
                     path_srv.request.goal_pos_y = goap_srv.response.pos[1];
@@ -426,6 +446,7 @@ int main(int argc, char **argv)
                 }
                 //
                 goap_srv.request.mission_name = goap_srv.response.mission_name ;
+                goap_srv.request.mission_child_name = goap_srv.response.mission_child_name ;
                 //-------goap end               
                 action act(goap_srv.response.pos[0],goap_srv.response.pos[1],temp.movement_from_goap,goap_srv.response.degree,goap_srv.response.speed,goap_srv.response.is_wait,goap_srv.response.mode);
                 int desire_pos_x = act.PosX();
@@ -633,7 +654,7 @@ int main(int argc, char **argv)
 
                         //==到點==
                         //若到點則代表沒完成任務（任務已被他人完成或失敗）
-                        if(at_pos(current_state.MyPosX(),current_state.MyPosY(), current_state.MyDegree(), desire_pos_x, desire_pos_y, desire_angle, speed_mode_margin, speed_mode_angle_margin)){
+                        if(count>3 && at_pos(current_state.MyPosX(),current_state.MyPosY(), current_state.MyDegree(), desire_pos_x, desire_pos_y, desire_angle, speed_mode_margin, speed_mode_angle_margin)){
                             action_state.ChangeKillMission(true);
                             action_done = true;
                             ROS_INFO("speed mode action done");
@@ -643,6 +664,7 @@ int main(int argc, char **argv)
                                     old_grab_status[i] = 0;
                                 }
                             }
+                            count = 0; 
                         }
                         //==未到點==
                         //不然算路徑給速度角度
@@ -714,6 +736,7 @@ int main(int argc, char **argv)
                 debug_1.desire_hand=rx2;
                 debug_1.is_wait=desire_wait;
                 debug_1.mission_name = goap_srv.response.mission_name;
+                debug_1.mission_child_name = goap_srv.response.mission_child_name;
 
 
                  
@@ -765,6 +788,7 @@ int main(int argc, char **argv)
         debug_2.hand_state=temp.from_agent.hand;
         debug_2.kill_mission=kill_mission;
         debug_2.goal_covered_counter=goal_covered_counter;
+        debug_2.time =temp.from_agent.time;
         pub_goap_response.publish(debug_1);
         pub_main_state.publish(debug_2);
 

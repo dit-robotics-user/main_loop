@@ -1,31 +1,66 @@
 #!/usr/bin/env python
-# coding=utf-8
-from cup import *
 import math
-import copy
+
+
+def calculate_unit_vector(start, goal):  # give two points and calculates the unit vector
+    x = goal[0] - start[0]
+    y = goal[1] - start[1]
+    length = math.sqrt(x*x + y*y)
+    unit_vector = (x/length, y/length)
+    return unit_vector
+
+
+def calculate_degree(start, goal):  # from vector then calculates the degree from 0-360
+    num = goal[1] - start[1]
+    den = goal[0] - start[0]
+    pi = 3.1415926
+    radius = 0
+    if num != 0 and den != 0:
+        if num > 0 and den > 0:  # 1 quadrant
+            radius = math.atan(num / den)
+        elif num > 0:  # 2, 3 quadrant
+            radius = pi + math.atan(num / den)
+        else:  # 4 quadrant
+            radius = 2 * pi + math.atan(num / den)
+    elif num == 0 and den > 0:
+        radius = 0  # slope is zero
+    elif num == 0 and den < 0:
+        radius = pi  # slope is zero
+    elif num > 0 and den == 0:
+        radius = pi / 2  # slope is infinity
+    elif num < 0 and den == 0:
+        radius = 3 * pi / 2  # slope is infinity
+    else:
+        '''print('start:')
+        print(start)
+        print('goal')
+        print(goal)
+        print('error')'''
+    degree = int(radius * 180 / pi)  # switches radius to degree
+    #print('degree:', degree)
+    return degree
 
 
 class Action:
-    def __init__(self, name, preconditions, effects, child_action, position, degree, speed, cost, mode, speed_mode_radius, type_number, cup_number, wait):
+    def __init__(self, name, preconditions, effects, position, cost, degree, speed, mode, speed_mode_radius, number, iscup, iswait):
         self.name = name
         self.preconditions = preconditions
         self.effects = effects
-        self.child_action = child_action
-        self.cost = cost
-        self.position = position
-        self.wait = wait
-        self.degree = degree
-        self.type_number = type_number
-        self.mode = mode  # speed mode or position mode
-        self.speed_mode_radius = speed_mode_radius
-        self.speed = speed
-        self.cup_number = cup_number
-        self.tangent_position = []
-        self.tangent_angle = []
         self.path = []
         self.priority = 0
         self.required_world_state = []
-        self.result_world_state = []
+        self.current_world_state = []
+        self.cost = cost
+        self.position = position
+        self.iswait = iswait
+        self.degree = degree
+        self.number = number
+        self.grab_mode = mode  # speed mode or position mode
+        self.radius = speed_mode_radius
+        self.speed = speed
+        self.circular_position = []
+        self.circular_angle = []
+        self.iscup = iscup
 
     def __gt__(self, other):
         return self.priority > other.priority
@@ -36,12 +71,8 @@ class Action:
         print(self.effects)
 
     def calculate_priority(self, my_pos):
-        if self.name == 'cup_hold':
-            self.priority = 0  # though priority here is 0, but after calculating the leftover actions, priority will be compensated
-        else:
-            self.priority = len(self.required_world_state) + self.cost + math.sqrt(((my_pos[0]-self.position[0])
-                            * (my_pos[0]-self.position[0]) + (my_pos[1]-self.position[1])*(my_pos[1]-self.position[1])))
-            #print(self.priority)
+        self.priority = len(self.required_world_state) + self.cost + math.sqrt(((my_pos[0]-self.position[0])
+                        * (my_pos[0]-self.position[0]) + (my_pos[1]-self.position[1])*(my_pos[1]-self.position[1])))
         '''print('----')
         print(len(self.required_world_state))
         print(self.cost)
@@ -49,45 +80,30 @@ class Action:
                (my_pos[1]-self.position[1])*(my_pos[1]-self.position[1])))
         print('----')'''
 
-    def req_world_state_change(self, cws, former_required_ws, goal):  # renews required world state
-        self.required_world_state = copy.deepcopy(former_required_ws)
+    def world_state_change(self, cws, rws):
         for precondition in self.preconditions:
-            if precondition not in self.required_world_state:
-                self.required_world_state.append(precondition)
+            if precondition not in rws:
+                rws.append(precondition)
         for state in cws:
-            if state in self.required_world_state:
-                self.required_world_state.remove(state)
+            if state in rws:
+                rws.remove(state)
         for effect in self.effects:
-            if effect in self.required_world_state:
-                self.required_world_state.remove(effect)
-        if goal[0] in self.required_world_state:
-            self.required_world_state.remove(goal[0])
-
-        '''copy_rws = former_required_ws.copy()
-        copy_cws = cws.copy()
-        for effect in self.effects:
-            if effect in copy_rws:
-                copy_rws.remove(effect)
-        for precondition in self.preconditions:
-            if precondition not in copy_rws:
-                copy_rws.append(precondition)
-        for state in copy_cws:
-            if state in copy_rws:
-                copy_rws.remove(state)
-        self.required_world_state = copy_rws'''
+            if effect in rws:
+                rws.remove(effect)
+        self.required_world_state = rws
 
     def refresh(self):
         self.path = []
         self.priority = 0
         self.required_world_state = []
-        self.result_world_state = []
+        self.current_world_state = []
 
     def tangent_point_calculation(self, my_pos, stretch_factor):  # is_right should be included in cup actions
         cx = self.position[0]
         cy = self.position[1]
         x = my_pos[0]
         y = my_pos[1]
-        r = self.speed_mode_radius
+        r = self.radius
         is_right = False
         if (cx - x)*(cx - x) + (cy - y)*(cy - y) <= r*r:
             print('error input, my pos is inside/on the radius')
@@ -131,14 +147,8 @@ class Action:
         pos1 = (x1, y1)
         pos2 = (x2, y2)
 
-        #print('pos1:')
-        #print(pos1)
         degree1 = calculate_degree(my_pos, pos1)
-        #print('pos2:')
-        #print(pos2)
         degree2 = calculate_degree(my_pos, pos2)
-        #print('pos_cen:')
-        #print(self.position)
 
         center_degree = calculate_degree(my_pos, self.position)
 
@@ -154,8 +164,6 @@ class Action:
             else:
                 self.position = (pos2[0] + stretch_factor * calculate_unit_vector(my_pos, pos2)[0], pos2[1] +
                                  stretch_factor * calculate_unit_vector(my_pos, pos2)[1])
-            print('degree: ' + str(self.degree))
-            print(self.position)
         else:  # use left claw
             self.degree = max(degree1, degree2, center_degree)
             # extend the goal along vector
@@ -165,5 +173,3 @@ class Action:
             else:
                 self.position = (pos2[0] + stretch_factor * calculate_unit_vector(my_pos, pos2)[0], pos2[1] +
                                  stretch_factor * calculate_unit_vector(my_pos, pos2)[1])
-            print('degree: ' + str(self.degree))
-            print(self.position)

@@ -2,7 +2,7 @@
 
 from main_loop.srv import *
 import rospy
-from setting import *
+from setting_demo import *
 
 class MyClass:
 	action_done = False  # <----
@@ -112,7 +112,7 @@ def add_two_ints_server():
 	global left_side
 	global right_side
 	rospy.init_node('goap_test')
-	rospy.Service('goap_test_v1', goap_, handle_return_to_main)
+	rospy.Service('goap_test_v1', goap_demo, handle_return_to_main)
 	while True:
 
 		path_done = False

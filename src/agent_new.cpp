@@ -136,7 +136,7 @@ int main(int argc, char **argv){
                     begin_time =ros::Time::now();
                     count =1;                    
                 }else{
-                    if(last_clustering_time>100){
+                    if(last_clustering_time>100000){
                         temp.exact_status=6;
                         count=0;
                     }

@@ -338,6 +338,7 @@ int main(int argc, char **argv)
     goap_srv.request.pos.push_back(0);
     goap_srv.request.my_degree = 90 ; 
     goap_srv.request.mission_name = "setting" ;
+    goap_srv.request.mission_child_name = "setting" ;
     goap_srv.request.time = 0 ;
     goap_srv.request.direction = true ; 
     goap_srv.request.kill_mission = false ; 
@@ -402,14 +403,14 @@ int main(int argc, char **argv)
                 if(action_done){
                     action_state.ChangeActionDone(true);
                     action_done = false;
-                    /*
-                    if(goap_srv.request.mission_name == "light_house"){
+                    
+                    if(goap_srv.request.mission_name == "lighthouse" && goap_srv.request.mission_child_name == "goto" ){
                         little_ws.lighthouse_done = true ; 
                     }
-                    if(goap_srv.request.mission_name == "flag_up"){
+                    if(goap_srv.request.mission_name == "hand_push" && goap_srv.request.mission_child_name == "windsock_hand_down"){
                         little_ws.flag_done = true ; 
                     }
-                    */
+                    
                 }
                 if(kill_mission){
                     action_state.ChangeKillMission(true);
@@ -441,6 +442,7 @@ int main(int argc, char **argv)
                 }
                 //
                 goap_srv.request.mission_name = goap_srv.response.mission_name ;
+                goap_srv.request.mission_child_name = goap_srv.response.mission_child_name ;
                 //-------goap end               
                 action act(goap_srv.response.pos[0],goap_srv.response.pos[1],temp.movement_from_goap,goap_srv.response.degree,goap_srv.response.speed,goap_srv.response.is_wait,goap_srv.response.mode);
                 int desire_pos_x = act.PosX();

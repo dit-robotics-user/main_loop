@@ -50,7 +50,7 @@ penalty_action = 0
 path = []
 
 # ==設定任務及動作==
-action_list, current_world_state, mission_list, MyClass.my_pos= setting(MyClass.setting_number, action_list, current_world_state, mission_list, MyClass.my_pos, MyClass.my_degree, MyClass.cup_color, MyClass.direction)	
+action_list, current_world_state, mission_list, MyClass.my_pos= setting(MyClass.setting_number, action_list, current_world_state, mission_list, MyClass.my_pos, MyClass.my_degree, MyClass.cup_color, MyClass.direction,)	
 
 def penalty(current_action, penalty_cost, penalty_turns, action_list):
     for action in action_list:
@@ -107,7 +107,7 @@ def handle_return_to_main(req):
 	MyClass.input_name = req.mission_name
 	MyClass.kill_mission = req.kill_mission 
 	MyClass.time = req.time
-	return [MyClass.output_degree,MyClass.output_speed,MyClass.output_mode,MyClass.output_position,MyClass.output,MyClass.output_wait,MyClass.output_mission_child_name,MyClass.output_task_name]
+	return [MyClass.output_degree,MyClass.output_speed,MyClass.output_mode,MyClass.output_position,MyClass.output,MyClass.output_wait,MyClass.output_mission_child_name,MyClass.output_task_name ,MyClass.output_mission_child_name]
 
 def add_two_ints_server():
 	global mission_list

@@ -17,6 +17,7 @@ class MyClass:
 	output_task_name = "start"
 	last_action_done_ = False
 	input_name = " "
+	input_child_name = " "
 	replan_mission = False
 	kill_mission = True
 	task_mission = " " 
@@ -105,9 +106,10 @@ def handle_return_to_main(req):
 	MyClass.action_done = req.action_done  # <----
 	MyClass.my_pos = (req.pos[0],req.pos[1])
 	MyClass.input_name = req.mission_name
+	MyClass.input_child_name = req.mission_child_name
 	MyClass.kill_mission = req.kill_mission 
 	MyClass.time = req.time
-	return [MyClass.output_degree,MyClass.output_speed,MyClass.output_mode,MyClass.output_position,MyClass.output,MyClass.output_wait,MyClass.output_mission_child_name,MyClass.output_task_name ,MyClass.output_mission_child_name]
+	return [MyClass.output_degree,MyClass.output_speed,MyClass.output_mode,MyClass.output_position,MyClass.output,MyClass.output_wait,MyClass.output_mission_child_name,MyClass.output_mission_child_name]
 
 def add_two_ints_server():
 	global mission_list
@@ -170,7 +172,7 @@ def add_two_ints_server():
 					
 					print(top_path.name + " " + top_child.name)
 
-					if MyClass.action_done is True and MyClass.output_mission_name == MyClass.input_name:
+					if MyClass.action_done is True and MyClass.output_mission_child_name == MyClass.input_child_name:
 						top_path.child_action.remove(top_child)
 
 				current_world_state = top_path.result_world_state

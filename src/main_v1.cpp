@@ -343,7 +343,6 @@ int main(int argc, char **argv)
     goap_srv.request.direction = true ; 
     goap_srv.request.kill_mission = false ; 
     goap_srv.request.cup_color = 55 ; 
-    goap_srv.request.task_name = "" ; 
     little_ws.lighthouse_done = false ; 
     little_ws.flag_done = false ; 
     

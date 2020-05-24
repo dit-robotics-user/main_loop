@@ -13,7 +13,7 @@ from operator import attrgetter
 
 def setting(mode, action_list, current_world_state, mission_list, my_pos, my_degree, cup_color, direction):
 	if mode is 1:
-		my_pos = (700,2200)
+		my_pos = (640,345)
 		a1 = Action('hand_close', [], [1], [], (0, 0), 0, 0, 0, 0, 0, 2, 0, True)
 		a2 = Action('hand_open', [], [2], [], (0, 0), 0, 0, 0, 0, 0, 2, 0, True)
 		a3 = Action('wrist_mid', [], [2], [], (0, 0), 0, 0, 0, 0, 0, 1, 0, True)
@@ -32,32 +32,32 @@ def setting(mode, action_list, current_world_state, mission_list, my_pos, my_deg
 
 		#   get cup
 		c1 = Action('cup_prepare', ['no_cups'], ['cup_prepare'], [a6, a2, a8], (300, 300), 90, 150, 3, 1, 15, 1, 4, True)
-		c2 = Action('cup_get1', ['cup_prepare'], ['cup_get'], [a3, a7, a6], (400, 1800), 180, 150, 3, 1, 15, 4, 4, True)
-		c3 = Action('cup_get2', ['cup_prepare'], ['cup_get'], [a3, a7, a6], (400, 500), 180, 150, 3, 1, 15, 4, 4, True)
-		c4 = Action('cup_get3', ['cup_prepare'], ['cup_get'], [a3, a7, a6], (1000, 600), 90, 150, 3, 1, 15, 4, 4, True)
+		c2 = Action('cup_get1', ['cup_prepare'], ['cup_get'], [a3, a7, a6], (105, 850), 180, 150, 3, 1, 15, 4, 4, True)
+		c3 = Action('cup_get2', ['cup_prepare'], ['cup_get'], [a3, a7, a6], (141, 2170), 180, 150, 3, 1, 15, 4, 4, True)
+		c4 = Action('cup_get3', ['cup_prepare'], ['cup_get'], [a3, a7, a6], (1600, 118), 270, 150, 3, 1, 15, 4, 4, True)
 		c5 = Action('cup_hold', ['cup_get'],  ['get_points', 'have_cups'], [a5], (0, 0), 90, 150, 3, 1, 15, 1, 4, True)
 
 		#   activate lighthouse
-		c6 = Action('lighthouse', ['lighthouse_unactivated'], ['get_points', 'lighthouse_activated'], [a13], (400, 2000), 90, 150, 3, 1, 15, 4, 4, True)
+		c6 = Action('lighthouse', ['lighthouse_unactivated'], ['get_points', 'lighthouse_activated'], [a13], (200, 225), 180, 150, 3, 1, 15, 4, 4, True)
 
 		#   put first round cup
-		c7 = Action('put_green1', ['have_cups', 'first_time'], ['green1_put'], [a4, a9, a6], (1100, 2200), 0, 150, 3, 1, 15, 4, 4, True)
-		c8 = Action('put_red1', ['green1_put'], ['red1_put'], [a4, a10], (500, 2200), 0, 150, 3, 1, 15, 4, 4, True)
-		c9 = Action('put_initial1', ['red1_put'], ['get_points', 'no_cups', 'second_time'], [a13, a5], (500, 2000), 270, 150, 3, 1, 15, 4, 4, True)
+		c7 = Action('put_green1', ['have_cups', 'first_time'], ['green1_put'], [a4, a9, a6], (670, 180), 180, 150, 3, 1, 15, 4, 4, True)
+		c8 = Action('put_red1', ['green1_put'], ['red1_put'], [a4, a10], (800, 180), 180, 150, 3, 1, 15, 4, 4, True)
+		c9 = Action('put_initial1', ['red1_put'], ['get_points', 'no_cups', 'second_time'], [a13, a5], (700, 550), 90, 150, 3, 1, 15, 4, 4, True)
 
 		#   put second round cup
-		c10 = Action('put_set2', ['have_cups', 'second_time'], ['cup_set'], [a4, a12, a6], (900, 2100), 270, 150, 3, 1, 15, 4, 4, True)
-		c11 = Action('put_green2', ['cup_set'], ['green2_put'], [a4, a11, a6], (1100, 2200), 0, 150, 3, 1, 15, 4, 4, True)
-		c12 = Action('put_leftover2', ['green2_put'], ['leftover2_put'], [a4, a7, a6], (900, 2100), 270, 150, 3, 1, 15, 4, 4, True)
-		c13 = Action('put_red2', ['leftover2_put'], ['red2_put'], [a4, a12, a6], (800, 2200), 180, 150, 3, 1, 15, 4, 4, True)
-		c14 = Action('put_initial2', ['red2_put'], ['get_points', 'no_cups', 'home_full'], [a13, a5], (900, 1800), 270, 150, 3, 1, 15, 4, 4, True)
+		c10 = Action('put_set2', ['have_cups', 'second_time'], ['cup_set'], [a4, a12, a6], (700, 600), 90, 150, 3, 1, 15, 4, 4, True)
+		c11 = Action('put_green2', ['cup_set'], ['green2_put'], [a4, a11, a6], (670, 180), 180, 150, 3, 1, 15, 4, 4, True)
+		c12 = Action('put_leftover2', ['green2_put'], ['leftover2_put'], [a4, a7, a6], (720, 180), 900, 150, 3, 1, 15, 4, 4, True)
+		c13 = Action('put_red2', ['leftover2_put'], ['red2_put'], [a4, a12, a6], (800, 180), 180, 150, 3, 1, 15, 4, 4, True)
+		c14 = Action('put_initial2', ['red2_put'], ['get_points', 'no_cups', 'home_full'], [a13, a5], (700, 600), 270, 150, 3, 1, 15, 4, 4, True)
 
 		#   push windsock
-		c15 = Action('hand_prepare', ['hand_down', 'windsocks_unpushed'], ['hand_up'], [a14], (400, 1000), 85, 150, 3, 1, 15, 4, 4, True)
-		c16 = Action('hand_push', ['hand_up'], ['get_points', 'windsocks_pushed', 'hand_down'], [a15], (800, 1250), 85, 150, 3, 1, 15, 4, 4, True)
+		c15 = Action('hand_prepare', ['hand_down', 'windsocks_unpushed'], ['hand_up'], [a14], (1865, 500), 85, 150, 3, 1, 15, 4, 4, True)
+		c16 = Action('hand_push', ['hand_up'], ['get_points', 'windsocks_pushed', 'hand_down'], [a15], (1865, 90), 85, 150, 3, 1, 15, 4, 4, True)
 
 		#  go home
-		c17 = Action('go_home', [], ['at_home'], [a13], (700, 2200), 270, 150, 3, 1, 15, 4, 4, True)
+		c17 = Action('go_home', [], ['at_home'], [a13], (700, 300), 270, 150, 3, 1, 15, 4, 4, True)
 
 		action_list = [c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14, c15, c16, c17]
 		action_list = [c1, c2, c3, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14, c17]

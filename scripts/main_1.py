@@ -322,15 +322,15 @@ def add_two_ints_server():
 					
 
 					# ==子動作做完==
-					if MyClass.action_done is True and MyClass.output_mission_name == MyClass.input_name:
+					if MyClass.action_done is True and MyClass.output_mission_child_name == MyClass.input_child_name:
 						top_path.child_action.remove(top_child)
-						if MyClass.output_name == 'lift_left':
+						if MyClass.output_mission_name == 'lift_left':
 							current_left_layer -= 1
-						elif MyClass.output_name == 'lift_right':
+						elif MyClass.output_mission_name == 'lift_right':
 							current_right_layer -= 1
-						elif MyClass.output_name == 'lower_left':
+						elif MyClass.output_mission_name == 'lower_left':
 							current_left_layer += 1
-						elif MyClass.output_name == 'lower_right':
+						elif MyClass.output_mission_name == 'lower_right':
 							current_right_layer += 1
 
 				current_world_state = top_path.result_world_state  # update current world state status

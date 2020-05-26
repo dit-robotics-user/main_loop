@@ -318,7 +318,7 @@ def add_two_ints_server():
 					MyClass.output_mode = top_child.mode
 					MyClass.output_position = top_child.position
 					MyClass.output_wait = top_child.wait
-					output = output_processor_big_chicken(top_child, current_left_layer, current_right_layer)
+					MyClass.output = output_processor_big_chicken(top_child, current_left_layer, current_right_layer)
 					
 
 					# ==子動作做完==

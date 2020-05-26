@@ -401,6 +401,11 @@ int main(int argc, char **argv)
                 if(action_done){
                     action_state.ChangeActionDone(true);
                     action_done = false;
+                    ROS_INFO ("rx0:%ld ", rx0);                
+                    ROS_INFO ("rx1:%ld ", rx1);
+                    ROS_INFO ("rx2:%ld ", rx2);
+
+                    ROS_INFO ("mission: %s ", goap_srv.response.mission_name.c_str());
 
                     if(goap_srv.request.mission_name == "lighthouse" && goap_srv.request.mission_child_name == "goto" ){
                         little_ws.lighthouse_done = true ; 
@@ -441,6 +446,7 @@ int main(int argc, char **argv)
                     //for path plan
                     path_srv.request.goal_pos_x = goap_srv.response.pos[0];
                     path_srv.request.goal_pos_y = goap_srv.response.pos[1];
+                     ROS_INFO ("ST2[2]:%d ",temp.movement_from_goap[2]=goap_srv.response.ST2[2]);
                 }else{
                     ROS_ERROR("Failed to call goap_test");
                 }
@@ -510,7 +516,10 @@ int main(int argc, char **argv)
                                 if(desire_movement[14]!=-1){
                                     rx2 = desire_movement[14];
                                 }
-                                
+                                //rx3 
+                                if(desire_movement[15]!=-1){
+                                    rx3 = desire_movement[15];
+                                }
                                 break;}
 
                             case RobotState::BLOCKED:

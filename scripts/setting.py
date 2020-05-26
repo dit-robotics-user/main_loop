@@ -65,7 +65,7 @@ def setting(mode, action_list, child_list, current_world_state, mission_list, my
 
         #   put cups
         c8 = Action('put_prepare', ['have_cups'], ['put_prepare'], [a18], (200, 200), 85, 150, 3, 1, 15, 4, 4, True)
-        c9 = Action('put_cups', ['put_prepare'], ['cups_out', '1', '2', '3', '4'], [], (200, 200), 85, 150, 3, 1, 15, 4, 4, True)
+        c9 = Action('put_cups', ['put_prepare'], ['cups_out', '1', '2', '3', '4'], [], (600, 600), 85, 150, 3, 1, 15, 4, 4, True)
         c10 = Action('put_done', ['cups_out'], ['get_points'], [a18], (200, 200), 85, 150, 3, 1, 15, 4, 4, True)
 
         #   speed mode grab

@@ -454,7 +454,7 @@ int main(int argc, char **argv)
                 desire_movement = act.Movement();
                                     
  
-                    m = ActionMode::POSITION_MODE;
+                m = ActionMode::POSITION_MODE;
                 debug_2.action_done=action_state.MyActionDone();
                 
                 switch(m){
@@ -546,21 +546,7 @@ int main(int argc, char **argv)
                             case RobotState::ON_THE_WAY:
                                 debug_2.robot_case="ON_THE_WAY";
                                 //---------path plan
-                                if(client_path.call(path_srv)){
-                                    double clustering_time = ros::Time::now().toSec () - begin_time; 
-                                    now_degree = path_srv.response.degree ; 
-                                }else{
-                                    ROS_INFO ("mission: %s ", goap_srv.response.mission_name.c_str());
-									ROS_INFO("desire_pos_x=%d",desire_pos_x);
-									ROS_INFO("desire_pos_y=%d",desire_pos_y);
-									ROS_INFO("action_state.MyPosX()=%d",action_state.MyPosX());
-									ROS_INFO("action_state.MyPosY()=%d",action_state.MyPosY());
-                                    ROS_ERROR("Failed to call service path plan");
-                                }
-                                if(now_degree<0){
-                                    now_degree = last_degree;
-                                } 
-                                //-----path plan end 
+
                                 distance_square = (current_state.MyPosX() - desire_pos_x)*(current_state.MyPosX() - desire_pos_x) + (current_state.MyPosY() - desire_pos_y)*(current_state.MyPosY() - desire_pos_y);
                                 if(distance_square < switch_mode_distance){
                                     r0 = 0x4000;
@@ -570,6 +556,23 @@ int main(int argc, char **argv)
                                     //return pos_mode; //<----------------
                                 }
                                 else{
+									if(client_path.call(path_srv)){
+										double clustering_time = ros::Time::now().toSec () - begin_time; 
+										now_degree = path_srv.response.degree ; 
+									}else{
+										ROS_INFO ("mission: %s ", goap_srv.response.mission_name.c_str());
+										ROS_INFO("desire_pos_x=%d",desire_pos_x);
+										ROS_INFO("desire_pos_y=%d",desire_pos_y);
+										ROS_INFO("action_state.MyPosX()=%d",action_state.MyPosX());
+										ROS_INFO("action_state.MyPosY()=%d",action_state.MyPosY());
+										ROS_ERROR("Failed to call service path plan");
+									}
+									if(now_degree<0){
+										now_degree = last_degree;
+									} 
+									//-----path plan end 
+									
+									
                                     r0 = 0x3000;
                                     r1 = desire_speed;
                                     r2 = now_degree;

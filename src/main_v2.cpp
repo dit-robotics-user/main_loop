@@ -290,6 +290,11 @@ int main(int argc, char **argv)
     ros::Publisher pub_main_state = nh.advertise<main_loop::main_state>("Main_state", 1);
 	ros::ServiceClient client_path = nh.serviceClient<main_loop::path>("path_plan");
     ros::ServiceClient client_goap = nh.serviceClient<main_loop::goap_>("goap_test_v1");
+    
+    //
+    ros::ServiceClient client_cup = n.serviceClient<central_beacon_main::cup>("cup");
+    ros::ServiceClient client_ns = n.serviceClient<central_beacon_main::ns>("ns");
+    
     sub_state temp;
 	main_loop::path path_srv;
     main_loop::goap_ goap_srv;
@@ -377,6 +382,24 @@ int main(int argc, char **argv)
                 r1 = 0;
                 r2 = 0;
                 r3 = 0;
+
+                debug_1.desire_degree=0;
+                debug_1.desire_speed=0;
+                debug_1.desire_mode=r0;
+                debug_1.desire_pos={};
+                debug_1.desire_servo_state=0;
+                debug_1.desire_stepper=0;     
+                debug_1.desire_hand=0;        
+                debug_1.is_wait=0;
+                debug_1.mission_name= "setting";
+                
+                break;
+            case Status::READY: //4
+                r0 = 0x6000;
+                r1 = 0;
+                r2 = 0;
+                r3 = 0;
+                
 
                 debug_1.desire_degree=0;
                 debug_1.desire_speed=0;
@@ -529,7 +552,7 @@ int main(int argc, char **argv)
                                     ROS_INFO ("rx0:%ld ", rx0);                
                                     ROS_INFO ("rx1:%ld ", rx1);
                                     ROS_INFO ("rx2:%ld ", rx2);
-                                    ROS_INFO("complete:%d",count);
+                                    ROS_INFO ("complete:%d",count);
                                     ROS_INFO ("debug_2.robot_case: %s ", debug_2.robot_case.c_str());
                                     ROS_INFO ("mission: %s ", goap_srv.response.mission_name.c_str());
                                     ROS_INFO("action done in action state: %d" , action_state.MyActionDone());
@@ -552,21 +575,7 @@ int main(int argc, char **argv)
 
                             case RobotState::ON_THE_WAY:
                                 debug_2.robot_case="ON_THE_WAY";
-                                //---------path plan
-                                if(client_path.call(path_srv)){
-                                    now_degree = path_srv.response.degree ; 
-                                }else{
-                                    ROS_INFO ("mission: %s ", goap_srv.response.mission_name.c_str());
-									ROS_INFO("desire_pos_x=%d",desire_pos_x);
-									ROS_INFO("desire_pos_y=%d",desire_pos_y);
-									ROS_INFO("action_state.MyPosX()=%d",action_state.MyPosX());
-									ROS_INFO("action_state.MyPosY()=%d",action_state.MyPosY());
-                                    ROS_ERROR("Failed to call service path plan");
-                                }
-                                if(now_degree<0){
-                                    now_degree = last_degree;
-                                } 
-                                //-----path plan end 
+
                                 distance_square = (current_state.MyPosX() - desire_pos_x)*(current_state.MyPosX() - desire_pos_x) + (current_state.MyPosY() - desire_pos_y)*(current_state.MyPosY() - desire_pos_y);
                                 if(distance_square < switch_mode_distance){
                                     r0 = 0x4000;
@@ -576,6 +585,21 @@ int main(int argc, char **argv)
                                     //return pos_mode; //<----------------
                                 }
                                 else{
+									//---------path plan
+									if(client_path.call(path_srv)){
+										now_degree = path_srv.response.degree ; 
+									}else{
+										ROS_INFO ("mission: %s ", goap_srv.response.mission_name.c_str());
+										ROS_INFO("desire_pos_x=%d",desire_pos_x);
+										ROS_INFO("desire_pos_y=%d",desire_pos_y);
+										ROS_INFO("action_state.MyPosX()=%d",action_state.MyPosX());
+										ROS_INFO("action_state.MyPosY()=%d",action_state.MyPosY());
+										ROS_ERROR("Failed to call service path plan");
+									}
+									if(now_degree<0){
+										now_degree = last_degree;
+									} 
+									//-----path plan end 
                                     r0 = 0x3000;
                                     r1 = desire_speed;
                                     r2 = now_degree;

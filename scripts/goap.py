@@ -22,7 +22,7 @@ def get_successors(required_states, action_list):  # linking actions by examinin
 
 # ==計算動作的優先順序==
 def calculate_successor_priority(top, successor):
-    magic_number = 300  # value due to distance and cost.. found by trial and error
+    magic_number = 30  # value due to distance and cost.. found by trial and error
     cost_of_cup_movement = 10  # compensating value for not taking the distance to cups setup pos into account
     if successor.name == 'cup_prepare':
         successor.priority = top.priority + cost_of_cup_movement + magic_number

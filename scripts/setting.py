@@ -50,7 +50,7 @@ def setting(mode, action_list, child_list, current_world_state, mission_list, my
         c1 = Action('lighthouse', ['lighthouse_unactivated'], ['get_points', 'lighthouse_activated'], [a18], (500, 500), 85, 150, 3, 1, 15, 4, 4, True)
 
         #   push windsock
-        c2 = Action('hand_prepare', ['hand_down', 'windsocks_unpushed'], ['hand_up'], [a15], (400, 400), 85, 150, 3, 1, 15, 4, 4, True)
+        c2 = Action('hand_prepare', ['hand_down', 'windsocks_unpushed'], ['hand_up'], [a15], (700, 300), 85, 150, 3, 1, 15, 4, 4, True)
         c3 = Action('hand_push', ['hand_up'], ['get_points', 'windsocks_pushed', 'hand_down'], [a16], (400, 400), 85, 150, 3, 1, 15, 4, 4, True)
 
         #   go home
@@ -64,22 +64,22 @@ def setting(mode, action_list, child_list, current_world_state, mission_list, my
         c7 = Action('lift_right', ['right_layer_full'], ['3', '4', 'get_points', 'right_layer_up'], [a20], my_pos, my_degree, 150, 3, 1, 15, 1, 4, False)
 
         #   put cups
-        c8 = Action('put_prepare', ['have_cups'], ['put_prepare'], [a18], (200, 200), 85, 150, 3, 1, 15, 4, 4, True)
+        c8 = Action('put_prepare', ['have_cups'], ['put_prepare'], [a18], (400, 400), 85, 150, 3, 1, 15, 4, 4, True)
         c9 = Action('put_cups', ['put_prepare'], ['cups_out', '1', '2', '3', '4'], [], (600, 600), 85, 150, 3, 1, 15, 4, 4, True)
-        c10 = Action('put_done', ['cups_out'], ['get_points'], [a18], (200, 200), 85, 150, 3, 1, 15, 4, 4, True)
+        c10 = Action('put_done', ['cups_out'], ['get_points'], [a18], (400, 400), 85, 150, 3, 1, 15, 4, 4, True)
 
         #   speed mode grab
         c11 = Action('cup_prepare', ['grab_available'], ['cup_prepare'], [a24], my_pos, my_degree, 150, 0, 1, 15, 1, 0, True)
-        c12 = Action('cup_speed_mode_1', ['cup_prepare', '2'], ['get_points', 'get_cups', 'have_cups'], [a1], (100, 100), 0,
+        c12 = Action('cup_speed_mode_1', ['cup_prepare', '2'], ['get_points', 'get_cups', 'have_cups'], [a1], (800, 800), 0,
                     150, 0, 2, 15, 1, 0, True)
 
         #   pos mode grab
         c13 = Action('cup_pos_mode_1', ['grab_available', '1', '3'], ['get_points', 'get_cups', 'have_cups'], [a5],
-                    (0, 0), 0, 150, 0, 1, 15, 2, 1, True)
+                    (300, 300), 0, 150, 0, 1, 15, 2, 1, True)
         c14 = Action('cup_pos_mode_2', ['grab_available', '1'], ['get_points', 'get_cups', 'have_cups'], [a1],
-                     (20, 0), 0, 150, 0, 1, 15, 2, 1, True)
+                     (400, 400), 0, 150, 0, 1, 15, 2, 1, True)
         c15 = Action('cup_pos_mode_3', ['grab_available', '2'], ['get_points', 'get_cups', 'have_cups'], [a2],
-                     (30, 0), 0, 150, 0, 1, 15, 2, 1, True)
+                     (500, 500), 0, 150, 0, 1, 15, 2, 1, True)
 
         action_list = [c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14, c15]
         #action_list = [ c11, c12]

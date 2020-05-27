@@ -203,7 +203,7 @@ def cost_adjuster(cws, current_left_layer, current_right_layer):
 action_done = True
 replan_mission = False
 kill_mission = False
-my_pos = (3, 3)
+my_pos = (700, 300)
 my_degree = 0
 setting_number = 1
 time = 50
@@ -244,7 +244,7 @@ def handle_return_to_main(req):
 	MyClass.input_child_name = req.mission_child_name
 	MyClass.kill_mission = req.kill_mission 
 	MyClass.time = req.time
-	return [MyClass.output_degree,MyClass.output_speed,MyClass.output_mode,MyClass.output_position,MyClass.output,MyClass.output_wait,MyClass.output_mission_child_name,MyClass.output_mission_child_name]
+	return [MyClass.output_degree,MyClass.output_speed,MyClass.output_mode,MyClass.output_position,MyClass.output,MyClass.output_wait,MyClass.output_mission_name,MyClass.output_mission_child_name]
 
 def add_two_ints_server():
 	global mission_list

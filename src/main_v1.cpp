@@ -311,8 +311,8 @@ int main(int argc, char **argv)
     int now_my_pos_y;
     float last_degree = 0 ;
     float now_degree = 0 ;
-    path_srv.request.goal_pos_x = 1600;
-    path_srv.request.goal_pos_y = 1800;
+    path_srv.request.goal_pos_x = 0;
+    path_srv.request.goal_pos_y = 0;
 	path_srv.request.my_pos_x = 700 ;
     path_srv.request.my_pos_y = 300 ;
     path_srv.request.enemy1_x = 1800 ;
@@ -323,7 +323,7 @@ int main(int argc, char **argv)
     path_srv.request.ally_y = 2200 ; 
     goap_srv.request.replan=false;
     goap_srv.request.action_done=false;
-    goap_srv.request.pos.push_back(300);
+    goap_srv.request.pos.push_back(700);
     goap_srv.request.pos.push_back(300);
     goap_srv.request.my_degree = 90 ; 
     goap_srv.request.mission_name = "setting" ;
@@ -404,7 +404,6 @@ int main(int argc, char **argv)
                     ROS_INFO ("rx0:%ld ", rx0);                
                     ROS_INFO ("rx1:%ld ", rx1);
                     ROS_INFO ("rx2:%ld ", rx2);
-
                     ROS_INFO ("mission: %s ", goap_srv.response.mission_name.c_str());
 
                     if(goap_srv.request.mission_name == "lighthouse" && goap_srv.request.mission_child_name == "goto" ){
@@ -446,7 +445,6 @@ int main(int argc, char **argv)
                     //for path plan
                     path_srv.request.goal_pos_x = goap_srv.response.pos[0];
                     path_srv.request.goal_pos_y = goap_srv.response.pos[1];
-                     ROS_INFO ("ST2[2]:%d ",temp.movement_from_goap[2]=goap_srv.response.ST2[2]);
                 }else{
                     ROS_ERROR("Failed to call goap_test");
                 }
@@ -464,11 +462,11 @@ int main(int argc, char **argv)
                 int desire_angle = act.Angle();
                 desire_movement = act.Movement();
                                     
-                if(desire_mode == 1){
-                    m = ActionMode::POSITION_MODE;
+                if(desire_mode == 2){
+                    m = ActionMode::SPEED_MODE;
                 }
                 else{
-                    m = ActionMode::SPEED_MODE;
+                    m = ActionMode::POSITION_MODE;
                 }
                 debug_2.action_done=action_state.MyActionDone();
                             
@@ -482,6 +480,10 @@ int main(int argc, char **argv)
                         else{
                             if(at_pos(current_state.MyPosX(),current_state.MyPosY(),current_state.MyDegree(), desire_pos_x, desire_pos_y, desire_angle, margin, angle_margin)){
                                 robot = RobotState::AT_POS;
+								r0 = 0x4000;
+								r1 = desire_pos_x;
+								r2 = desire_pos_y;
+								r3 = desire_angle;
                             }
                             else{
                                 robot = RobotState::ON_THE_WAY;
@@ -535,18 +537,9 @@ int main(int argc, char **argv)
                             case RobotState::ON_THE_WAY:
                                 debug_2.robot_case="ON_THE_WAY";
                                 //---------path plan
-                                if(client_path.call(path_srv)){
-                                    double clustering_time = ros::Time::now().toSec () - begin_time; 
-                                    now_degree = path_srv.response.degree ; 
-                                }else{
-                                    ROS_ERROR("Failed to call service path plan");
-                                }
-                                if(now_degree<0){
-                                    now_degree = last_degree;
-                                } 
-                                //-----path plan end 
+								
                                 distance_square = (current_state.MyPosX() - desire_pos_x)*(current_state.MyPosX() - desire_pos_x) + (current_state.MyPosY() - desire_pos_y)*(current_state.MyPosY() - desire_pos_y);
-                                if(distance_square < switch_mode_distance){
+                                if(distance_square <= switch_mode_distance){
                                     r0 = 0x4000;
                                     r1 = desire_pos_x;
                                     r2 = desire_pos_y;
@@ -554,6 +547,21 @@ int main(int argc, char **argv)
                                     //return pos_mode; //<----------------
                                 }
                                 else{
+									if(client_path.call(path_srv)){
+										double clustering_time = ros::Time::now().toSec () - begin_time; 
+										now_degree = path_srv.response.degree ; 
+									}else{
+										ROS_ERROR("Failed to call service path plan");
+										ROS_INFO ("position mode");
+										ROS_INFO ("desire_pos_x:%d ", desire_pos_x);                
+										ROS_INFO ("desire_pos_y:%d ", desire_pos_y);
+										ROS_INFO ("my_pos_x:%d ", temp.from_agent.my_pos_x);
+										ROS_INFO ("my_pos_y:%d ", temp.from_agent.my_pos_y);
+									}
+									if(now_degree<0){
+										now_degree = last_degree;
+									} 
+									//-----path plan end 
                                     r0 = 0x3000;
                                     r1 = desire_speed;
                                     r2 = now_degree;
@@ -571,46 +579,47 @@ int main(int argc, char **argv)
                                     //return speed_mode;//<-----------------
                                 }
                                 break;
-                        }
-                        bool c;
-                        if(rx1==current_state.MyTx1()){
-                            c = true;
-                        }
-                        else{
-                            c = false;
-                        }               
-                        bool b;
-                        if(rx0==current_state.MyTx0()){
-                            b = true;
-                        }
-                        else{
-                            b = false;
-                        }
-                        bool d;
-                        if(rx2==current_state.MyTx2()){
-                            d = true;
-                        }
-                        else{
-                            d = false;
-                        }
-                        if(count>3 && at_pos(current_state.MyPosX(),current_state.MyPosY(),current_state.MyDegree(), desire_pos_x, desire_pos_y, desire_angle, margin, angle_margin) && b && c && d){
-        				    ROS_INFO ("rx0:%ld ", rx0);                
-                            ROS_INFO ("rx1:%ld ", rx1);
-                            ROS_INFO ("rx2:%ld ", rx2);
-                            ROS_INFO("complete:%d",count);
-                            ROS_INFO ("debug_2.robot_case: %s ", debug_2.robot_case.c_str());
-                            ROS_INFO ("mission: %s ", goap_srv.response.mission_name.c_str());
-                            ROS_INFO("action done in action state: %d" , action_state.MyActionDone());
-                            action_done = true;
-                            goal_covered_counter = 0;
-                            count = 0; 
-                        }
-                        break;
-                    }
+							}
+							bool c;
+							if(rx1==current_state.MyTx1()){
+								c = true;
+							}
+							else{
+								c = false;
+							}               
+							bool b;
+							if(rx0==current_state.MyTx0()){
+								b = true;
+							}
+							else{
+								b = false;
+							}
+							bool d;
+							if(rx2==current_state.MyTx2()){
+								d = true;
+							}
+							else{
+								d = false;
+							}
+							if(count>3 && at_pos(current_state.MyPosX(),current_state.MyPosY(),current_state.MyDegree(), desire_pos_x, desire_pos_y, desire_angle, margin, angle_margin) && b && c && d){
+								ROS_INFO ("rx0:%ld ", rx0);                
+								ROS_INFO ("rx1:%ld ", rx1);
+								ROS_INFO ("rx2:%ld ", rx2);
+								ROS_INFO("complete:%d",count);
+								ROS_INFO ("debug_2.robot_case: %s ", debug_2.robot_case.c_str());
+								ROS_INFO ("mission: %s ", goap_srv.response.mission_name.c_str());
+								ROS_INFO("action done in action state: %d" , action_state.MyActionDone());
+								action_done = true;
+								goal_covered_counter = 0;
+								count = 0; 
+							}
+							break;
+						}
 
 
                     case ActionMode::SPEED_MODE:{
                         debug_2.robot_state="ActionMode::POSITION_MODE";
+                        debug_2.robot_case="ON_THE_WAY";
                         
 
                         //==給任務及位置==
@@ -620,7 +629,6 @@ int main(int argc, char **argv)
                         for(int i = 0; i < 12; i ++){
                             if(desire_movement[i] == 2){//自動夾給２
                                 old_grab_status[i] = 2;
-                 
                             }
                          
                         }
@@ -651,7 +659,7 @@ int main(int argc, char **argv)
                         //若自動夾完成則action_done
                         if(count>3 &&current_state.MyTx0()== finished_out){
                             action_done = true;
-                            ROS_INFO("action done");
+                            ROS_INFO("speed mode mission action done");
                             //把old_grab_status中有２的換成１（自動夾完成）
                             for(int i = 0; i < 12; i ++){
                             if(old_grab_status[i] == 2){
@@ -666,7 +674,7 @@ int main(int argc, char **argv)
                         if(count>3 && at_pos(current_state.MyPosX(),current_state.MyPosY(), current_state.MyDegree(), desire_pos_x, desire_pos_y, desire_angle, speed_mode_margin, speed_mode_angle_margin)){
                             action_state.ChangeKillMission(true);
                             action_done = true;
-                            ROS_INFO("speed mode action done");
+                            ROS_INFO("speed mode pos action done");
                             //把old_grab_status中有２的換回０（自動夾取消）
                             for(int i = 0; i < 12; i ++){
                                 if(desire_movement[i] == 2){
@@ -678,48 +686,53 @@ int main(int argc, char **argv)
                         //==未到點==
                         //不然算路徑給速度角度
                         else{
-                            if(client_path.call(path_srv)){
-                                double clustering_time = ros::Time::now().toSec () - begin_time; 
-                                now_degree = path_srv.response.degree ; 
-                            }else{
-                                ROS_ERROR("Failed to call service path plan");
-                            }
-                            if(now_degree<0){
-                                now_degree = last_degree;
-                            } 
-                            //-----path plan end 
                             distance_square = (current_state.MyPosX() - desire_pos_x)*(current_state.MyPosX() - desire_pos_x) + (current_state.MyPosY() - desire_pos_y)*(current_state.MyPosY() - desire_pos_y);
-                            /*
-                            if(distance_square < switch_mode_distance){
+                            
+                            if(distance_square <= switch_mode_distance){
                                 r0 = 0x4000;
                                 r1 = desire_pos_x;
                                 r2 = desire_pos_y;
                                 r3 = desire_angle;
                                 //return pos_mode; //<----------------
-                            }
-                            else{
-                            */
-                            r0 = 0x3000;
-                            r1 = desire_speed;
-                            r2 = now_degree;
-                            r3 = 0;
-                            if( path_srv.response.blocked == true){ 
-                                goal_covered_counter ++;
-                            }
-                            if( path_srv.response.blocked == false){ 
-                                goal_covered_counter = 0;
-                            }
-                            //return speed_mode;//<-----------------
-                            if(goal_covered_counter > cover_limit){
-                                action_state.ChangeKillMission(true);
-                                goal_covered_counter = 0;
-                                //把old_grab_status中有２的換回０（自動夾取消）
-                                for(int i = 0; i < 12; i ++){
-                                    if(desire_movement[i] == 2){
-                                        old_grab_status[i] = 0;
-                                    }
-                                }
-                            }
+                            }else{
+								if(client_path.call(path_srv)){
+									double clustering_time = ros::Time::now().toSec () - begin_time; 
+									now_degree = path_srv.response.degree ; 
+								}else{
+									ROS_ERROR("Failed to call service path plan");
+									ROS_INFO ("speed mode");
+									ROS_INFO ("desire_pos_x:%d ", desire_pos_x);                
+									ROS_INFO ("desire_pos_y:%d ", desire_pos_y);
+									ROS_INFO ("my_pos_x:%d ", temp.from_agent.my_pos_x);
+									ROS_INFO ("my_pos_y:%d ", temp.from_agent.my_pos_y);
+								}
+								if(now_degree<=0){
+									now_degree = last_degree;
+								} 
+								//-----path plan end 
+								r0 = 0x3000;
+								r1 = desire_speed;
+								r2 = now_degree;
+								r3 = 0;
+								if( path_srv.response.blocked == true){ 
+									goal_covered_counter ++;
+								}
+								if( path_srv.response.blocked == false){ 
+									goal_covered_counter = 0;
+								}
+								//return speed_mode;//<-----------------
+								if(goal_covered_counter > cover_limit){
+									action_state.ChangeKillMission(true);
+									goal_covered_counter = 0;
+									//把old_grab_status中有２的換回０（自動夾取消）
+									for(int i = 0; i < 12; i ++){
+										if(desire_movement[i] == 2){
+											old_grab_status[i] = 0;
+										}
+									}
+								}
+							}
+                            
                         }
                         //==被阻擋則停車==
                         if(current_state.IsBlocked()){

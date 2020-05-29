@@ -8,8 +8,8 @@ import math
 
 class MyClass:
 	action_done = False  # <----
-	my_pos = (400, 1800)  # <----
-	output = [-1]*7  # --->
+	my_pos = (700, 300)  # <----
+	output = [-1]*16  # --->
 	output_speed = 0  # --->
 	output_mode = -1  # --->
 	output_degree = 0  # --->
@@ -24,7 +24,7 @@ class MyClass:
 	kill_mission = True
 	task_mission = " " 
 	setting_number = 1
-	time = 50
+	time = 0
 	cup_color = 0
 	direction = 0
 	my_degree = 0
@@ -206,7 +206,7 @@ kill_mission = False
 my_pos = (700, 300)
 my_degree = 0
 setting_number = 1
-time = 50
+time = 0
 cup_color = 0
 direction = 0
 

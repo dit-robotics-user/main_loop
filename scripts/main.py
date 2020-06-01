@@ -1,6 +1,8 @@
+#!/usr/bin/env python
 from goap import *
 import math
-
+import rospy
+from main_loop.srv import *
 
 # ==REPLAN時給的懲罰==
 def penalty(current_action, penalty_cost, penalty_turns, action_list):
@@ -42,7 +44,7 @@ def output_processor_small_chicken(output_action):
 
 def output_processor_big_chicken(output_action, current_left_layer, current_right_layer):
     output = [-1] * 16
-    print(str(current_right_layer) + ' -=> ' + str(current_left_layer))
+    #print(str(current_right_layer) + ' -=> ' + str(current_left_layer))
     if output_action.type_number is 1 or output_action.type_number is 2 or output_action.type_number is 13:
         for p in output_action.effects:
             if p is 1:
@@ -113,9 +115,9 @@ def output_processor_big_chicken(output_action, current_left_layer, current_righ
         output[14] = 2
     elif output_action.type_number is 5:  # windsock hand
         output[15] = output_action.effects[0]
-    print(output_action.name)
-    print(output)
-    print('------------')
+    #print(output_action.name)
+    #print(output)
+    #print('------------')
     return output
 
 
@@ -175,7 +177,7 @@ def cost_adjuster(cws, current_left_layer, current_right_layer):
 action_done = True
 replan_mission = False
 kill_mission = False
-my_pos = (3, 3)
+my_pos = (0, 0)
 my_degree = 0
 setting_number = 1
 time = 100
@@ -221,6 +223,7 @@ while 1:
             action.cost = cost_adjuster(current_world_state, current_left_layer, current_right_layer)
     print()
     #print('=>' + str(new_current_world_state) + '<=')
+    #print('my_pos ' + str(my_pos))
     path = goap([mission_list[0].name], new_current_world_state, my_pos, action_list, child_list, current_left_layer, current_right_layer)  # calculate path
 
     if len(path) == 0:
@@ -258,8 +261,9 @@ while 1:
             top_path = path[0]
 
             # ==小雞應該不會使用到==
-            if top_path.mode == 2:
+            '''if top_path.mode == 2:
                 top_path.tangent_point_calculation(my_pos, 3)
+                print(top_path.position)'''
 
             # ==餵動作裡的子動作==
             while len(top_path.child_action) != 0:
@@ -271,7 +275,7 @@ while 1:
                 output_position = top_child.position
                 output_wait = top_child.wait
                 output = output_processor_big_chicken(top_child, current_left_layer, current_right_layer)
-                print('-> ' + output_name + ' ' + str(output_position))
+                print('-> ' + output_name + ' ' + str(output_position) + ' ' + str(top_path.priority))
 
                 # ==子動作做完==
                 if action_done is True:

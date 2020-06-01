@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# coding=utf-8
+#coding=utf-8
 from Queue import PriorityQueue
 from setting import *
 import copy
@@ -22,12 +22,13 @@ def get_successors(required_states, action_list):  # linking actions by examinin
 
 # ==計算動作的優先順序==
 def calculate_successor_priority(top, successor):
-    magic_number = 30  # value due to distance and cost.. found by trial and error
+    magic_number = 10  # value due to distance and cost.. found by trial and error
     cost_of_cup_movement = 10  # compensating value for not taking the distance to cups setup pos into account
     if successor.name == 'cup_prepare':
         successor.priority = top.priority + cost_of_cup_movement + magic_number
     else:
         successor.priority = top.priority + distance(top.position, successor.position) + magic_number
+        #print('cal_succ_pri ==> ' + successor.name + str(top.priority) + ' ' + str(distance(top.position, successor.position)) + ' ' + str(successor.priority))
 
 
 # ==算兩點距離==
@@ -156,6 +157,7 @@ def goap(goal, cws, my_pos, action_list, child_list, current_left_layer, current
         if len(successor.required_world_state) == 0:
             successor.path.append(successor)
             available_paths.append(successor)
+            #print(successor.name + ' ' + str(successor.priority))
         else:
             goal_expands.append(successor)
 
@@ -181,6 +183,7 @@ def goap(goal, cws, my_pos, action_list, child_list, current_left_layer, current
                 successor.path.reverse()
                 available_paths.append(successor)
                 search_done = True
+                #print(successor.name + ' ' + str(successor.priority))
             else:
                 p_queue.put((successor.priority, successor))
         '''if p_queue.empty() is True:
@@ -188,14 +191,16 @@ def goap(goal, cws, my_pos, action_list, child_list, current_left_layer, current
 
     if len(available_paths) > 0:
         available_paths.sort()
-        for object in available_paths:
-            print(object.name + '-->' + str(object.priority))
+        '''for object in available_paths:
+            print(object.name + '-->' + str(object.priority))'''
         output_path = available_paths[0].path
         output_path_processor(goal, output_path, cws)
 
         for act in output_path:
             if act.name == 'put_cups':
                 put_cup_processor(act, cws, child_list, current_left_layer, current_right_layer)
+            if act.mode is 2:
+                act.tangent_point_calculation(my_pos, 3)
 
         dominant_processor(output_path, 'cup_get')
 

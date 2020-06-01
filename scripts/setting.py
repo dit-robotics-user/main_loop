@@ -4,11 +4,9 @@ this .py file is the only place you will need to change
 =======================================================
 """
 #!/usr/bin/env python
-# coding=utf-8
 from action import *
 from mission import *
 from operator import attrgetter
-
 #mode = 1
 #(name, preconditions, effects, child_action, position, degree, speed, cost, mode, speed_mode_radius, type_number, cup_number, wait):
 #mode1 = position mode ; mode2 = speed mode
@@ -39,10 +37,10 @@ def setting(mode, action_list, child_list, current_world_state, mission_list, my
         a21 = Action('lower_left', [], [2], [], (0, 0), 0, 0, 0, 0, 0, 10, 0, True)
         a22 = Action('lower_right', [], [2], [], (0, 0), 0, 0, 0, 0, 0, 11, 0, True)
         a23 = Action('lower_both', [], [2], [], (0, 0), 0, 0, 0, 0, 0, 12, 0, True)
-        a24 = Action('auto_grab', [], [1], [], (0, 0), 0, 0, 0, 0, 0, 13, 0, True)
-        a25 = Action('auto_grab', [], [2], [], (0, 0), 0, 0, 0, 0, 0, 13, 0, True)
-        a26 = Action('auto_grab', [], [3], [], (0, 0), 0, 0, 0, 0, 0, 13, 0, True)
-        a27 = Action('auto_grab', [], [4], [], (0, 0), 0, 0, 0, 0, 0, 13, 0, True)
+        a24 = Action('auto_grab_1', [], [1], [], (0, 0), 0, 0, 0, 0, 0, 13, 0, True)
+        a25 = Action('auto_grab_2', [], [2], [], (0, 0), 0, 0, 0, 0, 0, 13, 0, True)
+        a26 = Action('auto_grab_3', [], [3], [], (0, 0), 0, 0, 0, 0, 0, 13, 0, True)
+        a27 = Action('auto_grab_4', [], [4], [], (0, 0), 0, 0, 0, 0, 0, 13, 0, True)
 
         child_list = [a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16, a17, a18, a19, a20, a21, a22, a23, a24, a25, a26, a27]
 
@@ -58,10 +56,10 @@ def setting(mode, action_list, child_list, current_world_state, mission_list, my
         c5 = Action('raise_flag', ['at_home'], ['flag_raised', 'go_home'], [a17], (300, 300), 85, 150, 3, 1, 15, 4, 4, True)
 
         #   lift left
-        c6 = Action('lift_left', ['left_layer_full'], ['1', '2', 'get_points'], [a19], my_pos, my_degree, 150, 3, 1, 15, 1, 4, False)
+        c6 = Action('lift_left_layer', ['left_layer_full'], ['1', '2', 'get_points'], [a19], my_pos, my_degree, 150, 3, 1, 15, 1, 4, False)
 
         #   lift right
-        c7 = Action('lift_right', ['right_layer_full'], ['3', '4', 'get_points', 'right_layer_up'], [a20], my_pos, my_degree, 150, 3, 1, 15, 1, 4, False)
+        c7 = Action('lift_right_layer', ['right_layer_full'], ['3', '4', 'get_points', 'right_layer_up'], [a20], my_pos, my_degree, 150, 3, 1, 15, 1, 4, False)
 
         #   put cups
         c8 = Action('put_prepare', ['have_cups'], ['put_prepare'], [a18], (400, 400), 85, 150, 3, 1, 15, 4, 4, True)

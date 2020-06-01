@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# coding=utf-8
 from cup import *
 import math
 import copy
@@ -154,8 +153,8 @@ class Action:
             else:
                 self.position = (pos2[0] + stretch_factor * calculate_unit_vector(my_pos, pos2)[0], pos2[1] +
                                  stretch_factor * calculate_unit_vector(my_pos, pos2)[1])
-            print('degree: ' + str(self.degree))
-            print(self.position)
+            #print('degree: ' + str(self.degree))
+            #print(self.position)
         else:  # use left claw
             self.degree = max(degree1, degree2, center_degree)
             # extend the goal along vector
@@ -165,5 +164,5 @@ class Action:
             else:
                 self.position = (pos2[0] + stretch_factor * calculate_unit_vector(my_pos, pos2)[0], pos2[1] +
                                  stretch_factor * calculate_unit_vector(my_pos, pos2)[1])
-            print('degree: ' + str(self.degree))
-            print(self.position)
+            #print('degree: ' + str(self.degree))
+            #print(self.position)

@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# coding=utf-8
+#coding=utf-8
 
 import rospy
 from main_loop.srv import *
@@ -21,7 +21,7 @@ class MyClass:
 	input_name = " "
 	input_child_name = " "
 	replan_mission = False
-	kill_mission = True
+	kill_mission = False
 	task_mission = " " 
 	setting_number = 1
 	time = 0

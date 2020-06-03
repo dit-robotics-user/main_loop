@@ -4,6 +4,7 @@ this .py file is the only place you will need to change
 =======================================================
 """
 #!/usr/bin/env python
+#coding=utf-8
 from action import *
 from mission import *
 from operator import attrgetter

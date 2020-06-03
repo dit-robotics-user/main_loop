@@ -68,6 +68,8 @@ add_service_files(
 	path.srv
 	goap_.srv
 	goap_demo.srv
+	ns.srv
+	cup.srv
 )
 
 ## Generate actions in the 'action' folder
@@ -235,6 +237,10 @@ target_link_libraries(main_demo_v2 ${catkin_LIBRARIES})
 add_executable(main_v1 src/main_v1.cpp)
 add_dependencies(main_v1 main_loop_gencpp)
 target_link_libraries(main_v1 ${catkin_LIBRARIES})
+
+add_executable(main_v2 src/main_v2.cpp)
+add_dependencies(main_v2 main_loop_gencpp)
+target_link_libraries(main_v2 ${catkin_LIBRARIES})
 
 add_dependencies(agent_new ${catkin_EXPORTED_TARGETS})
 target_link_libraries(main_demo_v2 ${catkin_LIBRARIES} python2.7)

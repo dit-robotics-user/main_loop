@@ -69,7 +69,7 @@ void sub_class::status_publish(){
 sub_class::sub_class(int my_pos_x_,int my_pos_y_, int ini_status){
     pub_to_main.my_pos_x = 700 ; 
     pub_to_main.my_pos_y = 300 ; 
-    pub_to_main.my_degree = 90 ; 
+    pub_to_main.my_degree = 10090 ; 
     pub_to_main.enemy1_x = 5000 ;
     pub_to_main.enemy1_y = 5000 ;
     pub_to_main.enemy2_x = 5000 ;

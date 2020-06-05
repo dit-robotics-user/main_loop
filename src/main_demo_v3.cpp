@@ -255,6 +255,7 @@ bool sub_state::lidar_be_blocked(float speed_degree,float car_degree){
 
 
 bool at_pos(int x, int y, int deg, int c_x, int c_y, int c_deg, int m, int angle_m){
+    //計算誤差
     bool at_p = false;
     int exact_angle_difference=0 ;
     int angle_difference_1=abs(c_deg-deg);
@@ -272,7 +273,6 @@ bool at_pos(int x, int y, int deg, int c_x, int c_y, int c_deg, int m, int angle
 
 int main(int argc, char **argv)
 {
-
     //ROS的topic和service定義處
  	ros::init (argc, argv, "main_demo_v3");
 	ros::NodeHandle nh;    	
@@ -316,10 +316,10 @@ int main(int argc, char **argv)
     float now_degree = 0 ;
     int count = 0 ;
 
-    //在main裡定義的topic和service所需的傳輸格式需由此先宣告一次
-    //並設定初始值以免service fail
     //在subscriber定義的參數則需宣告一個sub_class在此，即可運用在回調函式使用到的參數
     sub_state temp;
+    //在main裡定義的topic和service所需的傳輸格式需由此先宣告一次
+    //並設定初始值以免service fail
 	main_loop::path path_srv;
     main_loop::goap_demo_2 goap_srv;
     main_loop::cup srv_cup;
@@ -340,7 +340,7 @@ int main(int argc, char **argv)
     goap_srv.request.pos.push_back(700);
     goap_srv.request.pos.push_back(300);
     goap_srv.request.cup_color = {}; 
-    goap_srv.request.north_or_south = true ; 
+    goap_srv.request.north_or_south = 0 ; 
     goap_srv.request.time = 0 ;
     goap_srv.request.mission_name = "setting" ;
 
@@ -359,6 +359,7 @@ int main(int argc, char **argv)
         //status update
         int s = temp.from_agent.status; 
         Status stat  = static_cast<Status>(s);
+
         //debug
         main_loop::from_goap debug_1;
         main_loop::main_state debug_2;
@@ -389,7 +390,8 @@ int main(int argc, char **argv)
                 r1 = 0;
                 r2 = 0;
                 r3 = 0;
-                
+
+                //把資料丟入debug topic
                 debug_1.desire_degree=0;
                 debug_1.desire_speed=0;
                 debug_1.desire_mode=r0;
@@ -402,6 +404,7 @@ int main(int argc, char **argv)
                 break;
 
             case Status::READY:{
+                //吃杯子資訊
                 count ++ ;
                 if(count==1){
                     srv_cup.request.OUO==1;
@@ -430,6 +433,7 @@ int main(int argc, char **argv)
 
             case Status::RUN:{ //5
                	count ++;
+                //將agent資訊存入current state
                 state current_state(temp.from_agent.my_pos_x,temp.from_agent.my_pos_y,temp.from_agent.my_degree,temp.lidar_be_blocked(0,temp.from_agent.my_degree),temp.from_agent.wrist,temp.from_agent.hand,temp.from_agent.finger);//<--------get undergoing, finish, my_x, my_y, block from other nodes ()********
                 state action_state(0,0,0,false,0,0,0);
                 action_state = current_state;
@@ -442,7 +446,7 @@ int main(int argc, char **argv)
                     kill_mission = false;
                 }
 
-                //service parameter update
+                //更新service所需要的資料
                 //path plan
                 path_srv.request.my_pos_x = temp.from_agent.my_pos_x;
                 path_srv.request.my_pos_y = temp.from_agent.my_pos_y;
@@ -454,7 +458,6 @@ int main(int argc, char **argv)
                 path_srv.request.ally_y = 1 ; 
                 //goap
                 goap_srv.request.time = temp.from_agent.time;
-
                 goap_srv.request.cup_color.push_back(0);
                 goap_srv.request.cup_color.push_back(0); 
                 goap_srv.request.cup_color.push_back(1);
@@ -465,7 +468,7 @@ int main(int argc, char **argv)
                 goap_srv.request.pos.push_back(action_state.MyPosX());
                 goap_srv.request.pos.push_back(action_state.MyPosY()); 
             
-                //----------goap
+                //goap service
                 if(client_goap.call(goap_srv)){
                     
                     temp.movement_from_goap[0]=goap_srv.response.ST2[0];
@@ -484,7 +487,7 @@ int main(int argc, char **argv)
                 //
                 goap_srv.request.mission_name = goap_srv.response.mission_name ;
                 
-                //-------goap end               
+                //將goap所需的資料存入action          
                 action act(goap_srv.response.pos[0],goap_srv.response.pos[1],temp.movement_from_goap,goap_srv.response.degree,goap_srv.response.speed,goap_srv.response.is_wait,goap_srv.response.mode);
                 int desire_pos_x = act.PosX();
                 int desire_pos_y = act.PosY();
@@ -497,6 +500,7 @@ int main(int argc, char **argv)
                                     
  
                 m = ActionMode::POSITION_MODE;
+                //避免在下面被洗掉所以先在此存入Debug 
                 debug_2.action_done=action_state.MyActionDone();
                 
                 switch(m){
@@ -594,10 +598,9 @@ int main(int argc, char **argv)
                                     r1 = desire_pos_x;
                                     r2 = desire_pos_y;
                                     r3 = desire_angle;
-                                    //return pos_mode; //<----------------
                                 }
                                 else{
-									//---------path plan
+									//path plan service
 									if(client_path.call(path_srv)){
 										now_degree = path_srv.response.degree ; 
 									}else{
@@ -608,14 +611,15 @@ int main(int argc, char **argv)
 										ROS_INFO("action_state.MyPosY()=%d",action_state.MyPosY());
 										ROS_ERROR("Failed to call service path plan");
 									}
-									if(now_degree<0){
+									if(now_degree<0){  //--->如果回傳值為負值表示path plan 沒有算出資料 就存取上一次計算出的數值
 										now_degree = last_degree;
 									} 
-									//-----path plan end 
+									
                                     r0 = 0x3000;
                                     r1 = desire_speed;
                                     r2 = now_degree;
                                     r3 = 0;
+                                    //若敵人擋住路徑，增加counter後回傳kill mission
                                     if( path_srv.response.blocked == true){ 
                                         goal_covered_counter ++;
                                     }
@@ -626,13 +630,13 @@ int main(int argc, char **argv)
                                         action_state.ChangeKillMission(true);
                                         goal_covered_counter = 0;
                                     }
-                                    //return speed_mode;//<-----------------
                                 }
                                 break;
                         }
                         break;
 
                 }
+                //把資料丟入debug topic
                 debug_1.desire_degree=desire_angle;
                 debug_1.desire_speed=desire_speed;
                 debug_1.desire_mode=r0;
@@ -652,6 +656,7 @@ int main(int argc, char **argv)
                 r1 = 0;
                 r2 = 0;
                 r3 = 0;
+                //把資料丟入debug topic
                 debug_1.desire_degree=0;
                 debug_1.desire_speed=0;
                 debug_1.desire_mode=r0;
@@ -678,8 +683,8 @@ int main(int argc, char **argv)
         pub_st1.publish(for_st1);
         pub_st2.publish(for_st2);
 
-        //debug
-
+        /
+        //把資料丟入debug topic
         debug_2.status=temp.from_agent.status;
         debug_2.pos.push_back(temp.from_agent.my_pos_x);
         debug_2.pos.push_back(temp.from_agent.my_pos_y);
@@ -697,7 +702,7 @@ int main(int argc, char **argv)
         pub_goap_response.publish(debug_1);
         pub_main_state.publish(debug_2);
 
-
+        //
         last_degree = now_degree ; 
         ros::spinOnce();
     }

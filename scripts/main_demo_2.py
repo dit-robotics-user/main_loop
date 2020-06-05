@@ -49,7 +49,6 @@ demo_path = []
 
                    
 def handle_return_to_main(req):  #main輸入參數與獲得結果存取處(service回調函式)  
-	print("000")
 	mymain.action_done = req.action_done  # <----
 	mymain.my_pos = (req.pos[0],req.pos[1])
 	mymain.cup_color = [req.cup_color[0],req.cup_color[1],req.cup_color[2],req.cup_color[3],req.cup_color[4]]

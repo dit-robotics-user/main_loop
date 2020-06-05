@@ -66,6 +66,7 @@ add_service_files(
 	path.srv
 	goap_.srv
 	goap_demo.srv
+	goap_demo_2.srv
 	cup.srv
 	ns.srv
 )
@@ -231,20 +232,14 @@ add_dependencies(agent_new main_loop_gencpp)
 target_link_libraries(agent_new ${catkin_LIBRARIES})
 
 
-add_executable(main_demo_v2 src/main_demo_v2.cpp)
-add_dependencies(main_demo_v2 main_loop_gencpp)
-target_link_libraries(main_demo_v2 ${catkin_LIBRARIES})
 
-add_executable(main_v1 src/main_v1.cpp)
-add_dependencies(main_v1 main_loop_gencpp)
-target_link_libraries(main_v1 ${catkin_LIBRARIES})
+add_executable(main_demo_v3 src/main_demo_v3.cpp)
+add_dependencies(main_demo_v3 main_loop_gencpp)
+target_link_libraries(main_demo_v3 ${catkin_LIBRARIES})
 
-add_executable(main_v2 src/main_v2.cpp)
-add_dependencies(main_v2 main_loop_gencpp)
-target_link_libraries(main_v2 ${catkin_LIBRARIES})
 
 add_dependencies(agent_add_status ${catkin_EXPORTED_TARGETS})
-target_link_libraries(main_demo_v2 ${catkin_LIBRARIES} python2.7)
+
 
 
 

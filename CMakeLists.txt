@@ -68,6 +68,7 @@ add_service_files(
 	path.srv
 	goap_.srv
 	goap_demo.srv
+	goap_demo_2.srv
 	ns.srv
 	cup.srv
 )

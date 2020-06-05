@@ -154,6 +154,7 @@ int main(int argc, char **argv){
     //1 : eat data
     //2 : finish 
     //3 : eat garbage
+    //10 : start time 
 
     while(ros::ok()){
         //when status = a ,timer reset 
@@ -166,9 +167,11 @@ int main(int argc, char **argv){
                 }else{
                     if( temp.degree_temp < 10000){
                         temp.change_status(5);
+                        srv_ns.request.OAO=10;
                         count=0;
                     }
                 }
+
                 temp_timer++;
                 break;
 
@@ -177,6 +180,8 @@ int main(int argc, char **argv){
                     ROS_INFO("status=5");
                     temp.change_status(5);
                     begin_time =ros::Time::now();
+                    srv_cup.request.OUO=1;
+                    srv_ns.request.OAO=10;
                     count =1;                    
                 }else{
                     if(last_clustering_time>100000){
@@ -188,47 +193,54 @@ int main(int argc, char **argv){
                 now_time = ros::Time::now();
                 clustering_time = (now_time - begin_time).toSec();
 
-                if(clustering_time>0.0001){
-                    srv_cup.request.OUO=1;
-                }
                 if(clustering_time>30){
                     srv_ns.request.OAO=1;
                 }
-                
                 if(srv_cup.request.OUO==1){
                     if(client_cup.call(srv_cup)){
-                        for(int i;i<5;i++){
-                            if(srv_cup.response.CupResult[i]!=0 && srv_cup.response.CupResult[i]!=1 ){
-                                cup_suck = 1 ;     
-                            }else{
-                                srv_cup.request.OUO = 2 ;//finish
-                            }  
+                       
+                        if(srv_cup.response.CupResult[0]!=0 && srv_cup.response.CupResult[0]!=1 ){
+                            cup_suck = 1 ;     
+                            ROS_INFO("cup_suck");
+                        }else{
+                            srv_cup.request.OUO = 2 ;//finish
+                        }  
+                        
+                        if(srv_cup.request.OUO == 2){
+                            ROS_INFO("result[0]: %ld", (long int)srv_cup.response.CupResult[0]);
+                            ROS_INFO("result[1]: %ld", (long int)srv_cup.response.CupResult[1]);
+                            ROS_INFO("result[2]: %ld", (long int)srv_cup.response.CupResult[2]);
+                            ROS_INFO("result[3]: %ld", (long int)srv_cup.response.CupResult[3]);
+                            ROS_INFO("result[4]: %ld", (long int)srv_cup.response.CupResult[4]);   
                         }
-                        ROS_INFO("result[0]: %ld", (long int)srv_cup.response.CupResult[0]);
-                        ROS_INFO("result[0]: %ld", (long int)srv_cup.response.CupResult[1]);
-                        ROS_INFO("result[0]: %ld", (long int)srv_cup.response.CupResult[2]);
-                        ROS_INFO("result[0]: %ld", (long int)srv_cup.response.CupResult[3]);
-                        ROS_INFO("result[0]: %ld", (long int)srv_cup.response.CupResult[4]);   
+                    }else{
+                        ROS_INFO("fail to call");
                     }   
                 }
                 if(cup_suck == 1 ){
                     srv_cup.request.OUO = 3;
                 }
+                
 
 
-
-                if(srv_ns.request.OAO==1){
+                if(srv_ns.request.OAO==1||srv_ns.request.OAO==10){
                     if(client_ns.call(srv_ns)){
                         if(srv_ns.response.ns !=0 && srv_ns.response.ns!=1 ){
+                            ROS_INFO("cup_suck");
                             ns_suck = 1 ;     
                         }else{
                             srv_ns.request.OAO = 2 ;//finish 
                         } 
-                    ROS_INFO("ns: %ld", (long int)srv_ns.response.ns);
+                        ROS_INFO("ns: %ld", (long int)srv_ns.response.ns);
+                    }else{
+                        ROS_INFO("fail to call");
                     }   
                 }
                 if(cup_suck == 1 ){
-                    srv_cup.request.OUO = 3;
+                    srv_ns.request.OAO = 3;
+                }
+                if(srv_ns.request.OAO==10 ){
+                    srv_ns.request.OAO = 0;
                 }
 
 

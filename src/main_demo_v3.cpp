@@ -312,19 +312,15 @@ int main(int argc, char **argv)
     path_srv.request.enemy2_y = 2300 ;
     path_srv.request.ally_x = 1800 ;
     path_srv.request.ally_y = 2200 ; 
-    goap_srv.request.replan=false;
+
     goap_srv.request.action_done=false;
     goap_srv.request.pos.push_back(700);
     goap_srv.request.pos.push_back(300);
-    goap_srv.request.my_degree = 90 ; 
-    goap_srv.request.mission_name = "setting" ;
+    goap_srv.request.cup_color = {}; 
+    goap_srv.request.north_or_south = 0 ; 
     goap_srv.request.time = 0 ;
-    goap_srv.request.direction = true ; 
-    goap_srv.request.kill_mission = false ; 
-    goap_srv.request.cup_color = 55 ; 
-    goap_srv.request.mission_child_name = "" ; 
-    little_ws.lighthouse_done = false ; 
-    little_ws.flag_done = false ; 
+    goap_srv.request.mission_name = "setting" ;
+
 
     int count = 0 ;
     
@@ -549,7 +545,7 @@ int main(int argc, char **argv)
                                 else{
                                     //path service
 									if(client_path.call(path_srv)){
-										double clustering_time = ros::Time::now().toSec () - begin_time; 
+										
 										now_degree = path_srv.response.degree ; 
 									}else{
 										ROS_ERROR("Failed to call service path plan");
@@ -700,7 +696,7 @@ int main(int argc, char **argv)
                             }else{
                                 //path service 
 								if(client_path.call(path_srv)){
-									double clustering_time = ros::Time::now().toSec () - begin_time; 
+
 									now_degree = path_srv.response.degree ; 
 								}else{
 									ROS_ERROR("Failed to call service path plan");

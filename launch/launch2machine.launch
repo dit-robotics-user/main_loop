@@ -2,12 +2,12 @@
 
  <!--Machine Definition-->
 
-     <machine name="small"              
-     address="192.168.50.151"                       
-     user="ubuntu"                             
-  ssh-port = "22"                            
-  env-loader="~/env.sh"                       
-  timeout="20" />         
+	<machine name="small"              
+	address="192.168.50.151"                       
+	user="ubuntu"                             
+	ssh-port = "22"                            
+	env-loader="~/env.sh"                       
+	timeout="20" />         
 
      <machine name="master"
      address="192.168.50.140"

@@ -8,7 +8,7 @@
 #include <cstdlib>
 #include "std_msgs/String.h"
 #include "std_msgs/Header.h"
-#include "main_loop/agent.h"
+#include "main_loop/agent_2.h"
 #include "sensor_msgs/LaserScan.h"
 #include <std_msgs/Int32MultiArray.h>
 #include <std_msgs/Int32.h>
@@ -25,10 +25,10 @@ class sub_class{
         void camera_sub_callback(const main_loop::position::ConstPtr& msg);
         void status_sub_callback(const std_msgs::Int32::ConstPtr& msg);
         void publish_(float time);
-        void status_publish();  
         void change_status(int z); 
+        void status_publish();  
         int now_status(); 
-        int degree_temp = 0 ;
+        int now_degree();
         
         sub_class(int my_pos_x_ = 700, int my_pos_y_ = 300, int ini_status = 0);
         ~sub_class(){};
@@ -36,7 +36,7 @@ class sub_class{
     private:
         ros::NodeHandle n;
         ros::Publisher status_pub = n.advertise<std_msgs::Int32>("pub_status",1); 
-		ros::Publisher agent_pub = n.advertise<main_loop::agent>("agent_msg", 1);
+		ros::Publisher agent_pub = n.advertise<main_loop::agent_2>("agent_msg", 1);
         ros::Subscriber status_sub = n.subscribe<std_msgs::Int32>("update_status", 1, &sub_class::status_sub_callback,this);
 		ros::Subscriber ST1_sub = n.subscribe<std_msgs::Int32MultiArray>("rxST1", 1, &sub_class::ST1_sub_callback,this);
         ros::Subscriber ST2_sub = n.subscribe<std_msgs::Int32MultiArray>("rxST2", 1, &sub_class::ST2_sub_callback,this);
@@ -47,10 +47,11 @@ class sub_class{
         int enemy1_pos_y = 0 ;
         int enemy2_pos_x = 0 ;
         int enemy2_pos_y = 0 ; 
-        int sub_GUI_status;
+        int sub_GUI_status = 0 ;
         int exact_status = 0 ;
+        int degree_temp = 0 ;
         std_msgs::Int32 status;
-        main_loop::agent pub_to_main;
+        main_loop::agent_2 pub_to_main;
 };
 void sub_class::status_sub_callback(const std_msgs::Int32::ConstPtr& msg){
 
@@ -71,6 +72,9 @@ void sub_class::change_status(int z){
 }
 int sub_class::now_status(){
     return exact_status; 
+}
+int sub_class::now_degree(){
+    return degree_temp; 
 }
 void sub_class::status_publish(){
     status.data = now_status() ;
@@ -109,16 +113,17 @@ void sub_class::camera_sub_callback(const main_loop::position::ConstPtr& msg){
     pub_to_main.enemy1_y = enemy1_pos_y;
     pub_to_main.enemy2_x = enemy2_pos_x;
     pub_to_main.enemy2_y = enemy2_pos_y;
-    ROS_INFO("enemy1_pos_x: %d", enemy1_pos_x);
-    ROS_INFO("enemy1_pos_y: %d", enemy1_pos_y);
-    ROS_INFO("enemy2_pos_x: %d", enemy2_pos_x);
-    ROS_INFO("enemy2_pos_y: %d", enemy2_pos_y);
 }
 void sub_class::ST1_sub_callback(const std_msgs::Int32MultiArray::ConstPtr& msg){
     pub_to_main.my_pos_x = msg->data[0] ;
     pub_to_main.my_pos_y = msg->data[1] ;
     degree_temp = msg->data[2] ;
-    pub_to_main.my_degree = degree_temp-10000 ;
+    if(degree_temp>=10000){
+        pub_to_main.my_degree = degree_temp-10000 ;
+    }else{
+        pub_to_main.my_degree = degree_temp ;
+    }
+
 }
 void sub_class::ST2_sub_callback(const std_msgs::Int32MultiArray::ConstPtr& msg){
     pub_to_main.servo_state = msg->data[0] ;
@@ -151,20 +156,19 @@ int main(int argc, char **argv){
     ros::NodeHandle nh;
     ros::ServiceClient client_cup = nh.serviceClient<main_loop::cup>("cup");
     ros::ServiceClient client_ns = nh.serviceClient<main_loop::ns>("ns");
+    
+    sub_class temp;
     main_loop::cup srv_cup;
     main_loop::ns srv_ns;
-
-
-    sub_class temp;
     ros::Time begin_time ;
     ros::Time now_time ;
-    int count = 0 ; 
+
     float last_clustering_time = 0 ;
     float clustering_time = 0 ; 
     float temp_timer ;
-
     int cup_suck = 0;
     int ns_suck = 0;
+    int count = 0 ; 
     srv_cup.request.OUO = 0;
     srv_ns.request.OAO = 0;
 
@@ -188,14 +192,12 @@ int main(int argc, char **argv){
                     temp.change_status(4);
                     count =1;                    
                 }else{
-                    if( temp.degree_temp < 10000){
+                    if( temp.now_degree() < 10000){
                         temp.change_status(5);
                         srv_ns.request.OAO=10;
                         count=0;
                     }
                 }
-
-                temp_timer++;
                 break;
 
             case 5:
@@ -203,8 +205,8 @@ int main(int argc, char **argv){
                     ROS_INFO("status=5");
                     temp.change_status(5);
                     begin_time =ros::Time::now();
-                    srv_cup.request.OUO=1;
-                    srv_ns.request.OAO=10;
+                    srv_cup.request.OUO=1; //--->call cup service 
+                    srv_ns.request.OAO=10; //--->pub to side camera
                     count =1;                    
                 }else{
                     if(last_clustering_time>100000){
@@ -213,28 +215,24 @@ int main(int argc, char **argv){
                     }
                 }
 
+                //calculate time
                 now_time = ros::Time::now();
                 clustering_time = (now_time - begin_time).toSec();
 
                 if(clustering_time>30){
-                    srv_ns.request.OAO=1;
+                    srv_ns.request.OAO=1;//--->30s call ns service 
                 }
+
+                //cup service
                 if(srv_cup.request.OUO==1){
                     if(client_cup.call(srv_cup)){
-                       
                         if(srv_cup.response.CupResult[0]!=0 && srv_cup.response.CupResult[0]!=1 ){
                             cup_suck = 1 ;     
                             ROS_INFO("cup_suck");
                         }else{
                             srv_cup.request.OUO = 2 ;//finish
                         }  
-                        
                         if(srv_cup.request.OUO == 2){
-                            ROS_INFO("result[0]: %ld", (long int)srv_cup.response.CupResult[0]);
-                            ROS_INFO("result[1]: %ld", (long int)srv_cup.response.CupResult[1]);
-                            ROS_INFO("result[2]: %ld", (long int)srv_cup.response.CupResult[2]);
-                            ROS_INFO("result[3]: %ld", (long int)srv_cup.response.CupResult[3]);
-                            ROS_INFO("result[4]: %ld", (long int)srv_cup.response.CupResult[4]);   
                         }
                     }else{
                         ROS_INFO("fail to call");
@@ -245,7 +243,7 @@ int main(int argc, char **argv){
                 }
                 
 
-
+                //ns service 
                 if(srv_ns.request.OAO==1||srv_ns.request.OAO==10){
                     if(client_ns.call(srv_ns)){
                         if(srv_ns.response.ns !=0 && srv_ns.response.ns!=1 ){
@@ -253,8 +251,7 @@ int main(int argc, char **argv){
                             ns_suck = 1 ;     
                         }else{
                             srv_ns.request.OAO = 2 ;//finish 
-                        } 
-                        ROS_INFO("ns: %ld", (long int)srv_ns.response.ns);
+                        }  
                     }else{
                         ROS_INFO("fail to call");
                     }   

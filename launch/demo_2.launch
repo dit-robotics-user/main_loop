@@ -7,8 +7,6 @@
 
 	<node pkg="eurobot_gui" type="eurobot_gui.py" name="eurobot_gui" output="screen" respawn="true" >
 	</node>
-	<node pkg="serial_port" type="serial_port_node" name="serial_port_node" output="log" respawn="true">
-	</node>
 
 	
 	

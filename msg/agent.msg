@@ -14,4 +14,6 @@ int32 stepper
 int32 hand
 int32 status
 float32 time 
+int32 ns 
+int32[] cup_color
 

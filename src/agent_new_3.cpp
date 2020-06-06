@@ -8,7 +8,7 @@
 #include <cstdlib>
 #include "std_msgs/String.h"
 #include "std_msgs/Header.h"
-#include "main_loop/agent_2.h"
+#include "main_loop/agent.h"
 #include "sensor_msgs/LaserScan.h"
 #include <std_msgs/Int32MultiArray.h>
 #include <std_msgs/Int32.h>
@@ -26,7 +26,8 @@ class sub_class{
         void status_sub_callback(const std_msgs::Int32::ConstPtr& msg);
         void publish_(float time);
         void change_status(int z); 
-        void status_publish();  
+        void change_cup_color(int color[]);
+        void status_publish();
         int now_status(); 
         int now_degree();
         
@@ -36,7 +37,7 @@ class sub_class{
     private:
         ros::NodeHandle n;
         ros::Publisher status_pub = n.advertise<std_msgs::Int32>("pub_status",1); 
-		ros::Publisher agent_pub = n.advertise<main_loop::agent_2>("agent_msg", 1);
+		ros::Publisher agent_pub = n.advertise<main_loop::agent>("agent_msg", 1);
         ros::Subscriber status_sub = n.subscribe<std_msgs::Int32>("update_status", 1, &sub_class::status_sub_callback,this);
 		ros::Subscriber ST1_sub = n.subscribe<std_msgs::Int32MultiArray>("rxST1", 1, &sub_class::ST1_sub_callback,this);
         ros::Subscriber ST2_sub = n.subscribe<std_msgs::Int32MultiArray>("rxST2", 1, &sub_class::ST2_sub_callback,this);
@@ -51,7 +52,7 @@ class sub_class{
         int exact_status = 0 ;
         int degree_temp = 0 ;
         std_msgs::Int32 status;
-        main_loop::agent_2 pub_to_main;
+        main_loop::agent pub_to_main;
 };
 void sub_class::status_sub_callback(const std_msgs::Int32::ConstPtr& msg){
 
@@ -79,6 +80,12 @@ int sub_class::now_degree(){
 void sub_class::status_publish(){
     status.data = now_status() ;
 	status_pub.publish(status);
+}
+void sub_class::change_cup_color(int color[]){
+    pub_to_main.cup_color={};
+    for(int k=0;k<5;k++){
+        pub_to_main.cup_color.push_back(color[k]);
+    }
 }
 sub_class::sub_class(int my_pos_x_,int my_pos_y_, int ini_status){
     pub_to_main.my_pos_x = 700 ; 
@@ -144,7 +151,7 @@ void sub_class::publish_(float time ){
     pub_to_main.status = now_status() ;
     if(status.data!=5){
         pub_to_main.emergency={};
-        for(int j=0 ;j<8;j++){
+        for(int j_=0 ;j_<8;j_++){
             pub_to_main.emergency.push_back(false);
         }  
     }
@@ -156,7 +163,7 @@ int main(int argc, char **argv){
     ros::NodeHandle nh;
     ros::ServiceClient client_cup = nh.serviceClient<main_loop::cup>("cup");
     ros::ServiceClient client_ns = nh.serviceClient<main_loop::ns>("ns");
-    
+
     sub_class temp;
     main_loop::cup srv_cup;
     main_loop::ns srv_ns;
@@ -171,6 +178,9 @@ int main(int argc, char **argv){
     int count = 0 ; 
     srv_cup.request.OUO = 0;
     srv_ns.request.OAO = 0;
+
+    int color_[5]={0,0,0,0,0};
+    temp.change_cup_color(color_);
 
     //availible form 
     //N S : 0 1 
@@ -231,8 +241,12 @@ int main(int argc, char **argv){
                             ROS_INFO("cup_suck");
                         }else{
                             srv_cup.request.OUO = 2 ;//finish
+                            for(int k_=0;k_<5;k_++){
+                                color_[k_]=srv_cup.response.CupResult[k_];
+                            }
                         }  
                         if(srv_cup.request.OUO == 2){
+                            temp.change_cup_color(color_);
                         }
                     }else{
                         ROS_INFO("fail to call");

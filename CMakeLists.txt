@@ -54,7 +54,6 @@ add_message_files(
 	main_state.msg
 	from_goap.msg
 	agent.msg
-	agent_2.msg
 	string_with_header.msg
 	position.msg
 	world_state.msg

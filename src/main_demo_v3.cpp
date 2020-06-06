@@ -2,9 +2,8 @@
 //對應版本:
 //goap --->main_demo_2.py
 //srv  --->goap_demo_2.srv
-//20200604 apdate main  
+//20200604 apdate main(new from C)  
 //==========================
- 
 #include "ros/ros.h"
 #include "std_msgs/String.h"
 #include <std_msgs/Int32MultiArray.h>
@@ -57,6 +56,9 @@ public:
     }
     void ChangeReplanPath(bool tf){
         replan_path = tf;
+    }
+    void ChangeIsBlocked(bool tf){
+        is_blocked = tf;
     }
     int MyActionDone(){
         return a_done;
@@ -172,14 +174,16 @@ class sub_state{    //--->定義輸出輸入所需參數
     	sub_state();
 		~sub_state(){};
 		void callback(const main_loop::agent::ConstPtr& msg);
-        bool lidar_be_blocked(float speed_degree,float car_degree);
-		bool emergency[8];
+        bool lidar_be_blocked();
+        bool blocking_with_direction(bool blocking_condition, int my_angle, int desire_angle);  //(blocking_condition = current_state.IsBlocked(), my_a = temp.from_agent.my_degree)
         int movement_from_goap[15];
         main_loop::agent from_agent;
 		
 	private:
 		ros::NodeHandle n ;
-		ros::Subscriber Agent_sub ;		 
+		ros::Subscriber Agent_sub ;		
+        bool emergency[8];
+        int cup_color[5]; 
 };
 
 sub_state::sub_state(){
@@ -187,7 +191,6 @@ sub_state::sub_state(){
     from_agent.servo_state = -2 ;
     from_agent.stepper = -2 ;
     from_agent.hand = -2 ;
-
 	Agent_sub = n.subscribe<main_loop::agent>("agent_msg", 1, &sub_state::callback,this);
 	for(int j=0;j<8;j++){
         emergency[j]=false;
@@ -216,10 +219,16 @@ void sub_state::callback(const main_loop::agent::ConstPtr& msg){
     emergency[5]=msg->emergency[5];
     emergency[6]=msg->emergency[6];
     emergency[7]=msg->emergency[7];
+
+    cup_color[0]=msg->cup_color[0];
+    cup_color[1]=msg->cup_color[1];
+    cup_color[2]=msg->cup_color[2];
+    cup_color[3]=msg->cup_color[3];
+    cup_color[4]=msg->cup_color[4];
   	
 }
 
-bool sub_state::lidar_be_blocked(float speed_degree,float car_degree){
+bool sub_state::lidar_be_blocked(){
     bool blockk=false;
     for(int i=0;i<8;i++){
         if(emergency[i]==true){
@@ -229,6 +238,42 @@ bool sub_state::lidar_be_blocked(float speed_degree,float car_degree){
     return blockk;
 }
 
+bool sub_state::blocking_with_direction(bool blocking_condition, int my_angle, int desire_angle){  //(blocking_condition = current_state.IsBlocked(), my_a = temp.from_agent.my_degree)
+    bool blocked = false;
+    if(blocking_condition){
+        int angle_a = my_angle - 90;
+        int angle_b = my_angle + 90;
+        if(angle_a < 0){
+            angle_a += 360;
+        }
+        if(angle_b < 0){
+            angle_b += 360;
+        }
+        if(angle_a > 360){
+            angle_a -= 360;
+        }
+        if(angle_b > 360){
+            angle_b -= 360;
+        }
+        if(desire_angle < angle_b || desire_angle > angle_a){
+            // forward motion
+            for(int i=0;i<=3;i++){
+                if(emergency[i]==true){
+                    blocked=true;
+                }
+            }
+        }
+        else{
+            // backward motion 
+            for(int i=4;i<=7;i++){
+                if(emergency[i]==true){
+                    blocked=true;
+                }
+            }
+        }   
+    }
+    return blocked ;
+}
 
 
 bool at_pos(int x, int y, int deg, int c_x, int c_y, int c_deg, int m, int angle_m){    //計算誤差
@@ -290,6 +335,7 @@ int main(int argc, char **argv)
     RobotState robot;
 
 
+
     //在subscriber定義的參數則需宣告一個sub_class在此，即可運用在回調函式使用到的參數
     sub_state temp;
     //在main裡定義的topic和service所需的傳輸格式需由此先宣告一次
@@ -330,26 +376,8 @@ int main(int argc, char **argv)
     
         //status update
         int s = temp.from_agent.status; 
-        Status stat  = static_cast<Status>(s);
+        Status stat= static_cast<Status>(s);
 
-        //enemy pos update 
-        path_srv.request.my_pos_x = temp.from_agent.my_pos_x;
-        path_srv.request.my_pos_y = temp.from_agent.my_pos_y;
-        if(temp.from_agent.enemy1_x!=0){
-            path_srv.request.enemy1_x = temp.from_agent.enemy1_x ;
-        }
-        if(temp.from_agent.enemy1_y!=0){
-            path_srv.request.enemy1_y = temp.from_agent.enemy1_y ;
-        }
-        if(temp.from_agent.enemy2_x!=0){
-            path_srv.request.enemy2_x = temp.from_agent.enemy2_x ;
-        }
-        if(temp.from_agent.enemy2_y!=0){
-            path_srv.request.enemy2_y = temp.from_agent.enemy2_y ;
-        }
-        path_srv.request.ally_x = 300 ;
-        path_srv.request.ally_y = 2200 ;          
-        
         //debug
         main_loop::goap_debug debug_1;
         main_loop::main_debug debug_2;
@@ -377,18 +405,15 @@ int main(int argc, char **argv)
             case Status::RUN:{ //5
                 count ++;
                 //將agent資訊存入current state
+                
                 state            
-                current_state(temp.from_agent.my_pos_x,temp.from_agent.my_pos_y,temp.from_agent.my_degree,temp.lidar_be_blocked(0,temp.from_agent.my_degree),
+                current_state(temp.from_agent.my_pos_x,temp.from_agent.my_pos_y,temp.from_agent.my_degree,temp.lidar_be_blocked(),
                 temp.from_agent.servo_state,temp.from_agent.stepper,temp.from_agent.hand);//<--------get undergoing, finish, my_x, my_y, block from other nodes ()********
                 state action_state(0,0,0,false,0,0,0);
                 action_state = current_state;
                 if(action_done){
                     action_state.ChangeActionDone(true);
                     action_done = false;
-                    ROS_INFO ("rx0:%ld ", rx0);                
-                    ROS_INFO ("rx1:%ld ", rx1);
-                    ROS_INFO ("rx2:%ld ", rx2);
-                    ROS_INFO ("mission: %s ", goap_srv.response.mission_name.c_str());
                 }
                 if(kill_mission){
                     action_state.ChangeKillMission(true);
@@ -399,10 +424,10 @@ int main(int argc, char **argv)
                 //path plan
                 path_srv.request.my_pos_x = temp.from_agent.my_pos_x;
                 path_srv.request.my_pos_y = temp.from_agent.my_pos_y;
-                path_srv.request.enemy1_x = 400 ;
-                path_srv.request.enemy1_y = 1800 ;
-                path_srv.request.enemy2_x = 550 ;
-                path_srv.request.enemy2_y = 500 ;
+                path_srv.request.enemy1_x = temp.from_agent.enemy1_x ;
+                path_srv.request.enemy1_y = temp.from_agent.enemy1_y ;
+                path_srv.request.enemy2_x = temp.from_agent.enemy2_x ;
+                path_srv.request.enemy2_y = temp.from_agent.enemy2_y ;
                 path_srv.request.ally_x = 1 ;
                 path_srv.request.ally_y = 1 ; 
                 //goap
@@ -415,7 +440,9 @@ int main(int argc, char **argv)
                 goap_srv.request.north_or_south = 0 ; 
                 goap_srv.request.action_done=action_state.MyActionDone();
                 goap_srv.request.pos.push_back(action_state.MyPosX());
-                goap_srv.request.pos.push_back(action_state.MyPosY()); 
+                goap_srv.request.pos.push_back(action_state.MyPosY());
+                //避免在下面被洗掉所以先在此存入Debug 
+                debug_2.action_done=action_state.MyActionDone();    
             
                 //oap service
                 if(client_goap.call(goap_srv)){
@@ -441,7 +468,7 @@ int main(int argc, char **argv)
                 }else{
                     ROS_ERROR("Failed to call goap_test");
                 }
-                //
+                //goap mission name update
                 goap_srv.request.mission_name = goap_srv.response.mission_name ;
 
                 //將goap所需的資料存入action      
@@ -454,18 +481,17 @@ int main(int argc, char **argv)
                 bool desire_wait = act.Wait();
                 int desire_angle = act.Angle();
                 desire_movement = act.Movement();
-                                    
+
+                //calculate if blocked using the desire angle and my_angle
+                current_state.ChangeIsBlocked(temp.blocking_with_direction(current_state.IsBlocked(),temp.from_agent.my_degree,desire_angle)); 
+                                                
                 if(desire_mode == 2){
                     m = ActionMode::SPEED_MODE;
                 }
                 else{
                     m = ActionMode::POSITION_MODE;
-                }
+                } 
 
-                //避免在下面被洗掉所以先在此存入Debug 
-                debug_2.action_done=action_state.MyActionDone();
-                            
-                            
                 switch(m){
                     case ActionMode::POSITION_MODE:{
                         debug_2.robot_state="ActionMode::POSITION_MODE";
@@ -532,8 +558,8 @@ int main(int argc, char **argv)
 
                             case RobotState::ON_THE_WAY:
                                 debug_2.robot_case="ON_THE_WAY";
-                                //---------path plan
-								
+
+ 
                                 distance_square = (current_state.MyPosX() - desire_pos_x)*(current_state.MyPosX() - desire_pos_x) + (current_state.MyPosY() - desire_pos_y)*(current_state.MyPosY() - desire_pos_y);
                                 if(distance_square <= switch_mode_distance){
                                     r0 = 0x4000;
@@ -544,8 +570,7 @@ int main(int argc, char **argv)
                                 }
                                 else{
                                     //path service
-									if(client_path.call(path_srv)){
-										
+									if(client_path.call(path_srv)){	
 										now_degree = path_srv.response.degree ; 
 									}else{
 										ROS_ERROR("Failed to call service path plan");
@@ -563,7 +588,6 @@ int main(int argc, char **argv)
                                     r1 = desire_speed;
                                     r2 = now_degree;
                                     r3 = 0;
-
                                     //若敵人擋住路徑，增加counter後回傳kill mission
                                     if( path_srv.response.blocked == true){ 
                                         goal_covered_counter ++;
@@ -620,7 +644,6 @@ int main(int argc, char **argv)
                         debug_2.robot_state="ActionMode::POSITION_MODE";
                         debug_2.robot_case="ON_THE_WAY";
                         
-
                         //==給任務及位置==
                         //基本上手跟平台都不需要給新指令，可以直接刪rx1,rx2
                         //rx0 <- desire movement
@@ -629,7 +652,6 @@ int main(int argc, char **argv)
                             if(desire_movement[i] == 2){//自動夾給２
                                 old_grab_status[i] = 2;
                             }
-                         
                         }
                         for(int i = 11; i >= 0; i --){
                             out = out << 2;
@@ -638,7 +660,6 @@ int main(int argc, char **argv)
                         rx0 = out;
                   
                         //==任務完成轉換器===
-                        //這邊需要稍微調整動作的完成，因為自動夾的指令是２但完成後會變１吧？
                         long int finished_out = 0;
                         int copy_old_status[12] = {0};
                         for(int i = 0; i < 12; i ++){
@@ -651,22 +672,20 @@ int main(int argc, char **argv)
                         }
                         for(int i = 11; i >= 0; i --){
                             finished_out = finished_out << 2;
-                            finished_out += copy_old_status[i];
-                        }
-
-                        //==任務完成==
-                        //若自動夾完成則action_done
-                        if(count>3 &&current_state.MyTx0()== finished_out){
+                            if(count>3 &&current_state.MyTx0()== finished_out){
                             action_done = true;
-                            ROS_INFO("speed mode mission action done");
+                            ROS_INFO("speed mode action done");
                             //把old_grab_status中有２的換成１（自動夾完成）
                             for(int i = 0; i < 12; i ++){
-                            if(old_grab_status[i] == 2){
-                                    old_grab_status[i] = 1;
+                                if(old_grab_status[i] == 2){
+                                        old_grab_status[i] = 1;
+                                    }
                                 }
-                            }
-                            count = 0;
+                                count = 0;
+                            }finished_out += copy_old_status[i];
                         }
+                        //==任務完成==
+                        //若自動夾完成則action_done
 
                         //==到點==
                         //若到點則代表沒完成任務（任務已被他人完成或失敗）
@@ -686,17 +705,14 @@ int main(int argc, char **argv)
                         //不然算路徑給速度角度
                         else{
                             distance_square = (current_state.MyPosX() - desire_pos_x)*(current_state.MyPosX() - desire_pos_x) + (current_state.MyPosY() - desire_pos_y)*(current_state.MyPosY() - desire_pos_y);
-                            
-                            if(distance_square <= switch_mode_distance){
+                            if(distance_square <= switch_mode_distance){//--->pos mode
                                 r0 = 0x4000;
                                 r1 = desire_pos_x;
                                 r2 = desire_pos_y;
                                 r3 = desire_angle;
-                                //return pos_mode; //<----------------
                             }else{
                                 //path service 
 								if(client_path.call(path_srv)){
-
 									now_degree = path_srv.response.degree ; 
 								}else{
 									ROS_ERROR("Failed to call service path plan");
@@ -762,11 +778,9 @@ int main(int argc, char **argv)
                 debug_1.is_wait=desire_wait;
                 debug_1.mission_name = goap_srv.response.mission_name;
 
-
-
-                 
                 break;
-                }
+            }
+
             case Status::STOP: //6
                 r0 = 0x5000;
                 r1 = 0;
@@ -809,7 +823,7 @@ int main(int argc, char **argv)
         debug_2.enemy1_y=path_srv.request.enemy1_y;
         debug_2.enemy2_x=path_srv.request.enemy2_x;
         debug_2.enemy2_y=path_srv.request.enemy2_y;
-        debug_2.is_blocked=temp.lidar_be_blocked(0,temp.from_agent.my_degree);
+        debug_2.is_blocked=temp.lidar_be_blocked();
         debug_2.servo_state=temp.from_agent.servo_state;
         debug_2.stepper_state=temp.from_agent.stepper;
         debug_2.hand_state=temp.from_agent.hand;

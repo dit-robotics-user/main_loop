@@ -16,7 +16,6 @@
 #include <main_loop/position.h>
 #include <main_loop/cup.h>
 #include <main_loop/ns.h>
-#include <main_loop/position.h>
 
 class sub_class{
     public:
@@ -43,7 +42,11 @@ class sub_class{
         ros::Subscriber ST2_sub = n.subscribe<std_msgs::Int32MultiArray>("rxST2", 1, &sub_class::ST2_sub_callback,this);
         ros::Subscriber camera_sub= n.subscribe<main_loop::position>("enemy_pose", 1, &sub_class::camera_sub_callback,this);
         ros::Subscriber lidarmsg_sub= n.subscribe<lidar_2020::alert_range>("ranging_alert", 1, &sub_class::lidarmsg_sub_callback,this);
-        int status_dominate=0;
+        int status_dominate = 0 ;
+        int enemy1_pos_x = 0 ;
+        int enemy1_pos_y = 0 ;
+        int enemy2_pos_x = 0 ;
+        int enemy2_pos_y = 0 ; 
         int sub_GUI_status;
         int exact_status = 0 ;
         std_msgs::Int32 status;
@@ -86,10 +89,30 @@ sub_class::sub_class(int my_pos_x_,int my_pos_y_, int ini_status){
     status.data = ini_status;
 }
 void sub_class::camera_sub_callback(const main_loop::position::ConstPtr& msg){
-	pub_to_main.enemy1_x = msg->enemy1_x;
-    pub_to_main.enemy1_y = msg->enemy1_y;
-	pub_to_main.enemy2_x = msg->enemy2_x;
-	pub_to_main.enemy2_y = msg->enemy2_y;
+    enemy1_pos_x =  msg->enemy1_x ;
+    enemy1_pos_y =  msg->enemy1_y ;
+    enemy2_pos_x =  msg->enemy2_x ;
+    enemy2_pos_y =  msg->enemy2_y ;
+    if(enemy1_pos_x == -1){
+        enemy1_pos_x = pub_to_main.enemy1_x;
+    }
+    if(enemy1_pos_y == -1){
+        enemy1_pos_y = pub_to_main.enemy1_y;
+    }
+    if(enemy2_pos_x == -1){
+        enemy2_pos_x = pub_to_main.enemy2_x;
+    }
+    if(enemy2_pos_y == -1){
+        enemy2_pos_y = pub_to_main.enemy2_y;
+    }
+    pub_to_main.enemy1_x = enemy1_pos_x;
+    pub_to_main.enemy1_y = enemy1_pos_y;
+    pub_to_main.enemy2_x = enemy2_pos_x;
+    pub_to_main.enemy2_y = enemy2_pos_y;
+    ROS_INFO("enemy1_pos_x: %d", enemy1_pos_x);
+    ROS_INFO("enemy1_pos_y: %d", enemy1_pos_y);
+    ROS_INFO("enemy2_pos_x: %d", enemy2_pos_x);
+    ROS_INFO("enemy2_pos_y: %d", enemy2_pos_y);
 }
 void sub_class::ST1_sub_callback(const std_msgs::Int32MultiArray::ConstPtr& msg){
     pub_to_main.my_pos_x = msg->data[0] ;

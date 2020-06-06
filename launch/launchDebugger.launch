@@ -1,0 +1,7 @@
+<launch>
+
+<node pkg="debugger" type="debugger.py" name="debugger" output="screen"  ns="master" >
+</node>
+ 
+ 
+</launch>

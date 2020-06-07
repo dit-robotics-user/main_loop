@@ -94,6 +94,7 @@ class mymain:  #main輸入與輸出參數需在此calss定義
 	north_or_south = 2           # <---
 	time = 0                     # <---
 	name = 0                     # <---
+	child_name = 0               # <---	
 	my_degree = 0                # <---
 	output_speed = 0             # --->
 	output_mode = -1             # --->
@@ -102,6 +103,7 @@ class mymain:  #main輸入與輸出參數需在此calss定義
 	output = [-1]*15			 # --->
 	output_wait = True           # --->
 	output_name = "start"        # --->
+	output_child_name = "start"  # --->
 
 goal = []
 path_done = False
@@ -116,6 +118,7 @@ demo_path = []
 give_next_action = True
 go_home_flag = False
 action_path, go_home_path = setting(1)
+action_name = 0 
 
 
 def return_to_main(req):  #main輸入參數與獲得結果存取處(service回調函式)  
@@ -126,7 +129,8 @@ def return_to_main(req):  #main輸入參數與獲得結果存取處(service回�
 	mymain.my_degree = req.my_degree
 	mymain.time = req.time 
 	mymain.name = req.mission_name
-	return [mymain.output_speed,mymain.output_mode,mymain.output_degree,mymain.output_position,mymain.output,mymain.output_wait,mymain.output_name]
+	mymain.child_name = req.mission_child_name
+	return [mymain.output_speed,mymain.output_mode,mymain.output_degree,mymain.output_position,mymain.output,mymain.output_wait,mymain.output_name , mymain.output_child_name]
 
 def goap_server():
 	global give_next_action
@@ -148,6 +152,7 @@ def goap_server():
 					action.position = south_position
 				action_path = go_home_path
 			go_home_flag = True
+			
 
 		if give_next_action == True:  # expand action into its child actions
 			for c_action in action_path[0].child_action:
@@ -156,11 +161,14 @@ def goap_server():
 				c_action.position = action_path[0].position
 				c_action.degree = action_path[0].degree
 				demo_path.append(copy.deepcopy(c_action))
+			action_name = action_path[0].name
 			action_path.remove(action_path[0])
 			give_next_action = False
 
 		path = demo_path[0]
-		mymain.output_name = path.name
+		
+		mymain.output_child_name = path.name 
+		mymain.output_name = action_name
 		mymain.output = output_processor(path, left_side, right_side)
 		mymain.output_degree = path.degree
 		mymain.output_speed = path.speed
@@ -168,7 +176,7 @@ def goap_server():
 		mymain.output_position = path.position
 		mymain.output_wait = path.wait
 
-		if mymain.action_done is True and demo_path[0].name == mymain.output_name:
+		if mymain.action_done is True and demo_path[0].name == mymain.child_name:
 			if path.type_number is 9:  # lift right
 				right_side -= 1
 			elif path.type_number is 8:  # lift left
@@ -183,7 +191,7 @@ def goap_server():
 			print(path.name)
 			print(path.position)
 			print(path.degree)
-			print(output)
+			print(mymain.output)
 			print()
 			if len(demo_path) > 1:
 				demo_path.remove(demo_path[0])

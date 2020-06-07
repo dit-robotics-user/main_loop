@@ -94,6 +94,7 @@ class mymain:  #main輸入與輸出參數需在此calss定義
 	north_or_south = 2           # <---
 	time = 0                     # <---
 	name = 0                     # <---
+	my_degree = 0                # <---
 	output_speed = 0             # --->
 	output_mode = -1             # --->
 	output_degree = -1           # --->
@@ -121,6 +122,8 @@ def return_to_main(req):  #main輸入參數與獲得結果存取處(service回�
 	mymain.action_done = req.action_done  # <----
 	mymain.my_pos = (req.pos[0],req.pos[1])
 	mymain.cup_color = [req.cup_color[0],req.cup_color[1],req.cup_color[2],req.cup_color[3],req.cup_color[4]]
+	mymain.north_or_south = req.north_or_south
+	mymain.my_degree = req.my_degree
 	mymain.time = req.time 
 	mymain.name = req.mission_name
 	return [mymain.output_speed,mymain.output_mode,mymain.output_degree,mymain.output_position,mymain.output,mymain.output_wait,mymain.output_name]
@@ -139,9 +142,9 @@ def goap_server():
 		if mymain.time >= go_home_time and go_home_flag == False:  # switch to go home mode
 			demo_path.clear()
 			for action in go_home_path:
-				if north_or_south == north:
+				if mymain.north_or_south == 0:
 					action.position = north_position
-				elif north_or_south == south:
+				elif mymain.north_or_south == 1:
 					action.position = south_position
 				action_path = go_home_path
 			go_home_flag = True

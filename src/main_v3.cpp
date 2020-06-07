@@ -1,7 +1,7 @@
 //==========================
 //對應版本:
-//goap --->main_demo_2.py
-//srv  --->goap_demo_2.srv
+//goap --->main_3.py
+//srv  --->goap_2.srv
 //20200604 apdate main(new from C)  
 //==========================
 #include "ros/ros.h"
@@ -9,7 +9,7 @@
 #include <std_msgs/Int32MultiArray.h>
 #include "main_loop/path.h"
 #include "main_loop/agent.h"
-#include "main_loop/goap_demo_2.h"
+#include "main_loop/goap_2.h"
 #include <main_loop/from_goap.h>
 #include "main_loop/main_state.h"
 #include <main_loop/goap_debug.h>
@@ -209,7 +209,8 @@ void sub_state::callback(const main_loop::agent::ConstPtr& msg){
     from_agent.enemy1_y = msg->enemy1_y ;
     from_agent.enemy2_x = msg->enemy2_x ;
     from_agent.enemy2_y = msg->enemy2_y ;
-    from_agent.time = msg->time ; 
+    from_agent.time = msg->time ;
+    from_agent.ns = msg->ns ; 
 
 	emergency[0]=msg->emergency[0];
     emergency[1]=msg->emergency[1];
@@ -341,7 +342,7 @@ int main(int argc, char **argv)
     //在main裡定義的topic和service所需的傳輸格式需由此先宣告一次
     //並設定初始值以免service fail
 	main_loop::path path_srv;
-    main_loop::goap_demo_2 goap_srv;
+    main_loop::goap_2 goap_srv;
     main_loop::world_state little_ws; 
     //ros defult value
     int now_my_pos_x;
@@ -359,20 +360,20 @@ int main(int argc, char **argv)
     path_srv.request.ally_x = 1800 ;
     path_srv.request.ally_y = 2200 ; 
 
+    goap_srv.request.replan=false;
     goap_srv.request.action_done=false;
+    goap_srv.request.kill_mission=false;
     goap_srv.request.pos.push_back(700);
     goap_srv.request.pos.push_back(300);
     goap_srv.request.cup_color = {}; 
     goap_srv.request.north_or_south = 0 ; 
-    goap_srv.request.my_degree = 0 ; 
+    goap_srv.request.strategy = 0 ;
     goap_srv.request.time = 0 ;
     goap_srv.request.mission_name = "setting" ;
-
+    goap_srv.request.mission_child_name = "setting" ;
 
     int count = 0 ;
     
-
-
     while(ros::ok()){
     
         //status update
@@ -432,6 +433,10 @@ int main(int argc, char **argv)
                 path_srv.request.ally_x = 1 ;
                 path_srv.request.ally_y = 1 ; 
                 //goap
+                goap_srv.request.replan=action_state.ReplanPath();
+                goap_srv.request.action_done = action_state.MyActionDone();
+                goap_srv.request.kill_mission=action_state.KillMission();    
+                goap_srv.request.cup_color={};
                 goap_srv.request.time = temp.from_agent.time;
                 goap_srv.request.cup_color.push_back(0);
                 goap_srv.request.cup_color.push_back(0); 
@@ -439,10 +444,8 @@ int main(int argc, char **argv)
                 goap_srv.request.cup_color.push_back(0); 
                 goap_srv.request.cup_color.push_back(0); 
                 goap_srv.request.north_or_south = 0 ; 
-                goap_srv.request.action_done=action_state.MyActionDone();
                 goap_srv.request.pos.push_back(action_state.MyPosX());
                 goap_srv.request.pos.push_back(action_state.MyPosY());
-                goap_srv.request.my_degree = temp.from_agent.my_degree ; 
                 //避免在下面被洗掉所以先在此存入Debug 
                 debug_2.action_done=action_state.MyActionDone();    
             
@@ -472,6 +475,7 @@ int main(int argc, char **argv)
                 }
                 //goap mission name update
                 goap_srv.request.mission_name = goap_srv.response.mission_name ;
+                goap_srv.request.mission_name = goap_srv.response.mission_child_name ;
 
                 //將goap所需的資料存入action      
                 action act(goap_srv.response.pos[0],goap_srv.response.pos[1],temp.movement_from_goap,goap_srv.response.degree,goap_srv.response.speed,goap_srv.response.is_wait,goap_srv.response.mode);

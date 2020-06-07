@@ -27,6 +27,7 @@ class sub_class{
         void publish_(float time);
         void change_status(int z); 
         void change_cup_color(int color[]);
+        void change_ns(int ns_);
         void status_publish();
         int now_status(); 
         int now_degree();
@@ -70,6 +71,9 @@ void sub_class::status_sub_callback(const std_msgs::Int32::ConstPtr& msg){
 }
 void sub_class::change_status(int z){
     exact_status = z ; 
+}
+void sub_class::change_ns(int ns_){
+    pub_to_main.ns = ns_ ; 
 }
 int sub_class::now_status(){
     return exact_status; 
@@ -265,6 +269,7 @@ int main(int argc, char **argv){
                             ns_suck = 1 ;     
                         }else{
                             srv_ns.request.OAO = 2 ;//finish 
+                            temp.change_ns(srv_ns.response.ns);
                         }  
                     }else{
                         ROS_INFO("fail to call");

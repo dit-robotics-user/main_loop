@@ -5,6 +5,7 @@ int32[] pos
 int32[] cup_color
 int32 north_or_south
 int32 strategy
+int32 my_degree
 float32 time
 string mission_name
 string mission_child_name

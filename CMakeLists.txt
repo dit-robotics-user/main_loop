@@ -67,6 +67,7 @@ add_service_files(
 	AddTwoInts.srv
 	path.srv
 	goap_.srv
+	goap_2.srv
 	goap_demo.srv
 	goap_demo_2.srv
 	ns.srv
@@ -250,6 +251,10 @@ target_link_libraries(main_v1 ${catkin_LIBRARIES})
 add_executable(main_v2 src/main_v2.cpp)
 add_dependencies(main_v2 main_loop_gencpp)
 target_link_libraries(main_v2 ${catkin_LIBRARIES})
+
+add_executable(main_v3 src/main_v3.cpp)
+add_dependencies(main_v3 main_loop_gencpp)
+target_link_libraries(main_v3 ${catkin_LIBRARIES})
 
 add_dependencies(agent_new ${catkin_EXPORTED_TARGETS})
 target_link_libraries(main_demo_v2 ${catkin_LIBRARIES} python2.7)

@@ -253,6 +253,7 @@ int main(int argc, char **argv){
                             temp.change_cup_color(color_);
                         }
                     }else{
+                        cup_suck = 1 ;     
                         ROS_INFO("fail to call");
                     }   
                 }
@@ -273,6 +274,7 @@ int main(int argc, char **argv){
                         }  
                     }else{
                         ROS_INFO("fail to call");
+                        ns_suck = 1 ; 
                     }   
                 }
                 if(cup_suck == 1 ){

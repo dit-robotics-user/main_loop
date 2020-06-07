@@ -6,7 +6,7 @@ from main_loop.srv import *
 from goap import *
 import math
 
-class MyClass:
+class mymain:
 	setting_number = 1
 	replan = False				 # <---
 	action_done = False          # <---
@@ -14,6 +14,7 @@ class MyClass:
 	my_pos = (3, 3)              # <---
 	cup_color = [5, 3, 5, 5, 3]  # <---
 	north_or_south = 2           # <---
+	my_degree = 0				 # <---
 	strategy = 0           		 # <---
 	time = 0                     # <---
 	name = 0                     # <---
@@ -43,13 +44,20 @@ penalty_action = 0
 go_home_flag = False
 path = []
 current_left_layer = 3
-current_right_layer = 3	
-	
+current_right_layer = 3
+north = 0                   #-------------
+south = 1                   #-------------
+north_position = (1, 1)     #-------------
+south_position = (2, 2)     #-------------
+go_home_flag = False        #-------------
+cup_color = 0	
+
 # ==REPLAN時給的懲罰==
 def penalty(current_action, penalty_cost, penalty_turns, action_list):
     for action in action_list:
         if action.name == current_action.name:
             action.cost += penalty_cost
+            print(action.name + ' penalty!!!!!!!!!!!! (' + str(action.cost) + ')')
             penalty_action = action
             break
     return penalty_turns, penalty_action
@@ -60,6 +68,7 @@ def lift_penalty(penalty_action, penalty_cost, action_list):
     for action in action_list:
         if action.name == penalty_action.name:
             action.cost -= penalty_cost
+            print('lift ' + action.name + ' penalty.......')
 
 
 # ==將指令傳換成一串輸出給MAIN==
@@ -214,19 +223,20 @@ def cost_adjuster(cws, current_left_layer, current_right_layer):
 
 
 # ==設定任務及動作==
-action_list, current_world_state, mission_list, child_list, MyClass.my_pos = setting(MyClass.setting_number, action_list, child_list, current_world_state, mission_list, MyClass.my_pos, MyClass.my_degree, MyClass.cup_color, MyClass.direction)
+action_list, current_world_state, mission_list, child_list, mymain.my_pos = setting(mymain.setting_number, action_list, child_list, current_world_state, mission_list, mymain.my_pos, mymain.my_degree, mymain.cup_color)
 
 def handle_return_to_main(req):
-	MyClass.replan = req.replan 
-	MyClass.action_done = req.action_done  
-	MyClass.kill_mission = req.kill_mission
-	MyClass.my_pos = (req.pos[0],req.pos[1])
-	MyClass.my_pos = (req.pos[0],req.pos[1])
-	MyClass.name = req.mission_name
-	MyClass.child_name = req.mission_child_name
-	MyClass.kill_mission = req.kill_mission 
-	MyClass.time = req.time
-	return [MyClass.output_degree,MyClass.output_speed,MyClass.output_mode,MyClass.output_position,MyClass.output,MyClass.output_wait,MyClass.output_name,MyClass.output_child_name]
+	mymain.replan = req.replan 
+	mymain.action_done = req.action_done  
+	mymain.kill_mission = req.kill_mission
+	mymain.my_pos = (req.pos[0],req.pos[1])
+	mymain.my_pos = (req.pos[0],req.pos[1])
+	mymain.name = req.mission_name
+	mymain.child_name = req.mission_child_name
+	mymain.kill_mission = req.kill_mission 
+	mymain.time = req.time
+	mymain.my_degree = req.my_degree
+	return [mymain.output_degree,mymain.output_speed,mymain.output_mode,mymain.output_position,mymain.output,mymain.output_wait,mymain.output_name,mymain.output_child_name]
 
 def add_two_ints_server():
 	global mission_list
@@ -240,18 +250,25 @@ def add_two_ints_server():
 	rospy.Service('goap_test_v1', goap_2, handle_return_to_main)
 	while 1:
 		path_done = False
+		# -------------
+		if mymain.time >= go_home_time and go_home_flag == False:  # switch to go home mode
+			for action in action_list:
+				if mymain.north_or_south == north:
+					action.position = north_position
+				elif mymain.north_or_south == south:
+					action.position = south_position
+			go_home_flag = True
+		# -------------
 		# ==重製動作參數(好像可刪?)==
 		for actions in action_list:
 			actions.refresh()
-		mission_list = calculate_mission_priority(mission_list, MyClass.time, go_home_time)  # <---
+		mission_list = calculate_mission_priority(mission_list, mymain.time, go_home_time)  # <---
 		new_current_world_state = copy.deepcopy(current_world_state)  # prevent unwanted overlap or alter
 		for action in action_list:
 			if action.name == 'put_prepare':
 				action.cost = cost_adjuster(current_world_state, current_left_layer, current_right_layer)
 		print()
-		#print('=>' + str(new_current_world_state) + '<=')
-		#print('my_pos ' + str(my_pos))
-		path = goap([mission_list[0].name], new_current_world_state, MyClass.my_pos, action_list, child_list, current_left_layer, current_right_layer)  # calculate path
+		path = goap([mission_list[0].name], new_current_world_state, mymain.my_pos, action_list, child_list, current_left_layer, current_right_layer)  # calculate path
 
 		if len(path) == 0:
 			continue
@@ -259,9 +276,8 @@ def add_two_ints_server():
 		# ==餵PATH==
 		while path_done is False:
 			# ==MAIN判定重算路徑==
-			if MyClass.replan_mission is True:
-				penalty_timer, penalty_action = penalty(path[0], penalty_cost, penalty_turns,
-							action_list)  # 給予當下被REPLAN的動作一個COST上的懲罰，並懲罰幾回合(任務)
+			if mymain.replan is True:
+				penalty_timer, penalty_action = penalty(path[0], penalty_cost, penalty_turns, action_list)  # 給予當下被REPLAN的動作一個COST上的懲罰，並懲罰幾回合(任務)
 				penalty_undergoing = True
 				path_done = True  # 跳出WHILE並重算
 				continue
@@ -272,13 +288,14 @@ def add_two_ints_server():
 				penalty_undergoing = False
 
 			# ==MAIN判定刪除當下動作(任務?)==
-			if MyClass.kill_mission is True:
+			if mymain.kill_mission is True:
+				print('kill ==> ' + path[0].name)
 				kill_action(path[0], action_list)
 				path_done = True  # 跳出WHILE並重算
 				continue
 
 			# ==時間到則終止動作回家(只進入一次以免影響回家的陸續動作)==
-			if MyClass.time >= go_home_time and go_home_flag is False:
+			if mymain.time >= go_home_time and go_home_flag is False:
 				path_done = True  # 跳出WHILE並重算
 				go_home_flag = True
 				continue
@@ -289,31 +306,33 @@ def add_two_ints_server():
 
 				# ==小雞應該不會使用到==
 				'''if top_path.mode == 2:
-					top_path.tangent_point_calculation(MyClass.my_pos, 3)
+					top_path.tangent_point_calculation(my_pos, 3)
 					print(top_path.position)'''
 
 				# ==餵動作裡的子動作==
 				while len(top_path.child_action) != 0:
 					top_child = top_path.child_action[0]
-					MyClass.output_name = top_path.name
-					MyClass.output_child_name = top_child.name
-					MyClass.output_degree = top_child.degree
-					MyClass.output_speed = top_child.speed
-					MyClass.output_mode = top_child.mode
-					MyClass.output_position = top_child.position
-					MyClass.output_wait = top_child.wait
-					MyClass.output = output_processor_big_chicken(top_child, current_left_layer, current_right_layer)
+					mymain.output_child_name = top_child.name
+					mymain.output_name = top_path.name
+					mymain.output_degree = top_child.degree
+					mymain.output_speed = top_child.speed
+					mymain.output_mode = top_child.mode
+					mymain.output_position = top_child.position
+					mymain.output_wait = top_child.wait
 					
+					mymain.output = output_processor_big_chicken(top_child, current_left_layer, current_right_layer)
+					print('-> ' + mymain.output_name + ' ' + str(mymain.output_position) + ' ' + str(top_path.priority))
+
 					# ==子動作做完==
-					if MyClass.action_done is True and MyClass.output_child_name == MyClass.child_name:
+					if mymain.action_done is True and mymain.output_child_name == mymain.child_name:
 						top_path.child_action.remove(top_child)
-						if MyClass.output_child_name == 'lift_left':
+						if mymain.output_name == 'lift_left':
 							current_left_layer -= 1
-						elif MyClass.output_child_name == 'lift_right':
+						elif mymain.output_name == 'lift_right':
 							current_right_layer -= 1
-						elif MyClass.output_child_name == 'lower_left':
+						elif mymain.output_name == 'lower_left':
 							current_left_layer += 1
-						elif MyClass.output_child_name == 'lower_right':
+						elif mymain.output_name == 'lower_right':
 							current_right_layer += 1
 
 				current_world_state = top_path.result_world_state  # update current world state status
@@ -326,6 +345,8 @@ def add_two_ints_server():
 				if penalty_undergoing is True:  # PENALTY回合減1
 					penalty_timer -= 1
 				path_done = True
+
+
 
 
 if __name__ == "__main__":

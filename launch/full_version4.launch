@@ -6,7 +6,7 @@
 
 	<node pkg="main_loop" type="main_v3" name="main_v3" output="screen" respawn="true">
 	</node>
-	<node pkg="main_loop" type="agent_new_3" name="agent_new_3" output="screen" respawn="true" >
+	<node pkg="main_loop" type="agent_new_3" name="agent_new_3" respawn="true" >
 	</node>
 
 	<node pkg="main_loop" type="main_3.py" name="main_3"  respawn="true" >

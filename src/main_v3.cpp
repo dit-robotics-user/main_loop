@@ -305,7 +305,7 @@ int main(int argc, char **argv)
     ros::Publisher pub_goap_response = nh.advertise<main_loop::goap_debug>("Goap_response", 1);
     ros::Publisher pub_main_state = nh.advertise<main_loop::main_debug>("Main_state", 1);
 	ros::ServiceClient client_path = nh.serviceClient<main_loop::path>("path_plan");
-    ros::ServiceClient client_goap = nh.serviceClient<main_loop::goap_demo_2>("goap_test_v1");
+    ros::ServiceClient client_goap = nh.serviceClient<main_loop::goap_2>("goap_test_v1");
 
 
     // give default value here
@@ -415,6 +415,7 @@ int main(int argc, char **argv)
                 action_state = current_state;
                 if(action_done){
                     action_state.ChangeActionDone(true);
+                    ROS_INFO("action done in action state: %d" , action_state.MyActionDone());
                     action_done = false;
                 }
                 if(kill_mission){
@@ -475,7 +476,7 @@ int main(int argc, char **argv)
                 }
                 //goap mission name update
                 goap_srv.request.mission_name = goap_srv.response.mission_name ;
-                goap_srv.request.mission_name = goap_srv.response.mission_child_name ;
+                goap_srv.request.mission_child_name = goap_srv.response.mission_child_name ;
 
                 //將goap所需的資料存入action      
                 action act(goap_srv.response.pos[0],goap_srv.response.pos[1],temp.movement_from_goap,goap_srv.response.degree,goap_srv.response.speed,goap_srv.response.is_wait,goap_srv.response.mode);
@@ -637,7 +638,6 @@ int main(int argc, char **argv)
 								ROS_INFO("complete:%d",count);
 								ROS_INFO ("debug_2.robot_case: %s ", debug_2.robot_case.c_str());
 								ROS_INFO ("mission: %s ", goap_srv.response.mission_name.c_str());
-								ROS_INFO("action done in action state: %d" , action_state.MyActionDone());
 								action_done = true;
 								goal_covered_counter = 0;
 								count = 0; 

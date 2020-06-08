@@ -9,9 +9,11 @@ int32 enemy2_x
 int32 enemy2_y
 int32 ally_x
 int32 ally_y
-int32 wrist
+int32 servo_state
+int32 stepper
 int32 hand
-int32 finger
 int32 status
 float32 time 
+int32 ns 
+int32[] cup_color
 

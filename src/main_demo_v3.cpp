@@ -1,7 +1,8 @@
 //==========================
 //對應版本:
-//goap --->main_demo_2.py
-//srv  --->goap_demo_2.srv
+//agent --->agent_new_2.cpp
+//goap  --->main_demo_2.py
+//srv   --->goap_demo_2.srv
 //20200604 apdate main  
 //==========================
 #include "ros/ros.h"
@@ -16,8 +17,6 @@
 #include <main_loop/goap_debug.h>
 #include "main_loop/main_debug.h"
 #include "main_loop/world_state.h"
-#include <main_loop/cup.h>
-#include <main_loop/ns.h>
 
 #include <iostream>
 #include <queue>
@@ -42,7 +41,6 @@ public:
         kill_mission = false;
         replan_mission = false;
         replan_path = false;
-        is_blocked = block;
         action_wait = false;
     }
     void ChangeActionDone(bool tf){
@@ -104,7 +102,6 @@ public:
         is_blocked = false;
         action_wait = false;
     }
-
 private:
     bool a_done;
     int my_pos_x;
@@ -125,7 +122,7 @@ public:
     action(int x, int y, int movement_num[], int what_angle, int how_fast, bool is_wait, int what_mode){
         goal_pos_x = x;
         goal_pos_y = y;
-        for(int i = 0; i < 15; i ++){
+        for(int i = 0; i < 7; i ++){
             movement[i] = movement_num[i];
         }
         angle = what_angle;
@@ -158,7 +155,7 @@ public:
 private:
     int goal_pos_x;
     int goal_pos_y;
-    int movement[15];
+    int movement[7];
     int speed;
     int angle;
     bool wait;
@@ -169,6 +166,7 @@ enum class ActionMode {SPEED_MODE, POSITION_MODE};
 enum class Status {SET_STRATEGY, RESET, SET_INITIAL_POS, STARTING_SCRIPT, READY, RUN, STOP, IDLE};
 enum class RobotState {AT_POS, ON_THE_WAY, BLOCKED};
 
+
 class sub_state{   //--->定義輸出輸入所需參數
 	public:
     	sub_state();
@@ -176,7 +174,6 @@ class sub_state{   //--->定義輸出輸入所需參數
 		void callback(const main_loop::agent::ConstPtr& msg);
         void sub_world_state_callback(const main_loop::world_state::ConstPtr& msg);
         bool lidar_be_blocked(float speed_degree,float car_degree);
-		bool emergency[8];
         bool lighthouse_done ;
         bool flag_done ; 
         int movement_from_goap[7];
@@ -185,7 +182,8 @@ class sub_state{   //--->定義輸出輸入所需參數
 	private:
 		ros::NodeHandle n ;
 		ros::Subscriber Agent_sub ;		
-        ros::Subscriber world_state_sub ;	 	 
+        ros::Subscriber world_state_sub ;	 
+        	 
 };
 
 sub_state::sub_state(){ 

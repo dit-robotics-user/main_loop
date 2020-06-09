@@ -10,7 +10,7 @@
 #include <std_msgs/Int32MultiArray.h>
 #include "main_loop/path.h"
 #include "main_loop/agent.h"
-#include "main_loop/goap_demo_2.h"
+#include "main_loop/goap_2.h"
 #include <main_loop/from_goap.h>
 #include <main_loop/position.h>
 #include "main_loop/main_state.h"
@@ -326,9 +326,8 @@ int main(int argc, char **argv)
     ros::Publisher pub_goap_response = nh.advertise<main_loop::from_goap>("Goap_response", 1);
     ros::Publisher pub_main_state = nh.advertise<main_loop::main_state>("Main_state", 1);
 	ros::ServiceClient client_path = nh.serviceClient<main_loop::path>("path_plan");
-    ros::ServiceClient client_goap = nh.serviceClient<main_loop::goap_demo_2>("goap_test_v1");    
-    ros::ServiceClient client_cup = nh.serviceClient<main_loop::cup>("cup");
-    ros::ServiceClient client_ns = nh.serviceClient<main_loop::ns>("ns");
+    ros::ServiceClient client_goap = nh.serviceClient<main_loop::goap_2>("goap_test_v1");    
+
 
 
     // give default value here
@@ -365,9 +364,7 @@ int main(int argc, char **argv)
     //在main裡定義的topic和service所需的傳輸格式需由此先宣告一次
     //並設定初始值以免service fail
 	main_loop::path path_srv;
-    main_loop::goap_demo_2 goap_srv;
-    main_loop::cup srv_cup;
-    main_loop::ns srv_ns;
+    main_loop::goap_2 goap_srv;
 
     path_srv.request.goal_pos_x = 0;
     path_srv.request.goal_pos_y = 0;
@@ -390,11 +387,6 @@ int main(int argc, char **argv)
     goap_srv.request.mission_child_name = "setting" ;
 
 
-
-    int cup_suck = 0;
-    int ns_suck = 0;
-    srv_cup.request.OUO = 0;
-    srv_ns.request.OAO = 0;
     
 
 
@@ -586,6 +578,7 @@ int main(int argc, char **argv)
                                     ROS_INFO ("complete:%d",count);
                                     ROS_INFO ("debug_2.robot_case: %s ", debug_2.robot_case.c_str());
                                     ROS_INFO ("mission: %s ", goap_srv.response.mission_name.c_str());
+                                    ROS_INFO ("mission: %s ", goap_srv.response.mission_child_name.c_str());
                                     ROS_INFO("action done in action state: %d" , action_state.MyActionDone());
                                     action_done = true;
                                     goal_covered_counter = 0;
@@ -662,6 +655,7 @@ int main(int argc, char **argv)
                 debug_1.desire_finger=rx2;
                 debug_1.is_wait=desire_wait;
                 debug_1.mission_name = goap_srv.response.mission_name;
+                debug_1.mission_child_name = goap_srv.response.mission_child_name;
 
                  
                 break;

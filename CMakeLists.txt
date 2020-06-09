@@ -241,6 +241,10 @@ add_executable(main_demo_v3 src/main_demo_v3.cpp)
 add_dependencies(main_demo_v3 main_loop_gencpp)
 target_link_libraries(main_demo_v3 ${catkin_LIBRARIES})
 
+add_executable(main_v3 src/main_v3.cpp)
+add_dependencies(main_v3 main_loop_gencpp)
+target_link_libraries(main_v3 ${catkin_LIBRARIES})
+
 
 add_dependencies(agent_add_status ${catkin_EXPORTED_TARGETS})
 

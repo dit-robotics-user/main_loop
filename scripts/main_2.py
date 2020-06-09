@@ -138,6 +138,10 @@ def handle_return_to_main(req):
 def goap_server():
 	rospy.init_node('main_2')
 	rospy.Service('goap_test_v1', goap_2, handle_return_to_main)
+	global mission_list
+	global current_world_state
+	global penalty_timer
+	global penalty_undergoing
 	while 1:
 		path_done = False
 		if mymain.time >= go_home_time and go_home_flag is False:  # switch to go home mode
@@ -161,7 +165,7 @@ def goap_server():
 		# ==餵PATH==
 		while path_done is False:
 			# ==MAIN判定重算路徑==
-			if mymain.replan_mission is True:
+			if mymain.replan is True:
 				penalty_timer, penalty_action = penalty(path[0], penalty_cost, penalty_turns, action_list)  # 給予當下被REPLAN的動作一個COST上的懲罰，並懲罰幾回合(任務)
 				penalty_undergoing = True
 				path_done = True  # 跳出WHILE並重算
@@ -205,7 +209,7 @@ def goap_server():
 					print('-> ' + mymain.output_name + str(mymain.output_position))
 
 					# ==子動作做完==
-					if mymain.action_done is True:
+					if mymain.action_done is True and mymain.output_child_name == mymain.child_name:
 						top_path.child_action.remove(top_child)
 
 				current_world_state = top_path.result_world_state  # update current world state status

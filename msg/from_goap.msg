@@ -7,3 +7,4 @@ int32 desire_finger
 int32 desire_hand
 int32 is_wait
 string mission_name 
+string mission_child_name 

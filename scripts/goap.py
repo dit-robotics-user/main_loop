@@ -1,3 +1,4 @@
+#coding=utf-8
 from Queue import PriorityQueue
 from setting import *
 import copy

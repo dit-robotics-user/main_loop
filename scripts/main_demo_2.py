@@ -27,6 +27,7 @@ class mymain:  #main輸入與輸出參數需在此calss定義
 	north_or_south = 2           # <---
 	time = 0                     # <---
 	name = 0                     # <---
+	child_name = 0                     # <---
 	output_speed = 0             # --->
 	output_mode = -1             # --->
 	output_degree = -1           # --->
@@ -34,8 +35,9 @@ class mymain:  #main輸入與輸出參數需在此calss定義
 	output = [-1]*7				 # --->
 	output_wait = True           # --->
 	output_name = "start"        # --->
+	output_child_name = "start"  # --->
 
-go_home_time = 2000
+go_home_time = 4000
 path_done = False
 north = 1
 south = 2
@@ -53,8 +55,11 @@ def handle_return_to_main(req):  #main輸入參數與獲得結果存取處(servi
 	mymain.my_pos = (req.pos[0],req.pos[1])
 	mymain.cup_color = [req.cup_color[0],req.cup_color[1],req.cup_color[2],req.cup_color[3],req.cup_color[4]]
 	mymain.time = req.time 
+	mymain.my_degree = req.my_degree 
+	mymain.north_or_south = req.north_or_south 
 	mymain.name = req.mission_name
-	return [mymain.output_speed,mymain.output_mode,mymain.output_degree,mymain.output_position,mymain.output,mymain.output_wait,mymain.output_name]
+	mymain.child_name = req.mission_child_name
+	return [mymain.output_speed,mymain.output_mode,mymain.output_degree,mymain.output_position,mymain.output,mymain.output_wait,mymain.output_name,mymain.output_child_name]
 
 def goap_server():
 	
@@ -88,11 +93,13 @@ def goap_server():
 				c_action.position = action_path[0].position
 				c_action.degree = action_path[0].degree
 				demo_path.append(copy.deepcopy(c_action))
+			action_name = action_path[0].name
 			action_path.remove(action_path[0])
 			give_next_action = False
 
 		path = demo_path[0]
-		mymain.output_name = path.name
+		mymain.output_child_name = path.name 
+		mymain.output_name = action_name
 		mymain.output = output_processor(path)
 		mymain.output_degree = path.degree
 		mymain.output_speed = path.speed
@@ -100,7 +107,7 @@ def goap_server():
 		mymain.output_position = path.position
 		mymain.output_wait = path.wait
 
-		if mymain.action_done is True and demo_path[0].name == mymain.output_name:
+		if mymain.action_done is True and demo_path[0].name == mymain.child_name:
 
 			#print(path.name)
 			#print(path.position)

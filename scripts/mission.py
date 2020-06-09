@@ -21,7 +21,7 @@ class Mission:
         if self.priority_function_number is 0:  # get_points
         # 沒杯子就拿杯子
             if time > go_home_time:
-                self.priority = 2000
+                self.priority = 20000
             else:
                 self.priority = 0
         elif self.priority_function_number is 1:  # go_home
@@ -29,7 +29,7 @@ class Mission:
             if time > go_home_time:
                 self.priority = 0
             else:
-                self.priority = 2000
+                self.priority = 20000
         else:
             print('priority function number invalid')
 

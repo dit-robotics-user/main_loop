@@ -35,7 +35,7 @@ class Action:
 
     def calculate_priority(self, my_pos):
         if self.name == 'cup_hold':
-            self.priority = 0
+            self.priority = 0  # though priority here is 0, but after calculating the leftover actions, priority will be compensated
         else:
             self.priority = len(self.required_world_state) + self.cost + math.sqrt(((my_pos[0]-self.position[0])
                             * (my_pos[0]-self.position[0]) + (my_pos[1]-self.position[1])*(my_pos[1]-self.position[1])))

@@ -1,26 +1,16 @@
 from Queue import PriorityQueue
-
 from setting import *
 import copy
 import math
 
 
-'''def get_goal_successors(required_states, action_list):  # linking actions by examining there effects
-    successors = []
-    for action in action_list:
-        for state in required_states:
-            if state in action.effects:
-                copy_action = copy.deepcopy(action)
-                successors.append(copy_action)
-    return successors'''
-
-
+# ==給出可連接的所有動作==
 def get_successors(required_states, action_list):  # linking actions by examining there effects
     successors = []
     for action in action_list:
         is_append = True
         for state in required_states:
-            if state not in action.effects:
+            if state not in action.effects:  # must satisfy all required world states
                 is_append = False
         if is_append is True:
             copy_action = copy.deepcopy(action)
@@ -28,30 +18,25 @@ def get_successors(required_states, action_list):  # linking actions by examinin
     return successors
 
 
+# ==計算動作的優先順序==
 def calculate_successor_priority(top, successor, my_pos):
-    magic_number = 20
-    cost_of_cup_movement = 10
-    if successor.name == 'cup_prepare':
+    magic_number = 20  # value due to distance and cost.. found by trial and error
+    cost_of_cup_movement = 10  # compensating value for not taking the distance to cups setup pos into account
+    if successor.name == 'cup_prepare' or successor.name == 'cup_hold':
         successor.priority = top.priority + cost_of_cup_movement + magic_number
     elif successor.name[:7] == 'cup_get':
-		successor.priority = top.priority + cost_of_cup_movement + distance(my_pos, successor.position) + magic_number
+        successor.priority = top.priority + cost_of_cup_movement + distance(my_pos, successor.position) + magic_number
     else:
         successor.priority = top.priority + distance(top.position, successor.position) + magic_number
 
 
-def change_current_world_state(path, state, goal, action_list):  # changing the world state when the action is done
-    for action in action_list:
-        if action.name == path[-1]:
-            for eff in action.effects:
-                if eff not in state and eff != goal[0]:
-                    state.append(eff)
-
-
-def distance(pos1, pos2):  # calculates exact distance
+# ==算兩點距離==
+def distance(pos1, pos2):  # calculates exact distance of two points
     x = math.sqrt((pos2[0]-pos1[0])*(pos2[0]-pos1[0]) + (pos2[1]-pos1[1])*(pos2[1]-pos1[1]))
     return x
 
 
+# ==將每個動作的RESULT WORLD STATE更新上==
 def output_path_processor(goal, output_path, cws):
     passed_on_req = copy.deepcopy(cws)
     for i in range(0, len(output_path), 1):

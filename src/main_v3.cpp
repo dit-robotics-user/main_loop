@@ -327,6 +327,8 @@ int main(int argc, char **argv)
     ros::Publisher pub_main_state = nh.advertise<main_loop::main_state>("Main_state", 1);
 	ros::ServiceClient client_path = nh.serviceClient<main_loop::path>("path_plan");
     ros::ServiceClient client_goap = nh.serviceClient<main_loop::goap_demo_2>("goap_test_v1");    
+    ros::ServiceClient client_cup = nh.serviceClient<main_loop::cup>("cup");
+    ros::ServiceClient client_ns = nh.serviceClient<main_loop::ns>("ns");
 
 
     // give default value here
@@ -364,6 +366,8 @@ int main(int argc, char **argv)
     //並設定初始值以免service fail
 	main_loop::path path_srv;
     main_loop::goap_demo_2 goap_srv;
+    main_loop::cup srv_cup;
+    main_loop::ns srv_ns;
 
     path_srv.request.goal_pos_x = 0;
     path_srv.request.goal_pos_y = 0;
@@ -385,6 +389,12 @@ int main(int argc, char **argv)
     goap_srv.request.mission_name = "setting" ;
     goap_srv.request.mission_child_name = "setting" ;
 
+
+
+    int cup_suck = 0;
+    int ns_suck = 0;
+    srv_cup.request.OUO = 0;
+    srv_ns.request.OAO = 0;
     
 
 
@@ -576,7 +586,6 @@ int main(int argc, char **argv)
                                     ROS_INFO ("complete:%d",count);
                                     ROS_INFO ("debug_2.robot_case: %s ", debug_2.robot_case.c_str());
                                     ROS_INFO ("mission: %s ", goap_srv.response.mission_name.c_str());
-                                    ROS_INFO ("mission: %s ", goap_srv.response.mission_child_name.c_str());
                                     ROS_INFO("action done in action state: %d" , action_state.MyActionDone());
                                     action_done = true;
                                     goal_covered_counter = 0;

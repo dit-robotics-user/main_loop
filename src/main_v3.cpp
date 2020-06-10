@@ -323,8 +323,8 @@ int main(int argc, char **argv)
 	ros::NodeHandle nh;    	
     ros::Publisher pub_st1 = nh.advertise<std_msgs::Int32MultiArray>("txST1", 1);
 	ros::Publisher pub_st2 = nh.advertise<std_msgs::Int32MultiArray>("txST2", 1);
-    ros::Publisher pub_goap_response = nh.advertise<main_loop::from_goap>("Goap_response", 1);
-    ros::Publisher pub_main_state = nh.advertise<main_loop::main_state>("Main_state", 1);
+    ros::Publisher pub_goap_response = nh.advertise<main_loop::goap_debug>("Goap_response", 1);
+    ros::Publisher pub_main_state = nh.advertise<main_loop::main_debug>("Main_state", 1);
 	ros::ServiceClient client_path = nh.serviceClient<main_loop::path>("path_plan");
     ros::ServiceClient client_goap = nh.serviceClient<main_loop::goap_2>("goap_test_v1");    
 

@@ -1,0 +1,10 @@
+int32 desire_degree
+int32 desire_speed
+int32 desire_mode
+int32[] desire_pos
+int32 desire_wrist
+int32 desire_finger
+int32 desire_hand
+int32 is_wait
+string mission_name 
+string mission_child_name 

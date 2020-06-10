@@ -51,9 +51,11 @@ find_package(catkin REQUIRED COMPONENTS
 add_message_files(
 	FILES
 	agent.msg
+	main_debug.msg
+	goap_debug.msg
 	main_state.msg
 	from_goap.msg
-	agent.msg
+
 	string_with_header.msg
 	position.msg
 	world_state.msg

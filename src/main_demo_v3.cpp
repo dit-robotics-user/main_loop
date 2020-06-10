@@ -11,9 +11,7 @@
 #include "main_loop/path.h"
 #include "main_loop/agent.h"
 #include "main_loop/goap_demo_2.h"
-#include <main_loop/from_goap.h>
 #include <main_loop/position.h>
-#include "main_loop/main_state.h"
 #include <main_loop/goap_debug.h>
 #include "main_loop/main_debug.h"
 #include "main_loop/world_state.h"
@@ -323,8 +321,8 @@ int main(int argc, char **argv)
 	ros::NodeHandle nh;    	
     ros::Publisher pub_st1 = nh.advertise<std_msgs::Int32MultiArray>("txST1", 1);
 	ros::Publisher pub_st2 = nh.advertise<std_msgs::Int32MultiArray>("txST2", 1);
-    ros::Publisher pub_goap_response = nh.advertise<main_loop::from_goap>("Goap_response", 1);
-    ros::Publisher pub_main_state = nh.advertise<main_loop::main_state>("Main_state", 1);
+    ros::Publisher pub_goap_response = nh.advertise<main_loop::goap_debug>("Goap_response", 1);
+    ros::Publisher pub_main_state = nh.advertise<main_loop::main_debug>("Main_state", 1);
 	ros::ServiceClient client_path = nh.serviceClient<main_loop::path>("path_plan");
     ros::ServiceClient client_goap = nh.serviceClient<main_loop::goap_demo_2>("goap_test_v1");    
 
@@ -396,8 +394,8 @@ int main(int argc, char **argv)
         Status stat  = static_cast<Status>(s);
 
         //debug
-        main_loop::from_goap debug_1;
-        main_loop::main_state debug_2;     
+        main_loop::goap_debug debug_1;
+        main_loop::main_debug debug_2;     
 
         switch(stat){
             case Status::SET_STRATEGY: //0

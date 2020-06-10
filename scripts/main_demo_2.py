@@ -107,7 +107,7 @@ class mymain:  #main輸入與輸出參數需在此calss定義
 
 goal = []
 path_done = False
-go_home_time = 2000
+go_home_time = 10
 left_side = 3
 right_side = 3
 north = 1
@@ -157,9 +157,12 @@ def goap_server():
 		if give_next_action == True:  # expand action into its child actions
 			for c_action in action_path[0].child_action:
 				if action_path[0].mode == 2:
-					action_path[0].tangent_point_calculation(my_pos, 5)
+					action_path[0].tangent_point_calculation(my_pos, 2)
 				c_action.position = action_path[0].position
 				c_action.degree = action_path[0].degree
+				c_action.speed = action_path[0].speed
+				c_action.mode = action_path[0].mode
+				c_action.wait = action_path[0].wait
 				demo_path.append(copy.deepcopy(c_action))
 			action_name = action_path[0].name
 			action_path.remove(action_path[0])

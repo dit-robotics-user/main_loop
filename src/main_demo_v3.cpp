@@ -3,6 +3,7 @@
 //goap --->main_demo_2.py
 //srv  --->goap_demo_2.srv
 //20200604 apdate main(new from C)  
+// close lidar
 //==========================
 #include "ros/ros.h"
 #include "std_msgs/String.h"
@@ -404,6 +405,13 @@ int main(int argc, char **argv)
                 debug_1.mission_name= "setting";
                 
                 break;
+                
+            case Status::SET_INITIAL_POS: //0
+                r0 = 0x1000;
+                r1 = 700;
+                r2 = 300;
+                r3 = 90;
+                break;
             case Status::RUN:{ //5
                 count ++;
                 //將agent資訊存入current state
@@ -489,6 +497,7 @@ int main(int argc, char **argv)
 
                 //calculate if blocked using the desire angle and my_angle
                 current_state.ChangeIsBlocked(temp.blocking_with_direction(current_state.IsBlocked(),temp.from_agent.my_degree,desire_angle)); 
+                current_state.ChangeIsBlocked(temp.blocking_with_direction(false,temp.from_agent.my_degree,desire_angle)); 
                                                 
                 if(desire_mode == 2){
                     m = ActionMode::SPEED_MODE;

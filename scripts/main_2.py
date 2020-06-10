@@ -199,7 +199,8 @@ def goap_server():
 				# ==餵動作裡的子動作==
 				while len(top_path.child_action) != 0:
 					top_child = top_path.child_action[0]
-					mymain.output_name = top_child.name
+					mymain.output_child_name = top_child.name
+					mymain.output_name = top_path.name
 					mymain.output_degree = top_child.degree
 					mymain.output_speed = top_child.speed
 					mymain.output_mode = top_child.mode
@@ -209,7 +210,7 @@ def goap_server():
 					print('-> ' + mymain.output_name + str(mymain.output_position))
 
 					# ==子動作做完==
-					if mymain.action_done is True and mymain.output_child_name == mymain.child_name:
+					if mymain.action_done is True and top_child.name == mymain.child_name:
 						top_path.child_action.remove(top_child)
 
 				current_world_state = top_path.result_world_state  # update current world state status

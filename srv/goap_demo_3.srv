@@ -1,0 +1,17 @@
+bool action_done
+int32[] pos
+int32[] cup_color
+int32 north_or_south
+int32 my_degree
+float32 time
+string mission_name
+string mission_child_name 
+---
+int32 speed
+int32 mode
+int32 degree
+int32[] pos
+int32[] ST2
+int32 is_wait
+string mission_name 
+string mission_child_name 

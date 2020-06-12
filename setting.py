@@ -3,10 +3,10 @@ Set all actions, goals and current world states here!!
 this .py file is the only place you will need to change
 =======================================================
 """
-from action_demo_2 import *
+from action import *
 
 # name, preconditions, effects, child_action, position, degree, speed, cost, mode, speed_mode_radius, type_number, cup_number, wait
-def setting(mode, cup_color):
+def setting(mode):#, cup_color):
     demo_path = []
     if mode is 1:
         a1 = Action('hand1_out_get1', [], [1], [], (0, 0), 0, 0, 0, 0, 0, 1, 0, True)
@@ -90,9 +90,9 @@ def setting(mode, cup_color):
 
         child_action_list = [a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15]
         action_path = [c1, c2, c3, c4, c5, c6, c7, c8, c9, c10]
-        go_home_path = [c18, c19]
+        go_home_path = [c9, c10]
 
-        for child in child_action_list:
+        '''for child in child_action_list:
             green = 5
             red = 3
             if child.name == 'finger_open_green2':
@@ -102,6 +102,7 @@ def setting(mode, cup_color):
             elif child.name == 'finger_open_red2':
                 for i in range(len(cup_color)):
                     if cup_color[i] == red:
-                        child.effects.append(i+1)
+                        child.effects.append(i+1)'''
 
     return action_path, go_home_path
+

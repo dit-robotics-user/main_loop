@@ -66,7 +66,6 @@ demo_path = []
 
                    
 def handle_return_to_main(req):  #main輸入參數與獲得結果存取處(service回調函式)  
-	rospy.loginfo('test1 test1');
 	mymain.action_done = req.action_done  # <----
 	mymain.my_pos = (req.pos[0],req.pos[1])
 	#mymain.cup_color = [req.cup_color[0],req.cup_color[1],req.cup_color[2],req.cup_color[3],req.cup_color[4]]
@@ -109,6 +108,9 @@ def goap_server():
 					action_path[0].tangent_point_calculation(my_pos, 5)
 				c_action.position = action_path[0].position
 				c_action.degree = action_path[0].degree
+				c_action.speed = action_path[0].speed
+				c_action.mode = action_path[0].mode
+				c_action.wait = action_path[0].wait
 				demo_path.append(copy.deepcopy(c_action))  #demo_path 變成child_action
 			action_name = action_path[0].name
 			action_path.remove(action_path[0])

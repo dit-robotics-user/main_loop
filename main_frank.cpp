@@ -84,10 +84,10 @@ class sub_class{
 		~sub_class(){};
 };
 
-int hand=0;
-int suck=0; 
-int stepper=0;
-int flag=0;  
+int hand=5;
+int suck=5; 
+int stepper=5;
+int flag=5;  
 
 int rx0;
 int rx1;
@@ -96,7 +96,8 @@ int rx3;
 
 int current_action[4] = {hand, suck, stepper, flag};
 int desire_action[10];
-int old_action[10] = {9,9,9,9,6,6,6,6,6,6};
+int temp_desire_action[10];
+int old_action[10] = {9,9,9,9,6,6,6,6,5,6};
 int command_action[4];
 int desire_speed = 0;
 
@@ -108,6 +109,9 @@ int switch_mode_distance = 4000000;//square
 int distance_square = 0;
 
 bool action_done = false;
+
+    main_loop::path path_srv;
+    main_loop::goap_ goap_srv;
 
 void sub_class::ST1_sub_callback(const std_msgs::Int32MultiArray::ConstPtr& msg){
     my_pos_x = msg->data[0] ;
@@ -146,7 +150,7 @@ bool command_finish(){
 }*/
 
 bool at_pos(){
-	if(my_pos_x == path_srv.request.goal_pos_x && my_pos_y == path_srv.request.goal_pos_y && my_degree == goap_srv.response.degree){
+	if(my_pos_x == path_srv.request.goal_pos_x && my_pos_y == path_srv.request.goal_pos_y /*&& my_degree == goap_srv.response.degree*/){
 		return true;
 	}
 	else{
@@ -160,17 +164,13 @@ int main(int argc, char **argv){
 
 	sub_class sub;
 
-    main_loop::path path_srv;
-    main_loop::goap_ goap_srv;
-
-    goap_srv.request.replan=false;
     goap_srv.request.action_done=false;
-    goap_srv.request.kill_mission=false;
-    goap_srv.request.pos.push_back(700);
+
     goap_srv.request.pos.push_back(300);
-    goap_srv.request.cup_color = {}; 
+    goap_srv.request.pos.push_back(300);
+   // goap_srv.request.cup_color = {}; 
     goap_srv.request.north_or_south = 0 ; 
-    goap_srv.request.strategy = 0 ;
+
     goap_srv.request.time = 0 ;
     goap_srv.request.mission_name = "setting" ;
     goap_srv.request.mission_child_name = "setting" ;
@@ -189,16 +189,18 @@ int main(int argc, char **argv){
 
 		if(sub.client_goap.call(goap_srv)){
                     
-            desire_action[0]=goap_srv.response.ST2[0];
-            desire_action[1]=goap_srv.response.ST2[1];
-            desire_action[2]=goap_srv.response.ST2[2];
-            desire_action[3]=goap_srv.response.ST2[3];
-            desire_action[4]=goap_srv.response.ST2[4];
-            desire_action[5]=goap_srv.response.ST2[5];
-            desire_action[6]=goap_srv.response.ST2[6];
-            desire_action[7]=goap_srv.response.ST2[7];
-            desire_action[8]=goap_srv.response.ST2[8];
-            desire_action[9]=goap_srv.response.ST2[9];
+            ROS_INFO("success to call goap_test");
+
+	    temp_desire_action[0]=goap_srv.response.ST2[0];
+            temp_desire_action[1]=goap_srv.response.ST2[1];
+            temp_desire_action[2]=goap_srv.response.ST2[2];
+            temp_desire_action[3]=goap_srv.response.ST2[3];
+            temp_desire_action[4]=goap_srv.response.ST2[4];
+            temp_desire_action[5]=goap_srv.response.ST2[5];
+            temp_desire_action[6]=goap_srv.response.ST2[6];
+            temp_desire_action[7]=goap_srv.response.ST2[7];
+            temp_desire_action[8]=goap_srv.response.ST2[8];
+            temp_desire_action[9]=goap_srv.response.ST2[9];
             //for path plan
             path_srv.request.goal_pos_x = goap_srv.response.pos[0];
             path_srv.request.goal_pos_y = goap_srv.response.pos[1];
@@ -206,63 +208,84 @@ int main(int argc, char **argv){
             desire_speed = goap_srv.response.speed;  //底盤?
 
             goap_srv.request.mission_name = goap_srv.response.mission_name ;
-            goap_srv.request.mission_child_name = goap_srv.response.mission_child_name 
+            goap_srv.request.mission_child_name = goap_srv.response.mission_child_name ;
         }
         else{
             ROS_ERROR("Failed to call goap_test");
         }
+
+
+
+
+
+
+
+
+
 
 		current_action[0] = hand;
 		current_action[1] = suck;
 		current_action[2] = stepper;
 		current_action[3] = flag;
 
-		/*ROS_INFO("action_from_goap:");
+		ROS_INFO("action_from_goap:");
 		for(int i=0; i<10; i++){
-			ROS_INFO("%d ", desire_action[i]);
-		}*/
+			ROS_INFO("%d ", temp_desire_action[i]);
+		}
+		ROS_INFO("old:");
+		for(int i=0; i<10; i++){
+			ROS_INFO("%d ", old_action[i]);
+		}
 
 		//rx0 hand 1234
         rx0 = 0;
         for(int i = 0; i < 4; i ++){
-            if(desire_action[i] == -1){
+            if(temp_desire_action[i] == -1){
                 desire_action[i] = old_action[i];
+            }
+            else{
+		desire_action[i] = temp_desire_action[i];
             }
         }
         for(int i = 0; i < 4; i ++){
-            rx0 += pow(10, 3-i) * desire_action[i] //可以用嗎
+            rx0 += pow(10, 3-i) * desire_action[i]; //可以用嗎
         }
         
         //rx1 suck 1234
         rx1 = 0;
         for(int i = 4; i < 8; i ++){
-            if(desire_action[i] == -1){
+            if(temp_desire_action[i] == -1){
                 desire_action[i] = old_action[i];
+            }
+	    else{
+		desire_action[i] = temp_desire_action[i];
             }
         }
         for(int i = 4; i < 8; i ++){
-            rx1 += pow(10, 7-i) * desire_action[i] //可以用嗎
+            rx1 += pow(10, 7-i) * desire_action[i]; //可以用嗎
         }
         //rx2
         rx2 = 0;
-        if(desire_action[8] != -1){
-            rx2 = desire_action[8];
+        if(temp_desire_action[8] == -1){
+	    desire_action[8] = old_action[8];         //it will let old_action[i] = desire_action[i] work correctlly
+	    rx2 = old_action[8];
         }
         else{
-        	rx2 = old_action[8];
+	    desire_action[8] = temp_desire_action[8];
+            rx2 = temp_desire_action[8];
         }
         //rx3
         rx3 = 0;
-        if(desire_action[9] != -1){
-            rx3 = desire_action[9];
+        if(temp_desire_action[9] == -1){
+	    desire_action[9] = old_action[9];
+	    rx3 = old_action[9];
+            
         }
         else{
-        	rx3 = old_action[9];
+	    desire_action[9] = temp_desire_action[9];
+            rx3 = temp_desire_action[9];
         }
-        //old_action
-        for(int i = 0; i < 10; i ++){
-            old_action[i] = desire_action[i];
-        }
+        
         //command_action
         command_action[0] = rx0;
         command_action[1] = rx1;
@@ -279,10 +302,17 @@ int main(int argc, char **argv){
 		for(j=0; j<4; j++){
 			ROS_INFO("%d ", current_action[j]);
 		}
+		
+		ROS_INFO ("mission: %s ", goap_srv.response.mission_name.c_str());
+		ROS_INFO ("child mission: %s ", goap_srv.response.mission_child_name.c_str());
 
 		action_done = false;
-		if(command_finish() && at_pos()){
+		if(command_finish()/* && at_pos()*/){
 			ROS_INFO("finish");
+			//old_action
+			for(int i = 0; i < 10; i ++){
+			    old_action[i] = desire_action[i];
+			}
 			action_done = true;
 		}
 		else{
@@ -293,18 +323,18 @@ int main(int argc, char **argv){
 
 //-------------------------------------------------------------------------path
 
-		path_srv.request.my_pos_x = my_pos_x;
-        path_srv.request.my_pos_y = my_pos_y;
+		path_srv.request.my_pos_x = 400; //my_pos_x;
+        path_srv.request.my_pos_y = 400; //my_pos_y;
 
-        path_srv.request.goal_pos_x = goap_srv.response.pos[0]; //測試時用輸入的
-        path_srv.request.goal_pos_y = goap_srv.response.pos[1];
+        path_srv.request.goal_pos_x = 1000; //goap_srv.response.pos[0]; //測試時用輸入的
+        path_srv.request.goal_pos_y = 1000; //goap_srv.response.pos[1];
 
-        path_srv.request.enemy1_x = 380 ;
-        path_srv.request.enemy1_y = 2400 ;
-        path_srv.request.enemy2_x = 380 ;
-        path_srv.request.enemy2_y = 2300 ;
-        path_srv.request.ally_x = 380 ;
-        path_srv.request.ally_y = 2200 ;
+        path_srv.request.enemy1_x = 1300 ;
+        path_srv.request.enemy1_y = 1800 ;
+        path_srv.request.enemy2_x = 5000 ;
+        path_srv.request.enemy2_y = 5000 ;
+        path_srv.request.ally_x = 1300 ;
+        path_srv.request.ally_y = 1300 ;
 
         sub.n.getParam("main_frank/goal_pos_x", path_srv.request.goal_pos_x);
 		sub.n.getParam("main_frank/goal_pos_y", path_srv.request.goal_pos_y);
@@ -326,7 +356,7 @@ int main(int argc, char **argv){
             ROS_INFO("goaly:%d", path_srv.request.goal_pos_y);
             ROS_INFO("enemy1_x:%d",  path_srv.request.enemy1_x);
             ROS_INFO("enemy1_y:%d",  path_srv.request.enemy1_y);
-            ROS_INFO("response_degree:%d", path_srv.response.degree);
+          //  ROS_INFO("response_degree:%d", path_srv.response.degree);
         }
         else{
             ROS_ERROR("Failed to call path_plan");
@@ -340,12 +370,14 @@ int main(int argc, char **argv){
             for_st1.data.push_back(0x4000);                         //pos mode
             for_st1.data.push_back(path_srv.request.goal_pos_x);
             for_st1.data.push_back(path_srv.request.goal_pos_y);
-            for_st1.data.push_back(goap_srv.response.degree);		// ?  //final degree
+            //for_st1.data.push_back(goap_srv.response.degree);		// ?  //final degree
+for_st1.data.push_back(90);
         }
         else{
             for_st1.data.push_back(0x3000);                         //speed mode
-            for_st1.data.push_back(desire_speed);					//speed //goap_srv.response.speed
-            for_st1.data.push_back(path_srv.response.degree);	    //degree //instant
+            for_st1.data.push_back(200);					//speed //goap_srv.response.speed
+            //for_st1.data.push_back(path_srv.response.degree);	    //degree //instant
+for_st1.data.push_back(90);
             for_st1.data.push_back(0);								// ?
         }
 
@@ -362,3 +394,4 @@ int main(int argc, char **argv){
 	}
 	return 0;
 }
+

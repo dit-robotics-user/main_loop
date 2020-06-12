@@ -2,7 +2,7 @@
 #coding=utf-8
 from main_loop.srv import *
 import rospy
-from setting_demo_2 import *
+from setting import *
 
 
 def output_processor(output_action):
@@ -59,19 +59,19 @@ north = 1
 south = 2
 north_position = (1, 1)
 south_position = (2, 2)
-action_path, go_home_path = setting(1, mymain.cup_color)
+action_path, go_home_path = setting(1)#, mymain.cup_color)
 give_next_action = True
 go_home_flag = False
 demo_path = []
 
-
                    
 def handle_return_to_main(req):  #main輸入參數與獲得結果存取處(service回調函式)  
+	rospy.loginfo('test1 test1');
 	mymain.action_done = req.action_done  # <----
 	mymain.my_pos = (req.pos[0],req.pos[1])
-	mymain.cup_color = [req.cup_color[0],req.cup_color[1],req.cup_color[2],req.cup_color[3],req.cup_color[4]]
+	#mymain.cup_color = [req.cup_color[0],req.cup_color[1],req.cup_color[2],req.cup_color[3],req.cup_color[4]]
 	mymain.time = req.time 
-	mymain.my_degree = req.my_degree 
+	#mymain.my_degree = req.my_degree 
 	mymain.north_or_south = req.north_or_south 
 	mymain.name = req.mission_name
 	mymain.child_name = req.mission_child_name
@@ -85,12 +85,12 @@ def goap_server():
 	global action_path
 	
 	#定義goap service name:
-	rospy.init_node('main_demo_2')
-	rospy.Service('goap_test_v1', goap_demo_2, handle_return_to_main)
+	rospy.init_node('goap_main_v1')
+	rospy.Service('goap_test_v1', goap_, handle_return_to_main)
 	
 	#goap的loop放這:
 	while True:
-
+		#rospy.loginfo('test test');
 		path_done = False
 		if mymain.time >= go_home_time and go_home_flag == False:
 			demo_path.clear()
@@ -99,8 +99,9 @@ def goap_server():
 					action.position = north_position
 				elif mymain.north_or_south == south:
 					action.position = south_position
-				action_path = go_home_path
+			action_path = go_home_path
 			go_home_flag = True
+			give_next_action = True
 
 		if give_next_action == True:
 			for c_action in action_path[0].child_action:

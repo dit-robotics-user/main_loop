@@ -126,7 +126,7 @@ public:
     action(int x, int y, int movement_num[], int what_angle, int how_fast, bool is_wait, int what_mode){
         goal_pos_x = x;
         goal_pos_y = y;
-        for(int i = 0; i < 15; i ++){
+        for(int i = 0; i < 16; i ++){
             movement[i] = movement_num[i];
         }
         angle = what_angle;
@@ -159,7 +159,7 @@ public:
 private:
     int goal_pos_x;
     int goal_pos_y;
-    int movement[15];
+    int movement[16];
     int speed;
     int angle;
     bool wait;
@@ -178,13 +178,13 @@ class sub_state{    //--->定義輸出輸入所需參數
         bool lidar_be_blocked();
         bool blocking_with_direction(bool blocking_condition, int my_angle, int desire_angle);  //(blocking_condition = current_state.IsBlocked(), my_a = temp.from_agent.my_degree)
         int movement_from_goap[15];
+        int cup_color[5]; 
         main_loop::agent from_agent;
 		
 	private:
 		ros::NodeHandle n ;
 		ros::Subscriber Agent_sub ;		
         bool emergency[8];
-        int cup_color[5]; 
 };
 
 sub_state::sub_state(){
@@ -211,6 +211,7 @@ void sub_state::callback(const main_loop::agent::ConstPtr& msg){
     from_agent.enemy2_x = msg->enemy2_x ;
     from_agent.enemy2_y = msg->enemy2_y ;
     from_agent.time = msg->time ; 
+    from_agent.ns = msg->ns;
 
 	emergency[0]=msg->emergency[0];
     emergency[1]=msg->emergency[1];
@@ -364,7 +365,7 @@ int main(int argc, char **argv)
     goap_srv.request.pos.push_back(700);
     goap_srv.request.pos.push_back(300);
     goap_srv.request.cup_color = {}; 
-    goap_srv.request.north_or_south = 0 ; 
+    goap_srv.request.north_or_south = 0; 
     goap_srv.request.my_degree = 0 ; 
     goap_srv.request.time = 0 ;
     goap_srv.request.mission_name = "setting" ;
@@ -406,12 +407,37 @@ int main(int argc, char **argv)
                 
                 break;
                 
-            case Status::SET_INITIAL_POS: //0
+
+            case Status::RESET: //1
+                r0 = 0x6000;
+                r1 = 0;
+                r2 = 0;
+                r3 = 0;
+                break;
+
+            case Status::SET_INITIAL_POS:   //2
+                
                 r0 = 0x1000;
                 r1 = 700;
                 r2 = 300;
                 r3 = 90;
+                break;            
+            case Status::STARTING_SCRIPT:   //3
+                /*
+                r0 = 0x2000;
+                r1 = 0;
+                r2 = 0;
+                r3 = 0;
+                */
                 break;
+
+            case Status::READY:{    //4
+                r0 = 0x5000;
+                r1 = 0;
+                r2 = 0;
+                r3 = 0;
+                break;
+            }
             case Status::RUN:{ //5
                 count ++;
                 //將agent資訊存入current state
@@ -443,12 +469,13 @@ int main(int argc, char **argv)
                 path_srv.request.ally_y = 1 ; 
                 //goap
                 goap_srv.request.time = temp.from_agent.time;
-                goap_srv.request.cup_color.push_back(0);
-                goap_srv.request.cup_color.push_back(0); 
-                goap_srv.request.cup_color.push_back(1);
-                goap_srv.request.cup_color.push_back(0); 
-                goap_srv.request.cup_color.push_back(0); 
-                goap_srv.request.north_or_south = 0 ; 
+                goap_srv.request.cup_color={};
+                goap_srv.request.cup_color.push_back(temp.cup_color[0]);
+                goap_srv.request.cup_color.push_back(temp.cup_color[1]); 
+                goap_srv.request.cup_color.push_back(temp.cup_color[2]);
+                goap_srv.request.cup_color.push_back(temp.cup_color[3]); 
+                goap_srv.request.cup_color.push_back(temp.cup_color[4]); 
+                goap_srv.request.north_or_south = temp.from_agent.ns ; 
                 goap_srv.request.action_done=action_state.MyActionDone();
                 goap_srv.request.pos.push_back(action_state.MyPosX());
                 goap_srv.request.pos.push_back(action_state.MyPosY());
@@ -474,6 +501,7 @@ int main(int argc, char **argv)
                     temp.movement_from_goap[13]=goap_srv.response.ST2[13];
                     temp.movement_from_goap[14]=goap_srv.response.ST2[14];
                     temp.movement_from_goap[15]=goap_srv.response.ST2[15];
+                   
                     //for path plan
                     path_srv.request.goal_pos_x = goap_srv.response.pos[0];
                     path_srv.request.goal_pos_y = goap_srv.response.pos[1];
@@ -497,7 +525,7 @@ int main(int argc, char **argv)
 
                 //calculate if blocked using the desire angle and my_angle
                 current_state.ChangeIsBlocked(temp.blocking_with_direction(current_state.IsBlocked(),temp.from_agent.my_degree,desire_angle)); 
-                current_state.ChangeIsBlocked(temp.blocking_with_direction(false,temp.from_agent.my_degree,desire_angle)); 
+                current_state.ChangeIsBlocked(temp.blocking_with_direction(0,temp.from_agent.my_degree,desire_angle)); 
                                                 
                 if(desire_mode == 2){
                     m = ActionMode::SPEED_MODE;
@@ -557,6 +585,7 @@ int main(int argc, char **argv)
                                 //rx3 
                                 if(desire_movement[15]!=-1){
                                     rx3 = desire_movement[15];
+                                    ROS_INFO ("rx3:%d ", rx3);    
                                 }
                                 break;}
 
@@ -645,6 +674,13 @@ int main(int argc, char **argv)
 								ROS_INFO("complete:%d",count);
 								ROS_INFO ("debug_2.robot_case: %s ", debug_2.robot_case.c_str());
 								ROS_INFO ("mission: %s ", goap_srv.response.mission_name.c_str());
+								ROS_INFO ("temp.from_agent.ns=%d ", temp.from_agent.ns); 
+								ROS_INFO ("[0]=%d ", goap_srv.request.cup_color[0]); 
+								ROS_INFO ("[1]=%d ", goap_srv.request.cup_color[1]); 
+								ROS_INFO ("[2]=%d ", goap_srv.request.cup_color[2]); 
+								ROS_INFO ("[3]=%d ", goap_srv.request.cup_color[3]);
+								ROS_INFO ("[4]=%d ", goap_srv.request.cup_color[4]); 
+                
 								action_done = true;
 								goal_covered_counter = 0;
 								count = 0; 

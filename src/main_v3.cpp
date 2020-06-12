@@ -404,6 +404,34 @@ int main(int argc, char **argv)
                 debug_1.mission_name= "setting";
                 
                 break;
+
+            case Status::RESET: //1
+                r0 = 0x6000;
+                r1 = 0;
+                r2 = 0;
+                r3 = 0;
+                break;
+
+            case Status::SET_INITIAL_POS:   //2
+                r0 = 0x1000;
+                r1 = 1300;
+                r2 = 150;
+                r3 = 270;
+                break;            
+            case Status::STARTING_SCRIPT:   //3
+                r0 = 0x2000;
+                r1 = 0;
+                r2 = 0;
+                r3 = 0;
+                break;
+
+            case Status::READY:{    //4
+                r0 = 0x5000;
+                r1 = 0;
+                r2 = 0;
+                r3 = 0;
+                break;
+            }
             case Status::RUN:{ //5
                 count ++;
                 //將agent資訊存入current state

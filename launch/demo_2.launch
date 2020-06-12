@@ -2,7 +2,7 @@
 
 
 
-	<node pkg="main_loop" type="agent_new_3" name="agent_new_3" output="log" respawn="true" >
+	<node pkg="main_loop" type="agent_new_3" name="agent_new_3" respawn="true" >
 	</node>
 
 	<node pkg="eurobot_gui" type="eurobot_gui.py" name="eurobot_gui" output="screen" respawn="true" >
@@ -12,7 +12,7 @@
 
 	<node pkg="main_loop" type="main_demo_v3" name="main_demo_v3" output="screen" respawn="true">
 	</node>
-	<node pkg="main_loop" type="main_demo_2.py" name="main_demo_2" respawn="true" >
+	<node pkg="main_loop" type="main_demo_2.py" name="main_demo_2"  respawn="true" >
 	</node>
 
 	<node pkg="serial_port" type="serial_port_node" name="serial_port_node" output="log" respawn="true" >

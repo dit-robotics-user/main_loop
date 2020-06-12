@@ -101,6 +101,7 @@ sub_class::sub_class(int my_pos_x_,int my_pos_y_, int ini_status){
     pub_to_main.enemy2_y = 5000 ;
     pub_to_main.ally_x = 5000 ;
     pub_to_main.ally_y = 5000 ; 
+    pub_to_main.ns = 0 ;
     status.data = ini_status;
 }
 void sub_class::camera_sub_callback(const main_loop::position::ConstPtr& msg){

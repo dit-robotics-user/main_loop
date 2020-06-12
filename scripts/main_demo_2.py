@@ -13,7 +13,6 @@ def output_processor(output_action, current_left_layer, current_right_layer):
         for p in output_action.effects:
             if p is 1:
                 claw_num = 6 - 2 * current_left_layer   # use layer 2 - left_side + '1'
-                print(str(current_left_layer) + ' ' + str(claw_num))
                 if output_action.type_number is 1:
                     output[claw_num] = 1
                 elif output_action.type_number is 2:
@@ -74,15 +73,10 @@ def output_processor(output_action, current_left_layer, current_right_layer):
             output[13] = 1
         elif current_right_layer is 2 or current_right_layer is 1:
             output[13] = 2
-    elif output_action.type_number is 4:  # hand down 4
-        output[14] = 0
-    elif output_action.type_number is 3:  # hand up 3
-        output[14] = 2
-    elif output_action.type_number is 5:  # flag
+    elif output_action.type_number is 5:  # hand down 4
+        output[14] = output_action.effects[0]
+    elif output_action.type_number is 6:  # flag
         output[15] = output_action.effects[0]
-    #print(output_action.name)
-    #print(output)
-    #print('------------')
     return output
 
 
@@ -107,13 +101,13 @@ class mymain:  #main輸入與輸出參數需在此calss定義
 
 goal = []
 path_done = False
-go_home_time = 10
+go_home_time = 20
 left_side = 3
 right_side = 3
-north = 1
-south = 2
-north_position = (1, 1)      ######
-south_position = (2, 2)      ######
+north = 0
+south = 1
+north_position = (500, 300)      ######
+south_position = (1500, 300)      ######
 demo_path = []
 give_next_action = True
 go_home_flag = False
@@ -130,6 +124,7 @@ def return_to_main(req):  #main輸入參數與獲得結果存取處(service回�
 	mymain.time = req.time 
 	mymain.name = req.mission_name
 	mymain.child_name = req.mission_child_name
+	
 	return [mymain.output_speed,mymain.output_mode,mymain.output_degree,mymain.output_position,mymain.output,mymain.output_wait,mymain.output_name , mymain.output_child_name]
 
 def goap_server():
@@ -137,23 +132,24 @@ def goap_server():
 	global action_path
 	global left_side
 	global right_side
+	global go_home_flag
+	global demo_path
 
 	rospy.init_node('main_demo_2')
 	rospy.Service('goap_test_v1', goap_demo_2,return_to_main)
 	while True:
-
 		path_done = False
 		if mymain.time >= go_home_time and go_home_flag == False:  # switch to go home mode
-			demo_path.clear()
+			demo_path[:] = []
 			for action in go_home_path:
-				if mymain.north_or_south == 0:
+				if mymain.north_or_south == north:
 					action.position = north_position
-				elif mymain.north_or_south == 1:
+				elif mymain.north_or_south == south:
 					action.position = south_position
-				action_path = go_home_path
+			action_path = go_home_path
 			go_home_flag = True
+			give_next_action = True
 			
-
 		if give_next_action == True:  # expand action into its child actions
 			for c_action in action_path[0].child_action:
 				if action_path[0].mode == 2:
@@ -167,7 +163,7 @@ def goap_server():
 			action_name = action_path[0].name
 			action_path.remove(action_path[0])
 			give_next_action = False
-
+		
 		path = demo_path[0]
 		
 		mymain.output_child_name = path.name 

@@ -2,6 +2,10 @@
 #include "std_msgs/String.h"
 #include <std_msgs/Int32.h>
 #include <std_msgs/Int32MultiArray.h>
+
+#include "main_loop/path.h"
+#include "main_loop/goap_.h"
+
 #include <iostream>
 #include <sstream>
 #include <cstdlib>
@@ -91,7 +95,10 @@ int rx2;
 int rx3;
 
 int current_action[4] = {hand, suck, stepper, flag};
-int desire_action[4] = {rx0, rx1, rx2, rx3};
+int desire_action[10];
+int old_action[10] = {9,9,9,9,6,6,6,6,6,6};
+int command_action[4];
+int desire_speed = 0;
 
 int my_pos_x=0;
 int my_pos_y=0;
@@ -99,6 +106,8 @@ int my_degree=0;
 
 int switch_mode_distance = 4000000;//square
 int distance_square = 0;
+
+bool action_done = false;
 
 void sub_class::ST1_sub_callback(const std_msgs::Int32MultiArray::ConstPtr& msg){
     my_pos_x = msg->data[0] ;
@@ -117,11 +126,27 @@ bool command_finish(){
 	int count = 0;
 	int k = 0;
 	for(k=0; k<4; k++){
-		if (current_action[k] == desire_action[k]){
+		if (current_action[k] == command_action[k]){
 			count++;
 		}	
 	}
 	if(count == 4){
+		return true;
+	}
+	else{
+		return false;
+	}
+}
+
+/*bool suck_fail(){
+	int i=0;
+	for(i=0; i<4; i++){
+		if(current_action[1]/pow(10, i))
+	}
+}*/
+
+bool at_pos(){
+	if(my_pos_x == path_srv.request.goal_pos_x && my_pos_y == path_srv.request.goal_pos_y && my_degree == goap_srv.response.degree){
 		return true;
 	}
 	else{
@@ -138,6 +163,18 @@ int main(int argc, char **argv){
     main_loop::path path_srv;
     main_loop::goap_ goap_srv;
 
+    goap_srv.request.replan=false;
+    goap_srv.request.action_done=false;
+    goap_srv.request.kill_mission=false;
+    goap_srv.request.pos.push_back(700);
+    goap_srv.request.pos.push_back(300);
+    goap_srv.request.cup_color = {}; 
+    goap_srv.request.north_or_south = 0 ; 
+    goap_srv.request.strategy = 0 ;
+    goap_srv.request.time = 0 ;
+    goap_srv.request.mission_name = "setting" ;
+    goap_srv.request.mission_child_name = "setting" ;
+
 	while(ros::ok()){
 
 		sub.n.getParam("main_frank/rx0", rx0);
@@ -145,20 +182,96 @@ int main(int argc, char **argv){
 		sub.n.getParam("main_frank/rx2", rx2);
 		sub.n.getParam("main_frank/rx3", rx3);
 
-		desire_action[0] = rx0;
+		/*desire_action[0] = rx0;
 		desire_action[1] = rx1;
 		desire_action[2] = rx2;
-		desire_action[3] = rx3;
+		desire_action[3] = rx3;*/
+
+		if(sub.client_goap.call(goap_srv)){
+                    
+            desire_action[0]=goap_srv.response.ST2[0];
+            desire_action[1]=goap_srv.response.ST2[1];
+            desire_action[2]=goap_srv.response.ST2[2];
+            desire_action[3]=goap_srv.response.ST2[3];
+            desire_action[4]=goap_srv.response.ST2[4];
+            desire_action[5]=goap_srv.response.ST2[5];
+            desire_action[6]=goap_srv.response.ST2[6];
+            desire_action[7]=goap_srv.response.ST2[7];
+            desire_action[8]=goap_srv.response.ST2[8];
+            desire_action[9]=goap_srv.response.ST2[9];
+            //for path plan
+            path_srv.request.goal_pos_x = goap_srv.response.pos[0];
+            path_srv.request.goal_pos_y = goap_srv.response.pos[1];
+
+            desire_speed = goap_srv.response.speed;  //底盤?
+
+            goap_srv.request.mission_name = goap_srv.response.mission_name ;
+            goap_srv.request.mission_child_name = goap_srv.response.mission_child_name 
+        }
+        else{
+            ROS_ERROR("Failed to call goap_test");
+        }
 
 		current_action[0] = hand;
 		current_action[1] = suck;
 		current_action[2] = stepper;
 		current_action[3] = flag;
 
-		ROS_INFO("desire:");
-		int i=0;
-		for(i=0; i<4; i++){
+		/*ROS_INFO("action_from_goap:");
+		for(int i=0; i<10; i++){
 			ROS_INFO("%d ", desire_action[i]);
+		}*/
+
+		//rx0 hand 1234
+        rx0 = 0;
+        for(int i = 0; i < 4; i ++){
+            if(desire_action[i] == -1){
+                desire_action[i] = old_action[i];
+            }
+        }
+        for(int i = 0; i < 4; i ++){
+            rx0 += pow(10, 3-i) * desire_action[i] //可以用嗎
+        }
+        
+        //rx1 suck 1234
+        rx1 = 0;
+        for(int i = 4; i < 8; i ++){
+            if(desire_action[i] == -1){
+                desire_action[i] = old_action[i];
+            }
+        }
+        for(int i = 4; i < 8; i ++){
+            rx1 += pow(10, 7-i) * desire_action[i] //可以用嗎
+        }
+        //rx2
+        rx2 = 0;
+        if(desire_action[8] != -1){
+            rx2 = desire_action[8];
+        }
+        else{
+        	rx2 = old_action[8];
+        }
+        //rx3
+        rx3 = 0;
+        if(desire_action[9] != -1){
+            rx3 = desire_action[9];
+        }
+        else{
+        	rx3 = old_action[9];
+        }
+        //old_action
+        for(int i = 0; i < 10; i ++){
+            old_action[i] = desire_action[i];
+        }
+        //command_action
+        command_action[0] = rx0;
+        command_action[1] = rx1;
+        command_action[2] = rx2;
+        command_action[3] = rx3;
+
+		ROS_INFO("command:");
+		for(int i=0; i<4; i++){
+			ROS_INFO("%d ", command_action[i]);
 		}
 
 		ROS_INFO("current:");
@@ -167,12 +280,16 @@ int main(int argc, char **argv){
 			ROS_INFO("%d ", current_action[j]);
 		}
 
-		if(command_finish()){
+		action_done = false;
+		if(command_finish() && at_pos()){
 			ROS_INFO("finish");
+			action_done = true;
 		}
 		else{
 			ROS_INFO("ing or fail");
 		}
+
+		goap_srv.request.action_done = action_done;
 
 //-------------------------------------------------------------------------path
 
@@ -205,9 +322,11 @@ int main(int argc, char **argv){
 	    for_st1.data.push_back(r3); */
 
 	    if(sub.client_path.call(path_srv)){
-            ROS_INFO("%d", path_srv.request.goal_pos_x);
-            ROS_INFO("%d", path_srv.request.goal_pos_y);
-            ROS_INFO("%d", path_srv.response.degree);
+            ROS_INFO("goalx:%d", path_srv.request.goal_pos_x);
+            ROS_INFO("goaly:%d", path_srv.request.goal_pos_y);
+            ROS_INFO("enemy1_x:%d",  path_srv.request.enemy1_x);
+            ROS_INFO("enemy1_y:%d",  path_srv.request.enemy1_y);
+            ROS_INFO("response_degree:%d", path_srv.response.degree);
         }
         else{
             ROS_ERROR("Failed to call path_plan");
@@ -221,12 +340,12 @@ int main(int argc, char **argv){
             for_st1.data.push_back(0x4000);                         //pos mode
             for_st1.data.push_back(path_srv.request.goal_pos_x);
             for_st1.data.push_back(path_srv.request.goal_pos_y);
-            for_st1.data.push_back(90);						        // ?
+            for_st1.data.push_back(goap_srv.response.degree);		// ?  //final degree
         }
         else{
             for_st1.data.push_back(0x3000);                         //speed mode
-            for_st1.data.push_back(200);							//speed
-            for_st1.data.push_back(path_srv.response.degree);	    //degree
+            for_st1.data.push_back(desire_speed);					//speed //goap_srv.response.speed
+            for_st1.data.push_back(path_srv.response.degree);	    //degree //instant
             for_st1.data.push_back(0);								// ?
         }
 

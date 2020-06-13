@@ -1,0 +1,24 @@
+
+<launch>
+
+
+	<node pkg="main_loop" type="path_planning_" name="path_planning_" output="log" respawn="true" >
+	</node>
+
+	<node pkg="main_loop" type="main_demo_v4" name="main_demo_v4" output="screen" respawn="true">
+	</node>
+	<node pkg="main_loop" type="agent_new_3" name="agent_new_3">
+	</node>
+	<node pkg="main_loop" type="main_demo_3.py" name="main_demo_3" output="screen" respawn="true">
+	</node>
+	<node pkg="eurobot_gui" type="eurobot_gui.py" name="eurobot_gui" output="screen" respawn="true">
+	</node>
+	
+	
+	   <include file="$(find lidar_2020)/launch/octagonal_range.launch">
+    </include>	
+	
+    
+
+
+</launch>

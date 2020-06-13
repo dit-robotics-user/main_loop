@@ -24,6 +24,7 @@ class sub_class{
         void lidarmsg_sub_callback(const lidar_2020::alert_range::ConstPtr& msg);
         void camera_sub_callback(const main_loop::position::ConstPtr& msg);
         void status_sub_callback(const std_msgs::Int32::ConstPtr& msg);
+        void strategy_sub_callback(const std_msgs::Int32::ConstPtr& msg);
         void publish_(float time);
         void change_status(int z); 
         void change_cup_color(int color[]);
@@ -101,7 +102,8 @@ sub_class::sub_class(int my_pos_x_,int my_pos_y_, int ini_status){
     pub_to_main.enemy2_x = 5000 ;
     pub_to_main.enemy2_y = 5000 ;
     pub_to_main.ally_x = 5000 ;
-    pub_to_main.ally_y = 5000 ; 
+    pub_to_main.ally_y = 5000 ;
+    pub_to_main.ns = 0 ; 
     status.data = ini_status;
 }
 void sub_class::strategy_sub_callback(const std_msgs::Int32::ConstPtr& msg){

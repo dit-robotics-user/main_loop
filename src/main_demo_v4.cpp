@@ -15,6 +15,7 @@
 #include <main_loop/goap_debug.h>
 #include "main_loop/main_debug.h"
 #include "main_loop/world_state.h"
+#include "main_loop/set_strategy.h"
 
 #include <iostream>
 #include <queue>
@@ -221,6 +222,7 @@ void sub_state::callback(const main_loop::agent::ConstPtr& msg){
     from_agent.hand = msg -> hand ; 
     from_agent.finger = msg->finger ;
     from_agent.time = msg->time ;  
+    from_agent.strategy = msg->strategy;  
 	from_agent.enemy1_x = msg->enemy1_x;
 	from_agent.enemy1_y = msg->enemy1_y;
 	from_agent.enemy2_x = msg->enemy2_x;
@@ -324,7 +326,8 @@ int main(int argc, char **argv)
     ros::Publisher pub_goap_response = nh.advertise<main_loop::goap_debug>("Goap_response", 1);
     ros::Publisher pub_main_state = nh.advertise<main_loop::main_debug>("Main_state", 1);
 	ros::ServiceClient client_path = nh.serviceClient<main_loop::path>("path_plan");
-    ros::ServiceClient client_goap = nh.serviceClient<main_loop::goap_demo_2>("goap_test_v1");    
+    ros::ServiceClient client_goap = nh.serviceClient<main_loop::goap_demo_2>("goap_test_v1");   
+    ros::ServiceClient client_set_goap = nh.serviceClient<main_loop::set_strategy>("set");    
 
 
     // give default value here
@@ -362,6 +365,7 @@ int main(int argc, char **argv)
     //並設定初始值以免service fail
 	main_loop::path path_srv;
     main_loop::goap_demo_2 goap_srv;
+    main_loop::set_strategy strategy_srv;
 
     path_srv.request.goal_pos_x = 0;
     path_srv.request.goal_pos_y = 0;
@@ -430,6 +434,13 @@ int main(int argc, char **argv)
                 r1 = 0;
                 r2 = 0;
                 r3 = 0;
+                strategy_srv.request.strategy = temp.from_agent.strategy;
+                goap_srv.request.pos.push_back(temp.from_agent.my_pos_x);
+                goap_srv.request.pos.push_back(temp.from_agent.my_pos_y); 
+                if(client_set_goap.call(strategy_srv)){
+                }else{
+                    ROS_INFO("Failed to call set_strategy");
+                }
                 break;
             }
 
@@ -486,7 +497,7 @@ int main(int argc, char **argv)
                     path_srv.request.goal_pos_x = goap_srv.response.pos[0];
                     path_srv.request.goal_pos_y = goap_srv.response.pos[1];
                 }else{
-                    ROS_ERROR("Failed to call goap_test");
+                    ROS_INFO("Failed to call goap_test");
                 }
                 //
                 goap_srv.request.mission_name = goap_srv.response.mission_name ;

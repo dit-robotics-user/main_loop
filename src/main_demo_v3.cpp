@@ -175,6 +175,7 @@ class sub_state{   //--->定義輸出輸入所需參數
         bool blocking_with_direction(bool blocking_condition, int my_angle, int desire_angle);  //(blocking_condition = current_state.IsBlocked(), my_a = temp.from_agent.my_degree)
         bool lighthouse_done ;
         bool flag_done ; 
+        int cup_color[5]; 
         int movement_from_goap[7];
         main_loop::agent from_agent;
 
@@ -183,7 +184,6 @@ class sub_state{   //--->定義輸出輸入所需參數
 		ros::Subscriber Agent_sub ;		
         ros::Subscriber world_state_sub ;	
         bool emergency[8];
-        int cup_color[5]; 
         	 
 };
 
@@ -412,17 +412,19 @@ int main(int argc, char **argv)
                 r3 = 0;
                 break;
 
-            case Status::SET_INITIAL_POS:   //2
+            case Status::SET_INITIAL_POS:   //2--->設置ST的初始值 應該要根據strategy可以變動值
                 r0 = 0x1000;
-                r1 = 0;
-                r2 = 0;
-                r3 = 0;
+                r1 = 700;
+                r2 = 300;
+                r3 = 90;
                 break;            
-            case Status::STARTING_SCRIPT:   //3
+            case Status::STARTING_SCRIPT:   //3--->跑撞牆定位(測試時先把它註解)
+                /*
                 r0 = 0x2000;
                 r1 = 0;
                 r2 = 0;
                 r3 = 0;
+                */
                 break;
 
             case Status::READY:{    //4
@@ -460,11 +462,12 @@ int main(int argc, char **argv)
                 path_srv.request.ally_y = 1 ; 
                 //goap
                 goap_srv.request.time = temp.from_agent.time;
-                goap_srv.request.cup_color.push_back(0);
-                goap_srv.request.cup_color.push_back(0); 
-                goap_srv.request.cup_color.push_back(1);
-                goap_srv.request.cup_color.push_back(0); 
-                goap_srv.request.cup_color.push_back(0); 
+                goap_srv.request.cup_color = {}; 
+                goap_srv.request.cup_color.push_back(temp.cup_color[0]);
+                goap_srv.request.cup_color.push_back(temp.cup_color[1]); 
+                goap_srv.request.cup_color.push_back(temp.cup_color[2]);
+                goap_srv.request.cup_color.push_back(temp.cup_color[3]); 
+                goap_srv.request.cup_color.push_back(temp.cup_color[4]); 
                 goap_srv.request.north_or_south = 0 ; 
                 goap_srv.request.action_done=action_state.MyActionDone();
                 goap_srv.request.pos.push_back(action_state.MyPosX());

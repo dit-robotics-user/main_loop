@@ -177,14 +177,14 @@ class sub_state{   //--->定義輸出輸入所需參數
         bool lighthouse_done ;
         bool flag_done ; 
         int movement_from_goap[7];
+        int cup_color[5];
         main_loop::agent from_agent;
 
 	private:
 		ros::NodeHandle n ;
 		ros::Subscriber Agent_sub ;		
         ros::Subscriber world_state_sub ;	
-        bool emergency[8];
-        int cup_color[5]; 
+        bool emergency[8]; 
         	 
 };
 
@@ -471,11 +471,12 @@ int main(int argc, char **argv)
                 path_srv.request.ally_y = 1 ; 
                 //goap
                 goap_srv.request.time = temp.from_agent.time;
-                goap_srv.request.cup_color.push_back(0);
-                goap_srv.request.cup_color.push_back(0); 
-                goap_srv.request.cup_color.push_back(1);
-                goap_srv.request.cup_color.push_back(0); 
-                goap_srv.request.cup_color.push_back(0); 
+                goap_srv.request.cup_color = {}; 
+                goap_srv.request.cup_color.push_back(temp.cup_color[0]);
+                goap_srv.request.cup_color.push_back(temp.cup_color[1]); 
+                goap_srv.request.cup_color.push_back(temp.cup_color[2]);
+                goap_srv.request.cup_color.push_back(temp.cup_color[3]); 
+                goap_srv.request.cup_color.push_back(temp.cup_color[4]); 
                 goap_srv.request.north_or_south = 0 ; 
                 goap_srv.request.action_done=action_state.MyActionDone();
                 goap_srv.request.pos.push_back(action_state.MyPosX());

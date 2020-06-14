@@ -1,8 +1,8 @@
 //==========================
 //對應版本:
-//agent --->agent_new_3.cpp
+//agent --->agent_new_4.cpp
 //goap  --->main_demo_2.py
-//srv   --->goap_demo_2.srv
+//srv   --->goap_demo_4.srv
 //20200604 apdate main  
 //==========================
 #include "ros/ros.h"
@@ -359,6 +359,8 @@ int main(int argc, char **argv)
     float now_degree = 0 ;
     int count = 0 ;
 
+    int set_goap = 0;
+
     //在subscriber定義的參數則需宣告一個sub_class在此，即可運用在回調函式使用到的參數
     sub_state temp;
     //在main裡定義的topic和service所需的傳輸格式需由此先宣告一次
@@ -418,15 +420,17 @@ int main(int argc, char **argv)
 
             case Status::SET_INITIAL_POS:   //2
                 r0 = 0x1000;
-                r1 = 0;
-                r2 = 0;
-                r3 = 0;
+                r1 = 700;
+                r2 = 300;
+                r3 = 90;
                 break;            
             case Status::STARTING_SCRIPT:   //3
+                /*
                 r0 = 0x2000;
                 r1 = 0;
                 r2 = 0;
                 r3 = 0;
+                */
                 break;
 
             case Status::READY:{    //4
@@ -435,12 +439,27 @@ int main(int argc, char **argv)
                 r2 = 0;
                 r3 = 0;
                 strategy_srv.request.strategy = temp.from_agent.strategy;
-                goap_srv.request.pos.push_back(temp.from_agent.my_pos_x);
-                goap_srv.request.pos.push_back(temp.from_agent.my_pos_y); 
-                if(client_set_goap.call(strategy_srv)){
-                }else{
-                    ROS_INFO("Failed to call set_strategy");
-                }
+                strategy_srv.request.set_finish = 1 ;
+                strategy_srv.request.init_pos.push_back(temp.from_agent.my_pos_x);
+                strategy_srv.request.init_pos.push_back(temp.from_agent.my_pos_y);
+                //strategy_srv.request.init_pos.push_back(700);
+                //strategy_srv.request.init_pos.push_back(300);
+                strategy_srv.request.cup_color = {}; 
+                strategy_srv.request.cup_color.push_back(temp.cup_color[0]);
+                strategy_srv.request.cup_color.push_back(temp.cup_color[1]); 
+                strategy_srv.request.cup_color.push_back(temp.cup_color[2]);
+                strategy_srv.request.cup_color.push_back(temp.cup_color[3]); 
+                strategy_srv.request.cup_color.push_back(temp.cup_color[4]); 
+                if(temp.cup_color[0]!=2 && set_goap==0){
+                    if(client_set_goap.call(strategy_srv)){
+                        if(strategy_srv.response.goap_return==true){
+                            set_goap=1;
+                            ROS_INFO("set goap finish");
+                        }
+                    }else{
+                        ROS_INFO("Failed to call set_strategy");
+                    }
+                } 
                 break;
             }
 

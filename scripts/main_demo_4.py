@@ -42,6 +42,7 @@ class set_frommain:
 	init_pos = (3,3)
 	set_finish = 0 
 	setting_finish = 0 
+	cup_color = [5, 3, 5, 5, 3]  # <---
 	
 	
 
@@ -51,7 +52,6 @@ north = 1
 south = 2
 north_position = (1, 1)
 south_position = (2, 2)
-action_path, go_home_path = setting(1, mymain.cup_color)
 give_next_action = True
 go_home_flag = False
 demo_path = []
@@ -61,7 +61,6 @@ demo_path = []
 def handle_return_to_main(req):  #main輸入參數與獲得結果存取處(service回調函式)  
 	mymain.action_done = req.action_done  # <----
 	mymain.my_pos = (req.pos[0],req.pos[1])
-	mymain.cup_color = [req.cup_color[0],req.cup_color[1],req.cup_color[2],req.cup_color[3],req.cup_color[4]]
 	mymain.time = req.time 
 	mymain.my_degree = req.my_degree 
 	mymain.north_or_south = req.north_or_south 
@@ -71,8 +70,10 @@ def handle_return_to_main(req):  #main輸入參數與獲得結果存取處(servi
 	
 def setting_strategy(req):
 	set_frommain.strategy = req.strategy
-	set_frommain.init_pos = (req.pos[0],req.pos[1])
-	return [true]
+	set_frommain.init_pos = (req.init_pos[0],req.init_pos[1])
+	set_frommain.cup_color = [req.cup_color[0],req.cup_color[1],req.cup_color[2],req.cup_color[3],req.cup_color[4]]
+	set_frommain.set_finish =  1
+	return [True]
 	
 
 def goap_server():
@@ -83,57 +84,60 @@ def goap_server():
 	global action_path
 	
 	#定義goap service name:
-	rospy.init_node('main_demo_3')
+	rospy.init_node('main_demo_4')
 	rospy.Service('goap_test_v1', goap_demo_2, handle_return_to_main)
 	rospy.Service('set', set_strategy, setting_strategy)
 	
-	#goap的loop放這:
-	while True:
+	while True:	
+		#goap的loop放這:
+		if set_frommain.set_finish == 0 :
+			action_path, go_home_path = setting(1, set_frommain.cup_color)
+			print('setfinish')
+		else:
+			path_done = False
+			if mymain.time >= go_home_time and go_home_flag == False:
+				demo_path.clear()
+				for action in go_home_path:
+					if mymain.north_or_south == north:
+						action.position = north_position
+					elif mymain.north_or_south == south:
+						action.position = south_position
+					action_path = go_home_path
+				go_home_flag = True
 
-		path_done = False
-		if mymain.time >= go_home_time and go_home_flag == False:
-			demo_path.clear()
-			for action in go_home_path:
-				if mymain.north_or_south == north:
-					action.position = north_position
-				elif mymain.north_or_south == south:
-					action.position = south_position
-				action_path = go_home_path
-			go_home_flag = True
+			if give_next_action == True:
+				for c_action in action_path[0].child_action:
+					if action_path[0].mode == 2:
+						action_path[0].tangent_point_calculation(my_pos, 5)
+					c_action.position = action_path[0].position
+					c_action.degree = action_path[0].degree
+					demo_path.append(copy.deepcopy(c_action))
+				action_name = action_path[0].name
+				action_path.remove(action_path[0])
+				give_next_action = False
 
-		if give_next_action == True:
-			for c_action in action_path[0].child_action:
-				if action_path[0].mode == 2:
-					action_path[0].tangent_point_calculation(my_pos, 5)
-				c_action.position = action_path[0].position
-				c_action.degree = action_path[0].degree
-				demo_path.append(copy.deepcopy(c_action))
-			action_name = action_path[0].name
-			action_path.remove(action_path[0])
-			give_next_action = False
+			path = demo_path[0]
+			mymain.output_child_name = path.name 
+			mymain.output_name = action_name
+			mymain.output = output_processor(path)
+			mymain.output_degree = path.degree
+			mymain.output_speed = path.speed
+			mymain.output_mode = path.mode
+			mymain.output_position = path.position
+			mymain.output_wait = path.wait
 
-		path = demo_path[0]
-		mymain.output_child_name = path.name 
-		mymain.output_name = action_name
-		mymain.output = output_processor(path)
-		mymain.output_degree = path.degree
-		mymain.output_speed = path.speed
-		mymain.output_mode = path.mode
-		mymain.output_position = path.position
-		mymain.output_wait = path.wait
+			if mymain.action_done is True and demo_path[0].name == mymain.child_name:
 
-		if mymain.action_done is True and demo_path[0].name == mymain.child_name:
-
-			#print(path.name)
-			#print(path.position)
-			#print(path.degree)
-			#print(mymain.output)
-			#print()
-			if len(demo_path) > 1:
-				demo_path.remove(demo_path[0])
-			elif len(demo_path) == 1 and len(action_path) >= 1:
-				demo_path.remove(demo_path[0])
-				give_next_action = True
+				#print(path.name)
+				#print(path.position)
+				#print(path.degree)
+				#print(mymain.output)
+				#print()
+				if len(demo_path) > 1:
+					demo_path.remove(demo_path[0])
+				elif len(demo_path) == 1 and len(action_path) >= 1:
+					demo_path.remove(demo_path[0])
+					give_next_action = True
 			
 		
 

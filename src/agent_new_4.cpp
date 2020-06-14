@@ -1,6 +1,7 @@
 //===================
 //加入友軍、敵人位置
 //還有NS跟cup color資料
+//0614 update
 //===================
 #include "ros/ros.h"
 #include <iostream>
@@ -169,7 +170,7 @@ void sub_class::publish_(float time ){
 }
 
 int main(int argc, char **argv){
-    ros::init(argc,argv, "agent_new_3");
+    ros::init(argc,argv, "agent_new_4");
     ros::NodeHandle nh;
     ros::ServiceClient client_cup = nh.serviceClient<main_loop::cup>("cup");
     ros::ServiceClient client_ns = nh.serviceClient<main_loop::ns>("ns");
@@ -191,6 +192,7 @@ int main(int argc, char **argv){
 
     int color_[5]={0,0,0,0,0};
     temp.change_cup_color(color_);
+    int timer = 0 ; //--->單台測試時，小雞跳轉的counter(in status 4)
 
     //availible form 
     //N S : 0 1 
@@ -207,15 +209,21 @@ int main(int argc, char **argv){
         //when status = a ,timer reset 
         switch(temp.now_status()){
             case 4:
+            timer++;
                 if(count==0){
                     ROS_INFO("status=4");
-                    temp.change_status(4);
+                    temp.change_status(4);                        
+                    srv_ns.request.OAO=10;
                     count =1;                    
                 }else{
+                    if(timer>200){
+                        srv_cup.request.OUO = 1; //--->call cup service 
+                    }
                     if( temp.now_degree() < 10000){
-                        temp.change_status(5);
-                        srv_ns.request.OAO=10;
-                        count=0;
+                        if( timer >=800 || srv_cup.request.OUO == 2){
+                            temp.change_status(5);
+                            count=0;
+                        }
                     }
                 }
                 break;
@@ -225,7 +233,6 @@ int main(int argc, char **argv){
                     ROS_INFO("status=5");
                     temp.change_status(5);
                     begin_time =ros::Time::now();
-                    srv_cup.request.OUO=1; //--->call cup service 
                     srv_ns.request.OAO=10; //--->pub to side camera
                     count =1;                    
                 }else{
@@ -242,53 +249,7 @@ int main(int argc, char **argv){
                 if(clustering_time>30){
                     srv_ns.request.OAO=1;//--->30s call ns service 
                 }
-
-                //cup service
-                if(srv_cup.request.OUO==1){
-                    if(client_cup.call(srv_cup)){
-                        if(srv_cup.response.CupResult[0]!=0 && srv_cup.response.CupResult[0]!=1 ){
-                            cup_suck = 1 ;     
-                            ROS_INFO("cup_suck");
-                        }else{
-                            srv_cup.request.OUO = 2 ;//finish
-                            for(int k_=0;k_<5;k_++){
-                                color_[k_]=srv_cup.response.CupResult[k_];
-                            }
-                        }  
-                        if(srv_cup.request.OUO == 2){
-                            temp.change_cup_color(color_);
-                        }
-                    }else{
-                        cup_suck = 1 ;     
-                        ROS_INFO("fail to call");
-                    }   
-                }
-                if(cup_suck == 1 ){
-                    srv_cup.request.OUO = 3;
-                }
                 
-
-                //ns service 
-                if(srv_ns.request.OAO==1||srv_ns.request.OAO==10){
-                    if(client_ns.call(srv_ns)){
-                        if(srv_ns.response.ns !=0 && srv_ns.response.ns!=1 ){
-                            ROS_INFO("cup_suck");
-                            ns_suck = 1 ;     
-                        }else{
-                            srv_ns.request.OAO = 2 ;//finish 
-                            temp.change_ns(srv_ns.response.ns);
-                        }  
-                    }else{
-                        ROS_INFO("fail to call");
-                        ns_suck = 1 ; 
-                    }   
-                }
-                if(cup_suck == 1 ){
-                    srv_ns.request.OAO = 3;
-                }
-                if(srv_ns.request.OAO==10 ){
-                    srv_ns.request.OAO = 0;
-                }
 
 
                 break;
@@ -305,6 +266,53 @@ int main(int argc, char **argv){
             
                 break;
        }
+
+        //cup service
+        if(srv_cup.request.OUO==1){
+            if(client_cup.call(srv_cup)){
+                if(srv_cup.response.CupResult[0]!=0 && srv_cup.response.CupResult[0]!=1 ){
+                    cup_suck = 1 ;     
+                    ROS_INFO("cup_suck");
+                }else{
+                    srv_cup.request.OUO = 2 ;//finish
+                    for(int k_=0;k_<5;k_++){
+                        color_[k_]=srv_cup.response.CupResult[k_];
+                    }
+                }  
+                if(srv_cup.request.OUO == 2){
+                    temp.change_cup_color(color_);
+                }
+            }else{
+                cup_suck = 1 ;     
+                ROS_INFO("fail to call");
+            }   
+        }
+        if(cup_suck == 1 ){
+            srv_cup.request.OUO = 3;
+        }
+
+        //ns service 
+        if(srv_ns.request.OAO==1||srv_ns.request.OAO==10){
+            if(client_ns.call(srv_ns)){
+                if(srv_ns.response.ns !=0 && srv_ns.response.ns!=1 ){
+                    ROS_INFO("cup_suck");
+                    ns_suck = 1 ;     
+                }else{
+                    srv_ns.request.OAO = 2 ;//finish 
+                    temp.change_ns(srv_ns.response.ns);
+                }  
+            }else{
+                ROS_INFO("fail to call");
+                ns_suck = 1 ; 
+            }   
+        }
+        if(cup_suck == 1 ){
+            srv_ns.request.OAO = 3;
+        }
+        if(srv_ns.request.OAO==10 ){
+            srv_ns.request.OAO = 0;
+        }
+
 
         last_clustering_time=clustering_time;
         temp.publish_(clustering_time);

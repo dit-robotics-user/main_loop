@@ -68,7 +68,7 @@ def setting(mode, action_list, current_world_state, mission_list, my_pos, my_deg
 
         child_action_list = [a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15]
         action_list = [c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14, c15, c16, c17]
-        #action_list = [c1, c2, c3, c4, c5, c7, c8, c9, c10, c11, c12, c13, c14, c17]
+        action_list = [c10, c11, c12, c13, c14, c17]
 
         current_world_state = ['no_cups', 'hand_down', 'first_time', 'lighthouse_unactivated', 'windsocks_unpushed']
 

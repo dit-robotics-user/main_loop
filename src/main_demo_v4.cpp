@@ -445,11 +445,11 @@ int main(int argc, char **argv)
                 //strategy_srv.request.init_pos.push_back(700);
                 //strategy_srv.request.init_pos.push_back(300);
                 strategy_srv.request.cup_color = {}; 
-                strategy_srv.request.cup_color.push_back(temp.cup_color[0]);
-                strategy_srv.request.cup_color.push_back(temp.cup_color[1]); 
-                strategy_srv.request.cup_color.push_back(temp.cup_color[2]);
+                strategy_srv.request.cup_color.push_back(temp.cup_color[4]);
                 strategy_srv.request.cup_color.push_back(temp.cup_color[3]); 
-                strategy_srv.request.cup_color.push_back(temp.cup_color[4]); 
+                strategy_srv.request.cup_color.push_back(temp.cup_color[2]);
+                strategy_srv.request.cup_color.push_back(temp.cup_color[1]); 
+                strategy_srv.request.cup_color.push_back(temp.cup_color[0]); 
                 if(temp.cup_color[0]!=2 && set_goap==0){
                     if(client_set_goap.call(strategy_srv)){
                         if(strategy_srv.response.goap_return==true){
@@ -574,6 +574,10 @@ int main(int argc, char **argv)
                                 if(desire_movement[0]!=-1){
                                     rx0 = desire_movement[0];
                                 }
+			    long int r0=0x5000;
+			    long int r1=0;
+			    long int r2=0;
+			    long int r3=0;
 
                                 bool c;
                                 if(rx1==current_state.MyTx1()){
@@ -607,6 +611,12 @@ int main(int argc, char **argv)
                                     ROS_INFO ("mission: %s ", goap_srv.response.mission_name.c_str());
                                     ROS_INFO ("mission: %s ", goap_srv.response.mission_child_name.c_str());
                                     ROS_INFO("action done in action state: %d" , action_state.MyActionDone());
+					ROS_INFO("temp.cup_color[0]= %d" , temp.cup_color[0]);
+					ROS_INFO("temp.cup_color[1]= %d" , temp.cup_color[1]);
+					ROS_INFO("temp.cup_color[2]= %d" , temp.cup_color[2]);
+					ROS_INFO("temp.cup_color[3]= %d" , temp.cup_color[3]);
+					ROS_INFO("temp.cup_color[4]= %d" , temp.cup_color[4]);
+
                                     action_done = true;
                                     goal_covered_counter = 0;
                                     count = 0; 
@@ -635,20 +645,20 @@ int main(int argc, char **argv)
                                     r3 = desire_angle;
                                 }
                                 else{
-									//path plan service
-									if(client_path.call(path_srv)){
-										now_degree = path_srv.response.degree ; 
-									}else{
-										ROS_INFO ("mission: %s ", goap_srv.response.mission_name.c_str());
-										ROS_INFO("desire_pos_x=%d",desire_pos_x);
-										ROS_INFO("desire_pos_y=%d",desire_pos_y);
-										ROS_INFO("action_state.MyPosX()=%d",action_state.MyPosX());
-										ROS_INFO("action_state.MyPosY()=%d",action_state.MyPosY());
-										ROS_ERROR("Failed to call service path plan");
-									}
-									if(now_degree<0){  //--->如果回傳值為負值表示path plan 沒有算出資料 就存取上一次計算出的數值
-										now_degree = last_degree;
-									} 
+					//path plan service
+					if(client_path.call(path_srv)){
+						now_degree = path_srv.response.degree ; 
+					}else{
+						ROS_INFO ("mission: %s ", goap_srv.response.mission_name.c_str());
+						ROS_INFO("desire_pos_x=%d",desire_pos_x);
+						ROS_INFO("desire_pos_y=%d",desire_pos_y);
+						ROS_INFO("action_state.MyPosX()=%d",action_state.MyPosX());
+						ROS_INFO("action_state.MyPosY()=%d",action_state.MyPosY());
+						ROS_ERROR("Failed to call service path plan");
+					}
+					if(now_degree<0){  //--->如果回傳值為負值表示path plan 沒有算出資料 就存取上一次計算出的數值
+						now_degree = last_degree;
+					} 
 									
                                     r0 = 0x3000;
                                     r1 = desire_speed;

@@ -55,6 +55,7 @@ south_position = (900, 300)
 give_next_action = True
 go_home_flag = False
 demo_path = []
+counter = 0 
 
 
                    
@@ -74,7 +75,7 @@ def setting_strategy(req):
 	set_frommain.strategy = req.strategy
 	set_frommain.init_pos = (req.init_pos[0],req.init_pos[1])
 	set_frommain.cup_color = [req.cup_color[0],req.cup_color[1],req.cup_color[2],req.cup_color[3],req.cup_color[4]]
-	set_frommain.set_finish =  1
+	set_frommain.set_finish =  req.set_finish
 	return [True]
 	
 
@@ -86,6 +87,7 @@ def goap_server():
 	global action_path
 	global go_home_flag
 	global go_home_time
+	global counter
 
 	
 	#定義goap service name:
@@ -95,10 +97,12 @@ def goap_server():
 	
 	while True:	
 		#goap的loop放這:
-		if set_frommain.set_finish == 0 :
-			action_path, go_home_path = setting(1, set_frommain.cup_color)
-			print('setfinish')
-		else:
+		if set_frommain.set_finish == 1 :
+			if counter == 0:
+				action_path, go_home_path = setting(1, set_frommain.cup_color)
+				print('setfinish')
+				counter=1
+
 			path_done = False
 			if mymain.time >= go_home_time and go_home_flag == False:
 				demo_path.clear()

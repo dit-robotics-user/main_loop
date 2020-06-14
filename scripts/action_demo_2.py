@@ -79,4 +79,3 @@ class Action:
         self.priority = 0
         self.required_world_state = []
         self.result_world_state = []
-

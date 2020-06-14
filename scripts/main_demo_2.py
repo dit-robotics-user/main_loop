@@ -61,12 +61,15 @@ def handle_return_to_main(req):  #main輸入參數與獲得結果存取處(servi
 	mymain.child_name = req.mission_child_name
 	return [mymain.output_speed,mymain.output_mode,mymain.output_degree,mymain.output_position,mymain.output,mymain.output_wait,mymain.output_name,mymain.output_child_name]
 
+
 def goap_server():
 	
 	#定義跨函式但無須傳出的參數:
 	global demo_path
 	global give_next_action
 	global action_path
+	global go_home_flag
+	global go_home_time
 	
 	#定義goap service name:
 	rospy.init_node('main_demo_2')
@@ -77,14 +80,15 @@ def goap_server():
 
 		path_done = False
 		if mymain.time >= go_home_time and go_home_flag == False:
-			demo_path.clear()
+			demo_path[:] = []
 			for action in go_home_path:
 				if mymain.north_or_south == north:
 					action.position = north_position
 				elif mymain.north_or_south == south:
 					action.position = south_position
-				action_path = go_home_path
+			action_path = go_home_path
 			go_home_flag = True
+			give_next_action = True
 
 		if give_next_action == True:
 			for c_action in action_path[0].child_action:
@@ -119,7 +123,7 @@ def goap_server():
 			elif len(demo_path) == 1 and len(action_path) >= 1:
 				demo_path.remove(demo_path[0])
 				give_next_action = True
-			
+
 		
 
 if __name__ == "__main__":

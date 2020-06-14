@@ -61,12 +61,14 @@ demo_path = []
 def handle_return_to_main(req):  #main輸入參數與獲得結果存取處(service回調函式)  
 	mymain.action_done = req.action_done  # <----
 	mymain.my_pos = (req.pos[0],req.pos[1])
+	mymain.cup_color = [req.cup_color[0],req.cup_color[1],req.cup_color[2],req.cup_color[3],req.cup_color[4]]
 	mymain.time = req.time 
 	mymain.my_degree = req.my_degree 
 	mymain.north_or_south = req.north_or_south 
 	mymain.name = req.mission_name
 	mymain.child_name = req.mission_child_name
 	return [mymain.output_speed,mymain.output_mode,mymain.output_degree,mymain.output_position,mymain.output,mymain.output_wait,mymain.output_name,mymain.output_child_name]
+
 	
 def setting_strategy(req):
 	set_frommain.strategy = req.strategy
@@ -82,6 +84,9 @@ def goap_server():
 	global demo_path
 	global give_next_action
 	global action_path
+	global go_home_flag
+	global go_home_time
+
 	
 	#定義goap service name:
 	rospy.init_node('main_demo_4')

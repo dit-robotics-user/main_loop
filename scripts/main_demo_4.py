@@ -22,9 +22,9 @@ def output_processor(output_action):
 
 class mymain:  #main輸入與輸出參數需在此calss定義
 	action_done = False           # <---
-	my_pos = (3, 3)              # <---
-	cup_color = [5, 3, 5, 5, 3]  # <---
-	north_or_south = 2           # <---
+	my_pos = (0, 0,)              # <---
+	cup_color = [0, 0, 0, 0, 0]  # <---
+	north_or_south = 0           # <---
 	time = 0                     # <---
 	name = 0                     # <---
 	child_name = 0                     # <---
@@ -42,16 +42,16 @@ class set_frommain:
 	init_pos = (3,3)
 	set_finish = 0 
 	setting_finish = 0 
-	cup_color = [5, 3, 5, 5, 3]  # <---
+	cup_color = [0, 0, 0, 0, 0]  # <---
 	
 	
 
-go_home_time = 4000
+go_home_time = 300
 path_done = False
-north = 1
-south = 2
-north_position = (1, 1)
-south_position = (2, 2)
+north = 0
+south = 1
+north_position = (500, 300)
+south_position = (900, 300)
 give_next_action = True
 go_home_flag = False
 demo_path = []
@@ -107,15 +107,17 @@ def goap_server():
 						action.position = north_position
 					elif mymain.north_or_south == south:
 						action.position = south_position
-					action_path = go_home_path
+				action_path = go_home_path
 				go_home_flag = True
+				give_next_action = True
 
 			if give_next_action == True:
 				for c_action in action_path[0].child_action:
-					if action_path[0].mode == 2:
-						action_path[0].tangent_point_calculation(my_pos, 5)
 					c_action.position = action_path[0].position
 					c_action.degree = action_path[0].degree
+					c_action.speed = action_path[0].speed
+					c_action.mode= action_path[0].mode
+					c_action.wait = action_path[0].wait
 					demo_path.append(copy.deepcopy(c_action))
 				action_name = action_path[0].name
 				action_path.remove(action_path[0])

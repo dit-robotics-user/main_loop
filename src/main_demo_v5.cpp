@@ -1,8 +1,8 @@
 //==========================
 //對應版本:
-//agent --->agent_new_4.cpp
-//goap  --->main_demo_2.py
-//srv   --->goap_demo_4.srv
+//agent --->agent_new_5.cpp
+//goap  --->main_demo_5.py
+//srv   --->goap_demo_2.srv
 //20200604 apdate main  
 //==========================
 #include "ros/ros.h"
@@ -319,7 +319,7 @@ bool at_pos(int x, int y, int deg, int c_x, int c_y, int c_deg, int m, int angle
 int main(int argc, char **argv)
 {
     //ROS的topic和service定義處
- 	ros::init (argc, argv, "main_demo_v4");
+ 	ros::init (argc, argv, "main_demo_v5");
 	ros::NodeHandle nh;    	
     ros::Publisher pub_st1 = nh.advertise<std_msgs::Int32MultiArray>("txST1", 1);
 	ros::Publisher pub_st2 = nh.advertise<std_msgs::Int32MultiArray>("txST2", 1);
@@ -420,17 +420,17 @@ int main(int argc, char **argv)
 
             case Status::SET_INITIAL_POS:   //2
                 r0 = 0x1000;
-                r1 = 700;
-                r2 = 300;
-                r3 = 90;
+                r1 = 1300;
+                r2 = 150;
+                r3 = 270;
                 break;            
             case Status::STARTING_SCRIPT:   //3
-                /*
+          
                 r0 = 0x2000;
                 r1 = 0;
                 r2 = 0;
                 r3 = 0;
-                */
+             
                 break;
 
             case Status::READY:{    //4
@@ -554,6 +554,7 @@ int main(int argc, char **argv)
                         switch(robot){
                             case RobotState::AT_POS:{
                                 debug_2.robot_case="AT_POS";
+
                                 long int r0=0x5000;
                                 long int r1=0;
                                 long int r2=0;
@@ -660,7 +661,7 @@ int main(int argc, char **argv)
                                     if(now_degree<0){  //--->如果回傳值為負值表示path plan 沒有算出資料 就存取上一次計算出的數值
                                         now_degree = last_degree;
                                     } 
-                                                    
+									
                                     r0 = 0x3000;
                                     r1 = desire_speed;
                                     r2 = now_degree;

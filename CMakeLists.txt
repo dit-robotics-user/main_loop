@@ -243,6 +243,10 @@ add_executable(agent_new_4 src/agent_new_4.cpp)
 add_dependencies(agent_new_4 main_loop_gencpp)
 target_link_libraries(agent_new_4 ${catkin_LIBRARIES})
 
+add_executable(agent_new_5 src/agent_new_5.cpp)
+add_dependencies(agent_new_5 main_loop_gencpp)
+target_link_libraries(agent_new_5 ${catkin_LIBRARIES})
+
 add_executable(main_demo_v3 src/main_demo_v3.cpp)
 add_dependencies(main_demo_v3 main_loop_gencpp)
 target_link_libraries(main_demo_v3 ${catkin_LIBRARIES})

@@ -13,6 +13,7 @@ int32 servo_state
 int32 stepper
 int32 hand
 int32 status
+int32 strategy
 float32 time 
 int32 ns 
 int32[] cup_color

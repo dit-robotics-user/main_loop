@@ -70,6 +70,7 @@ add_service_files(
 	goap_2.srv
 	goap_demo.srv
 	goap_demo_2.srv
+	set_strategy.srv
 	ns.srv
 	cup.srv
 )
@@ -236,6 +237,11 @@ add_executable(agent_new_3 src/agent_new_3.cpp)
 add_dependencies(agent_new_3 main_loop_gencpp)
 target_link_libraries(agent_new_3 ${catkin_LIBRARIES})
 
+add_executable(agent_new_4 src/agent_new_4.cpp)
+add_dependencies(agent_new_4 main_loop_gencpp)
+target_link_libraries(agent_new_4 ${catkin_LIBRARIES})
+
+
 add_executable(main_demo_v2 src/main_demo_v2.cpp)
 add_dependencies(main_demo_v2 main_loop_gencpp)
 target_link_libraries(main_demo_v2 ${catkin_LIBRARIES})
@@ -243,6 +249,10 @@ target_link_libraries(main_demo_v2 ${catkin_LIBRARIES})
 add_executable(main_demo_v3 src/main_demo_v3.cpp)
 add_dependencies(main_demo_v3 main_loop_gencpp)
 target_link_libraries(main_demo_v3 ${catkin_LIBRARIES})
+
+add_executable(main_demo_v4 src/main_demo_v4.cpp)
+add_dependencies(main_demo_v4 main_loop_gencpp)
+target_link_libraries(main_demo_v4 ${catkin_LIBRARIES})
 
 add_executable(main_v1 src/main_v1.cpp)
 add_dependencies(main_v1 main_loop_gencpp)

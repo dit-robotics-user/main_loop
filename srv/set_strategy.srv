@@ -1,0 +1,6 @@
+int32 strategy
+int32 set_finish
+int32[] init_pos
+int32[] cup_color
+---
+bool goap_return

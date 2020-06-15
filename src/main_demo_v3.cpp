@@ -326,9 +326,9 @@ int main(int argc, char **argv)
     int action_done = false;
     int kill_mission = false;
     int replan_mission = false;
-    int margin = 50;
+    int margin = 20;
     int speed_mode_margin = 100;
-    int angle_margin = 10;
+    int angle_margin = 5;
     int speed_mode_angle_margin = 360;
     int switch_mode_distance = 250000;//square
     int left_layer = 0;
@@ -418,17 +418,18 @@ int main(int argc, char **argv)
             case Status::SET_INITIAL_POS:   //2
                 
                 r0 = 0x1000;
-                r1 = 700;
-                r2 = 300;
-                r3 = 90;
+                r1 = 1300;
+                r2 = 150;
+                r3 = 270;
+                
                 break;            
             case Status::STARTING_SCRIPT:   //3
-                /*
+
                 r0 = 0x2000;
                 r1 = 0;
                 r2 = 0;
                 r3 = 0;
-                */
+
                 break;
 
             case Status::READY:{    //4
@@ -557,6 +558,10 @@ int main(int argc, char **argv)
                         switch(robot){
                             case RobotState::AT_POS:{
                                 debug_2.robot_case="AT_POS";
+                                r0 = 0x5000;
+                                r1 = 0;
+                                r2 = 0;
+                                r3 = 0;
                                 //rx0
                                 long int out = 0;
                                 for(int i = 0; i < 12; i ++){

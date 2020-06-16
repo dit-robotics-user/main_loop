@@ -57,32 +57,32 @@ def setting(mode):#, cup_color):
         a36 = Action('goto', [], [], [], (0, 0), 0, 0, 0, 0, 0, 11, 0, True)
 
         #   hand 1 get cup
-        c1 = Action('hand1_get_cup', ['n'], ['c'], [a1, a34, a25, a33, a5, a34, a26, a33, a6], (400, 400), 90, 150, 3, 1, 15, 1, 4, True)
+        c1 = Action('hand1_get_cup', ['n'], ['c'], [a1, a34, a25, a33, a5, a34, a26, a33, a6], (520, 2700), 200, 160, 3, 1, 15, 1, 4, True)
 
 
         #   hand 2 get cup
-        c2 = Action('hand2_get_cup', ['h', 'e'], ['t'], [a7, a34, a27, a33, a11, a34, a28, a33, a12], (700, 800), 85, 150, 3, 1, 15, 4, 4, True)
+        c2 = Action('hand2_get_cup', ['h', 'e'], ['t'], [a7, a34, a27, a33, a11, a34, a28, a33, a12], (300, 2300), 230, 150, 3, 1, 15, 4, 4, True)
 
 
         #   hand 3 get cup
-        c3 = Action('hand3_get_cup', ['n'], ['c'], [a13, a34, a29, a33, a17, a34, a30, a33, a18], (750, 350), 90, 150, 3, 1, 15, 1, 4, True)
+        c3 = Action('hand3_get_cup', ['n'], ['c'], [a13, a34, a29, a33, a17, a34, a30, a33, a18], (300, 1950), 30, 150, 3, 1, 15, 1, 4, True)
 
 
         #   hand 4 get cup
-        c4 = Action('hand4_get_cup', ['l'], ['d'], [a19, a34, a31, a33, a23, a34, a32, a33, a24], (530, 300), 85, 150, 3, 1, 15, 4, 4, True)
+        c4 = Action('hand4_get_cup', ['l'], ['d'], [a19, a34, a31, a33, a23, a34, a32, a33, a24], (1000, 1700), 30, 150, 3, 1, 15, 4, 4, True)
 
         #   hand 1 release
-        c5 = Action('hand1_release', ['h'], ['p'], [a5, a34, a25, a33, a4, a34, a26, a33, a6], (480, 500), 85, 150, 3, 1, 15, 4, 4, True)
+        c5 = Action('hand1_release', ['h'], ['p'], [a5, a34, a25, a33, a4, a34, a26, a33, a6], (1600, 1800), 0, 150, 3, 1, 15, 4, 4, True)
 
 
         #   hand 2 release
-        c6 = Action('hand2_release', ['h'], ['p'], [a11, a34, a27, a33, a10, a34, a28, a33, a12], (480, 500), 85, 150, 3, 1, 15, 4, 4, True)
+        c6 = Action('hand2_release', ['h'], ['p'], [a11, a34, a27, a33, a10, a34, a28, a33, a12], (1300, 2550), 100, 150, 3, 1, 15, 4, 4, True)
 
         #   hand 3 release
-        c7 = Action('hand3_release', ['h'], ['p'], [a17, a34, a29, a33, a16, a34, a30, a33, a18], (480, 500), 85, 150, 3, 1, 15, 4, 4, True)
+        c7 = Action('hand3_release', ['h'], ['p'], [a17, a34, a29, a33, a16, a34, a30, a33, a18], (1300, 2550), 100, 150, 3, 1, 15, 4, 4, True)
 
         #   hand 4 release
-        c8 = Action('hand4_release', ['h'], ['p'], [a23, a34, a31, a33, a22, a34, a32, a33, a24], (480, 500), 85, 150, 3, 1, 15, 4, 4, True)
+        c8 = Action('hand4_release', ['h'], ['p'], [a23, a34, a31, a33, a22, a34, a32, a33, a24], (1300, 2550), 100, 150, 3, 1, 15, 4, 4, True)
 
         #  go home
         c9 = Action('go_home', [], ['at_home'], [a36], (300, 700), 85, 150, 3, 1, 15, 4, 4, True)

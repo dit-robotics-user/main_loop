@@ -101,7 +101,7 @@ class mymain:  #main輸入與輸出參數需在此calss定義
 
 goal = []
 path_done = False
-go_home_time = 20
+go_home_time = 150
 left_side = 3
 right_side = 3
 north = 0

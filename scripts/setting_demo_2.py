@@ -7,115 +7,86 @@ from action_demo_2 import *
 
 # name, preconditions, effects, position, cost, degree, speed, mode, speed_mode_radius, number, iscup, iswait
 def setting(mode):
-    if mode is 1:
-        a1 = Action('cup_close_1', [], [1], [], (0, 0), 0, 0, 0, 0, 0, 1, 0, True)
-        a2 = Action('cup_close_2', [], [2], [], (0, 0), 0, 0, 0, 0, 0, 1, 0, True)
-        a3 = Action('cup_close_3', [], [3], [], (0, 0), 0, 0, 0, 0, 0, 1, 0, True)
-        a4 = Action('cup_close_4', [], [4], [], (0, 0), 0, 0, 0, 0, 0, 1, 0, True)
-        a5 = Action('cup_close_5', [], [1, 3], [], (0, 0), 0, 0, 0, 0, 0, 1, 0, True)
-        a6 = Action('cup_close_6', [], [2, 4], [], (0, 0), 0, 0, 0, 0, 0, 1, 0, True)
-        a7 = Action('cup_close_7', [], [1, 4], [], (0, 0), 0, 0, 0, 0, 0, 1, 0, True)
-        a8 = Action('cup_close_all', [], [1, 2, 3, 4], [], (0, 0), 0, 0, 0, 0, 0, 1, 0, True)
-        a9 = Action('cup_open_1', [], [1], [], (0, 0), 0, 0, 0, 0, 0, 2, 0, True)
-        a10 = Action('cup_open_2', [], [2], [], (0, 0), 0, 0, 0, 0, 0, 2, 0, True)
-        a11 = Action('cup_open_3', [], [3], [], (0, 0), 0, 0, 0, 0, 0, 2, 0, True)
-        a12 = Action('cup_open_4', [], [4], [], (0, 0), 0, 0, 0, 0, 0, 2, 0, True)
-        a13 = Action('cup_open_5', [], [1, 3], [], (0, 0), 0, 0, 0, 0, 2, 0, 0, True)
-        a14 = Action('cup_open_6', [], [2, 4], [], (0, 0), 0, 0, 0, 0, 0, 2, 0, True)
-        a15 = Action('cup_open_all', [], [1, 2, 3, 4], [], (0, 0), 0, 0, 0, 0, 0, 2, 0, True)
-        a16 = Action('windsock_hand_up', [], [1], [], (0, 0), 0, 0, 0, 0, 0, 5, 0, True)
-        a17 = Action('windsock_hand_down', [], [0], [], (0, 0), 0, 0, 0, 0, 0, 5, 0, True)
-        a18 = Action('flag', [], [1], [], (0, 0), 0, 0, 0, 0, 0, 6, 0, True)
-        a19 = Action('goto', [], [], [], (0, 0), 0, 0, 0, 0, 0, 7, 0, True)
-        a20 = Action('lift_left', [], [1], [], (0, 0), 0, 0, 0, 0, 0, 8, 0, True)
-        a21 = Action('lift_right', [], [1], [], (0, 0), 0, 0, 0, 0, 0, 9, 0, True)
-        a22 = Action('lower_left', [], [2], [], (0, 0), 0, 0, 0, 0, 0, 10, 0, True)
-        a23 = Action('lower_right', [], [2], [], (0, 0), 0, 0, 0, 0, 0, 11, 0, True)
-        a24 = Action('lower_both', [], [2], [], (0, 0), 0, 0, 0, 0, 0, 12, 0, True)
-        a25 = Action('auto_grab_1', [], [1], [], (0, 0), 0, 0, 0, 0, 0, 13, 0, True)
-        a26 = Action('auto_grab_2', [], [2], [], (0, 0), 0, 0, 0, 0, 0, 13, 0, True)
-        a27 = Action('auto_grab_3', [], [3], [], (0, 0), 0, 0, 0, 0, 0, 13, 0, True)
-        a28 = Action('auto_grab_4', [], [4], [], (0, 0), 0, 0, 0, 0, 0, 13, 0, True)
+	if mode is 1:
+		a1 = Action('cup_close_1', [], [1], [], (0, 0), 0, 0, 0, 0, 0, 1, 0, True)
+		a2 = Action('cup_close_2', [], [2], [], (0, 0), 0, 0, 0, 0, 0, 1, 0, True)
+		a3 = Action('cup_close_3', [], [3], [], (0, 0), 0, 0, 0, 0, 0, 1, 0, True)
+		a4 = Action('cup_close_4', [], [4], [], (0, 0), 0, 0, 0, 0, 0, 1, 0, True)
+		a5 = Action('cup_close_5', [], [1, 3], [], (0, 0), 0, 0, 0, 0, 0, 1, 0, True)
+		a6 = Action('cup_close_6', [], [2, 4], [], (0, 0), 0, 0, 0, 0, 0, 1, 0, True)
+		a7 = Action('cup_close_7', [], [1, 4], [], (0, 0), 0, 0, 0, 0, 0, 1, 0, True)
+		a29 = Action('cup_close_7', [], [2, 3], [], (0, 0), 0, 0, 0, 0, 0, 1, 0, True)
+		a8 = Action('cup_close_all', [], [1, 2, 3, 4], [], (0, 0), 0, 0, 0, 0, 0, 1, 0, True)
+		a9 = Action('cup_open_1', [], [1], [], (0, 0), 0, 0, 0, 0, 0, 2, 0, True)
+		a10 = Action('cup_open_2', [], [2], [], (0, 0), 0, 0, 0, 0, 0, 2, 0, True)
+		a11 = Action('cup_open_3', [], [3], [], (0, 0), 0, 0, 0, 0, 0, 2, 0, True)
+		a12 = Action('cup_open_4', [], [4], [], (0, 0), 0, 0, 0, 0, 0, 2, 0, True)
+		a13 = Action('cup_open_5', [], [1, 3], [], (0, 0), 0, 0, 0, 0, 2, 0, 0, True)
+		a14 = Action('cup_open_6', [], [2, 4], [], (0, 0), 0, 0, 0, 0, 0, 2, 0, True)
+		a15 = Action('cup_open_all', [], [1, 2, 3, 4], [], (0, 0), 0, 0, 0, 0, 0, 2, 0, True)
+		a16 = Action('windsock_hand_up', [], [1], [], (0, 0), 0, 0, 0, 0, 0, 5, 0, True)
+		a17 = Action('windsock_hand_down', [], [0], [], (0, 0), 0, 0, 0, 0, 0, 5, 0, True)
+		a18 = Action('flag', [], [1], [], (0, 0), 0, 0, 0, 0, 0, 6, 0, True)
+		a19 = Action('goto', [], [], [], (0, 0), 0, 0, 0, 0, 0, 7, 0, True)
+		a20 = Action('lift_left', [], [1], [], (0, 0), 0, 0, 0, 0, 0, 8, 0, True)
+		a21 = Action('lift_right', [], [1], [], (0, 0), 0, 0, 0, 0, 0, 9, 0, True)
+		a22 = Action('lower_left', [], [2], [], (0, 0), 0, 0, 0, 0, 0, 10, 0, True)
+		a23 = Action('lower_right', [], [2], [], (0, 0), 0, 0, 0, 0, 0, 11, 0, True)
+		a24 = Action('lower_both', [], [2], [], (0, 0), 0, 0, 0, 0, 0, 12, 0, True)
+		a25 = Action('auto_grab_1', [], [1], [], (0, 0), 0, 0, 0, 0, 0, 13, 0, True)
+		a26 = Action('auto_grab_2', [], [2], [], (0, 0), 0, 0, 0, 0, 0, 13, 0, True)
+		a27 = Action('auto_grab_3', [], [3], [], (0, 0), 0, 0, 0, 0, 0, 13, 0, True)
+		a28 = Action('auto_grab_4', [], [4], [], (0, 0), 0, 0, 0, 0, 0, 13, 0, True)
 
-        child_list = [a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16, a17, a18, a19, a20, a21,
-                      a22, a23, a24, a25, a26, a27, a28]
+		child_list = [a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16, a17, a18, a19, a20, a21,
+					  a22, a23, a24, a25, a26, a27, a28]
 
-        #   pos mode grab
-        c1 = Action('prepare_1', [], [], [a19], (600, 300), 140, 150, 0, 0, 0, 0, 0, True)
-        c2 = Action('cup_pos_mode_1', ['grab_available', '1', '3'], ['get_points', 'get_cups', 'have_cups'], [a6],
-                     (500, 300), 140, 150, 0, 1, 15, 2, 1, True)
-        c3 = Action('prepare_2', [], [], [a19], (400, 500), 90, 150, 0, 0, 0, 0, 0, True)
-        c4 = Action('cup_pos_mode_2', ['grab_available', '1'], ['get_points', 'get_cups', 'have_cups'], [a1],
-                     (400, 650), 90, 150, 0, 1, 15, 2, 1, True)
+		#   pos mode grab
+		c1 = Action('prepare_1', [], [], [a19], (917, 245), 40, 300, 0, 0, 0, 0, 0, True)
+		c2 = Action('cup_pos_mode_1', [], [], [a6], (1127, 423), 40, 300, 0, 1, 15, 2, 1, True)
+		c3 = Action('prepare_2', [], [], [a19], (685, 248), 143, 300, 0, 0, 0, 0, 0, True)
+		c4 = Action('cup_pos_mode_2', [], [], [a5], (470, 415), 143, 300, 0, 1, 15, 2, 1, True)
 
-        #   lift left
-        c5 = Action('lift_left_layer', ['left_layer_full'], ['1', '2', 'get_points'], [a20], (400, 800), 90, 150, 3,
-                    1, 15, 1, 4, False)
+		#   lift left
+		c5 = Action('lift_left_layer', [], [], [a20], (251, 410), 90, 300, 3, 1, 15, 1, 4, False)
 
-        #   pos mode grab
-        c6 = Action('cup_pos_mode_3', ['grab_available', '2'], ['get_points', 'get_cups', 'have_cups'], [a3],
-                     (400, 900), 90, 150, 0, 1, 15, 2, 1, True)
+		#   pos mode grab
+		c6 = Action('cup_pos_mode_3', [], [], [a1], (248, 672), 90, 300, 0, 1, 15, 2, 1, True)
 
-        #   lift right
-        c7 = Action('lift_right_layer', ['right_layer_full'], ['3', '4', 'get_points', 'right_layer_up'], [a21],
-                    (400, 1700), 45, 150, 3, 1, 15, 1, 4, False)
+		#   lift right
+		c7 = Action('lift_right_layer', [], [], [a21], (248, 672), 90, 300, 3, 1, 15, 1, 4, False)
 
-        #   pos mode grab
-        c8 = Action('cup_pos_mode_3', ['grab_available', '2'], ['get_points', 'get_cups', 'have_cups'], [a1],
-                     (500, 1800), 45, 150, 0, 1, 15, 2, 1, True)
-        c9 = Action('prepare_4', [], [], [a19], (600, 1800), 20, 150, 0, 0, 0, 0, 0, True)
-        c10 = Action('cup_pos_mode_4', ['grab_available', '2'], ['get_points', 'get_cups', 'have_cups'], [a3],
-                     (700, 1900), 20, 150, 0, 1, 15, 2, 1, True)
-        c11 = Action('prepare_5', [], [], [a19], (900, 1400), 320, 150, 0, 0, 0, 0, 0, True)
-        c12 = Action('cup_pos_mode_5', ['grab_available', '2'], ['get_points', 'get_cups', 'have_cups'], [a2],
-                     (1000, 1500), 320, 150, 0, 1, 15, 2, 1, True)
-        c13 = Action('prepare_6', [], [], [a19], (900, 1200), 340, 150, 0, 0, 0, 0, 0, True)
-        c14 = Action('cup_pos_mode_6', ['grab_available', '2'], ['get_points', 'get_cups', 'have_cups'], [a4],
-                     (1000, 1300), 340, 150, 0, 1, 15, 2, 1, True)
+		#   pos mode grab
+		c8 = Action('cup_pos_mode_3', [], [], [a4], (245, 983), 90, 300, 0, 1, 15, 2, 1, True)
 
-        #   lift left
-        c15 = Action('lift_left_layer', ['left_layer_full'], ['1', '2', 'get_points'], [a20], (800, 300), 0, 150, 3,
-                    1, 15, 1, 4, False)
 
-        #   lift right
-        c16 = Action('lift_right_layer', ['right_layer_full'], ['3', '4', 'get_points', 'right_layer_up'], [a21],
-                    (800, 400), 0, 150, 3, 1, 15, 1, 4, False)
 
-        #   pos mode grab
-        c17 = Action('cup_pos_mode_7', ['grab_available', '2'], ['get_points', 'get_cups', 'have_cups'], [a2],
-                     (1000, 400), 0, 150, 0, 1, 15, 2, 1, True)
-        c18 = Action('cup_pos_mode_9', ['grab_available', '2'], ['get_points', 'get_cups', 'have_cups'], [a3],
-                     (1100, 400), 0, 150, 0, 1, 15, 2, 1, True)
+		c9 = Action('prepare_4', [], [], [a19], (489, 1900), 350, 300, 0, 0, 0, 0, 0, True)
+		c10 = Action('cup_pos_mode_4', [], [], [a29], (1216, 1774), 350, 300, 0, 1, 15, 2, 1, True)
+		c11 = Action('lift_both_layer', [], [], [a20, a21], (1427, 1464), 214, 300, 0, 0, 0, 0, 0, True)
+		c12 = Action('cup_pos_mode_5', [], [], [a29], (792, 1046), 214, 300, 0, 1, 15, 2, 1, True)
+		c13 = Action('put_prepare', [], [], [a19], (1346, 1800), 0, 300, 0, 0, 0, 0, 0, True)
+		c14 = Action('put_1', [], [], [a15], (1834, 1800), 0, 300, 0, 0, 0, 0, 0, True)
+		c15 = Action('put_2', [], [], [a24, a15], (1700, 1800), 0, 300, 0, 0, 0, 0, 0, True)
+		c16 = Action('put_3', [], [], [a24, a15], (1600, 1800), 0, 300, 0, 0, 0, 0, 0, True)
 
-        #   push windsock
-        c19 = Action('hand_prepare', ['hand_down', 'windsocks_unpushed'], ['hand_up'], [a16], (1700, 300), 270, 150, 3, 1,
-                     15, 4, 4, True)
-        c20 = Action('hand_push', ['hand_up'], ['get_points', 'windsocks_pushed', 'hand_down'], [a17], (1700, 700), 270,
-                     150, 3, 1, 15, 4, 4, True)
+		#   push windsock
+		c17 = Action('hand_goto', [], [], [a19], (1337, 1816), 277, 300, 0, 0, 0, 0, 0, True)
+		c18 = Action('hand_prepare', [], [], [a16], (1810, 200), 270, 300, 3, 1, 15, 4, 4, True)
+		c19 = Action('hand_push', [], [], [a17], (1810, 781), 270, 300, 3, 1, 15, 4, 4, True)
 
-        #   pos mode grab
-        c21 = Action('prepare_10', [], [], [a19], (1400, 1900), 0, 150, 0, 0, 0, 0, 0, True)
-        c22 = Action('cup_pos_mode_10', ['grab_available', '2'], ['get_points', 'get_cups', 'have_cups'], [a7],
-                    (1500, 1900), 0, 150, 0, 1, 15, 2, 1, True)
+		#   pos mode grab
+		c20= Action('go_default_1', [], [], [a19], (1618, 486), 155, 300, 3, 1, 15, 4, 4, True)
+		c21 = Action('go_default_2', [], [], [a19], (854, 988), 270, 300, 3, 1, 15, 4, 4, True)
 
-        #   put cups
-        c23 = Action('put_prepare', ['have_cups'], ['put_prepare'], [a19], (1500, 1900), 0, 150, 3, 1, 15, 4, 4, True)
-        c24 = Action('put_cups', ['put_prepare'], ['cups_out', '1', '2', '3', '4'], [a15], (1700, 1900), 0, 150, 3, 1, 15,
-                    4, 4, True)
-        c25 = Action('put_cups', ['put_prepare'], ['cups_out', '1', '2', '3', '4'], [a24, a15], (1600, 1900), 0, 150, 3,
-                     1, 15, 4, 4, True)
-        c26 = Action('put_cups', ['put_prepare'], ['cups_out', '1', '2', '3', '4'], [a24, a15], (1500, 1900), 0, 150, 3,
-                     1, 15, 4, 4, True)
-        c27 = Action('put_done', ['cups_out'], ['get_points'], [a19], (1500, 1900), 0, 150, 3, 1, 15, 4, 4, True)
+		#   go home
+		c22 = Action('go_home', [], ['at_home'], [a19], (700, 300), 90, 300, 3, 1, 15, 4, 4, True)
+		c23 = Action('raise_flag', ['at_home'], ['flag_raised', 'go_home'], [a18], (700, 300), 90, 300, 3, 1, 15, 4, 4,
+					True)
 
-        #   go home
-        c28 = Action('go_home', [], ['at_home'], [a19], (700, 300), 90, 150, 3, 1, 15, 4, 4, True)
-        c29 = Action('raise_flag', ['at_home'], ['flag_raised', 'go_home'], [a18], (700, 300), 90, 150, 3, 1, 15, 4, 4,
-                    True)
+		demo_path = [c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14, c15, c16, c17, c18, c19, c20, c21]
+		go_home_path = [c22,c23]
 
-        demo_path = [c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14, c15, c16, c17, c18, c19, c20, c21, c22, c23, c24, c25, c26, c27, c28, c29]
-        go_home_path = [c22,c23]
-
-    return demo_path, go_home_path
+	return demo_path, go_home_path
 
 

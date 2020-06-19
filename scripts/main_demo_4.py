@@ -120,6 +120,7 @@ give_next_action = True
 go_home_flag = False
 action_path, go_home_path = setting(1)
 action_name = 0 
+counter = 0
 
 
 def return_to_main(req):  #main輸入參數與獲得結果存取處(service回調函式)  
@@ -151,6 +152,7 @@ def goap_server():
 	global go_home_flag
 	global go_home_time
 	global demo_path
+	global counter
 
 	rospy.init_node('main_demo_4')
 	rospy.Service('goap_test_v1', goap_demo_2,return_to_main)
@@ -159,7 +161,7 @@ def goap_server():
 		#goap的loop放這:
 		if set_frommain.set_finish == 1 :
 			if counter == 0:
-				action_path, go_home_path = setting(1, set_frommain.cup_color)
+				action_path, go_home_path = setting(1)
 				print('setfinish')
 				counter=1		
 		

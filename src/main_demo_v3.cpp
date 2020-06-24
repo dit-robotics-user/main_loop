@@ -257,24 +257,66 @@ bool sub_state::blocking_with_direction(bool blocking_condition, int my_angle, i
         if(angle_b > 360){
             angle_b -= 360;
         }
-        if(desire_angle < angle_b && desire_angle > angle_a){
-            // forward motion
-            for(int i=0;i<=3;i++){
-                if(emergency[i]==true){
-                    ROS_INFO("backward blocked");
-                    blocked=true;
-                }
-            }
-        }
-        else{
-            // backward motion 
-            for(int i=4;i<=7;i++){
-                if(emergency[i]==true){
-                    ROS_INFO("forward blocked");
-                    blocked=true;
-                }
-            }
-        }   
+        if(angle_b < angle_a){
+			/*
+			int temp;
+			temp = angle_b;
+			angle_b = angle_a;
+			angle_a = temp;
+			*/
+			if(desire_angle < angle_a && desire_angle > angle_b){
+				// forward motion
+				for(int i=0;i<=3;i++){
+					if(emergency[i]==true){
+						ROS_INFO("desire_angle:%d",desire_angle);
+						ROS_INFO("angle_a:%d",angle_a);
+						ROS_INFO("angle_b:%d",angle_b);
+						ROS_INFO("backword blocked,b<a,a~b");
+						blocked=true;
+					}
+				}
+			}else{
+				// backward motion 
+				for(int i=4;i<=7;i++){
+					if(emergency[i]==true){
+						ROS_INFO("desire_angle:%d",desire_angle);
+						ROS_INFO("angle_a:%d",angle_a);
+						ROS_INFO("angle_b:%d",angle_b);
+						ROS_INFO("forward blocked,b<a");
+						blocked=true;
+					}
+				}
+			} 
+		}else{
+			
+			if(desire_angle < angle_b && desire_angle > angle_a){
+				// forward motion
+				for(int i=4;i<=7;i++){
+					if(emergency[i]==true){
+						ROS_INFO("desire_angle:%d",desire_angle);
+						ROS_INFO("angle_a:%d",angle_a);
+						ROS_INFO("angle_b:%d",angle_b);
+						ROS_INFO("forward blocked,b>a,a~b");
+						blocked=true;
+					}
+				}
+			}
+			else{
+				// backward motion 
+				for(int i=0;i<=3;i++){
+					if(emergency[i]==true){
+						ROS_INFO("desire_angle:%d",desire_angle);
+						ROS_INFO("angle_a:%d",angle_a);
+						ROS_INFO("angle_b:%d",angle_b);
+						ROS_INFO("backward blocked,b>a");
+						blocked=true;
+					}
+				}
+			}   
+				
+		}
+
+		
     }
     return blocked ;
 }

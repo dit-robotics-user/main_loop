@@ -24,7 +24,6 @@
 #include <stdlib.h>
 
 #define pi 3.14159265359
-
 using namespace std;
 
 
@@ -214,6 +213,8 @@ void sub_state::callback(const main_loop::agent::ConstPtr& msg){
     from_agent.enemy1_y = msg->enemy1_y ;
     from_agent.enemy2_x = msg->enemy2_x ;
     from_agent.enemy2_y = msg->enemy2_y ;
+	from_agent.ally_x = msg->ally_x;
+	from_agent.ally_y = msg->ally_y;
     from_agent.time = msg->time ; 
     from_agent.ns = msg->ns;
 
@@ -543,8 +544,8 @@ int main(int argc, char **argv)
                 path_srv.request.enemy1_y = temp.from_agent.enemy1_y ;
                 path_srv.request.enemy2_x = temp.from_agent.enemy2_x ;
                 path_srv.request.enemy2_y = temp.from_agent.enemy2_y ;
-                path_srv.request.ally_x = 1 ;
-                path_srv.request.ally_y = 1 ; 
+                path_srv.request.ally_x = temp.from_agent.ally_x  ;
+                path_srv.request.ally_y = temp.from_agent.ally_y  ; 
                 //goap
                 goap_srv.request.time = temp.from_agent.time;
                 goap_srv.request.cup_color={};
@@ -665,7 +666,7 @@ int main(int argc, char **argv)
                                     rx3 = desire_movement[15];
                                 }
                                 break;
-                                }
+							}
 
                             case RobotState::ON_THE_WAY:
                                 debug_2.robot_case="ON_THE_WAY";
@@ -677,23 +678,24 @@ int main(int argc, char **argv)
                                     r1 = desire_pos_x;
                                     r2 = desire_pos_y;
                                     r3 = desire_angle;
+                                    
+                                    //lidar方向判讀
 									int now_desired_angle = temp.adjust_direction(action_state.MyPosX(),action_state.MyPosY(),desire_pos_x,desire_pos_y);
-										ROS_INFO("now_desired_angle:%d",now_desired_angle);
-										current_state.ChangeIsBlocked(temp.blocking_with_direction(temp.lidar_be_blocked(),temp.from_agent.my_degree,now_desired_angle)); 
-								 
-										if(current_state.IsBlocked() == true){
-											debug_2.robot_case="BLOCKED";
-											//return stop; //<-------------tell STM to stop
-											r0 = 0x5000;
-											r1 = 0;
-											r2 = 0;
-											r3 = 0;
-											action_state.ChangeReplanMission(true);
-											ROS_INFO ("desire_pos_x:%d ", desire_pos_x);                
-											ROS_INFO ("desire_pos_y:%d ", desire_pos_y);
-											ROS_INFO ("my_pos_x:%d ", temp.from_agent.my_pos_x);
-											ROS_INFO ("my_pos_y:%d ", temp.from_agent.my_pos_y);
-										}
+									ROS_INFO("now_desired_angle:%d",now_desired_angle);
+									current_state.ChangeIsBlocked(temp.blocking_with_direction(temp.lidar_be_blocked(),temp.from_agent.my_degree,now_desired_angle)); 
+									if(current_state.IsBlocked() == true){
+										debug_2.robot_case="BLOCKED";
+										//return stop; //<-------------tell STM to stop
+										r0 = 0x5000;
+										r1 = 0;
+										r2 = 0;
+										r3 = 0;
+										action_state.ChangeReplanMission(true);
+										ROS_INFO ("desire_pos_x:%d ", desire_pos_x);                
+										ROS_INFO ("desire_pos_y:%d ", desire_pos_y);
+										ROS_INFO ("my_pos_x:%d ", temp.from_agent.my_pos_x);
+										ROS_INFO ("my_pos_y:%d ", temp.from_agent.my_pos_y);
+									}
                                     //return pos_mode; //<----------------
                                 }
                                 else{

@@ -202,7 +202,7 @@ def goap_server():
 			mymain.output_position = path.position
 			mymain.output_wait = path.wait
 
-			if mymain.action_done is True and demo_path[0].name == mymain.child_name:
+			if mymain.action_done is True and demo_path[0].name == mymain.child_name and  action_name == mymain.name :
 				if path.type_number is 9:  # lift right
 					right_side -= 1
 				elif path.type_number is 8:  # lift left

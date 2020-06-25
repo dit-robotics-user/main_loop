@@ -106,7 +106,7 @@ int r3=0;
 int current_action[4] = {hand, suck, stepper, flag};
 int desire_action[10];
 int temp_desire_action[10];
-int old_action[10] = {9,9,9,9,6,6,6,6,5,6};
+int old_action[10] = {9,9,9,9,6,6,6,6,1,6};
 int command_action[4];
 int desire_speed = 0;
 
@@ -121,6 +121,10 @@ int switch_mode_distance = 4000000;//square
 int distance_square = 0;
 
 bool action_done = false;
+
+bool set_origin = true;
+
+int count = 0;
 
 main_loop::path path_srv;
 main_loop::goap_ goap_srv;
@@ -210,6 +214,8 @@ path_srv.request.goal_pos_x = 1000;
 
 
 	while(ros::ok()){
+		
+		count ++;
 
 		/*sub.n.getParam("main_frank/rx0", rx0);
 		sub.n.getParam("main_frank/rx1", rx1);
@@ -413,11 +419,23 @@ ROS_INFO("my degree:%d", my_degree);
 					//for_st1.data.push_back(90);
 		            r3 = 0;                              	// ?
 		        }
+			set_origin = true;
 
 		        break;
 
             case RobotState::AT_POS:
             	ROS_INFO("at pos");
+
+			r0=0;
+			r1=0;
+			r2=0;
+			r3=0;
+			
+/*			if(set_origin == false){
+				count ++;
+			}*/
+
+			
             		//rx0 hand 1234
 		        rx0 = 0;
 		        for(int i = 0; i < 4; i ++){
@@ -487,19 +505,37 @@ ROS_INFO("my degree:%d", my_degree);
 				ROS_INFO ("child mission: %s ", goap_srv.response.mission_child_name.c_str());
 
 				action_done = false;
-				if(command_finish()){
+				if(count>3 && command_finish()){
 					ROS_INFO("finish");
 					//old_action
 					for(int i = 0; i < 10; i ++){
 					    old_action[i] = desire_action[i];
 					}
 					action_done = true;
+					count = 0;
 				}
 				else{
 					ROS_INFO("ing or fail");
 				}
 
 				goap_srv.request.action_done = action_done;
+
+/*				if(set_origin == true){
+					rx0 = 9999;
+					rx1 = 6666;
+					rx2 = 1;
+					rx3 = 6;
+					command_action[0] = rx0;
+					command_action[1] = rx1;
+					command_action[2] = rx2;
+					command_action[3] = rx3;
+					if(command_finish()){
+						set_origin = false;
+						for(int i = 0; i < 10; i ++){
+					    		old_action[i] = desire_action[i];
+						}
+					}
+				}*/
 
 				break;
 	}
@@ -523,15 +559,15 @@ ROS_INFO("my degree:%d", my_degree);
         }
 */
 
-/*	ROS_INFO("%d", r0);
+	ROS_INFO("r0:%d", r0);
 ROS_INFO("%d", r1);
 ROS_INFO("%d", r2);
 ROS_INFO("%d", r3);
-ROS_INFO("%d", rx0);
+ROS_INFO("rx0:%d", rx0);
 ROS_INFO("%d", rx1);
 ROS_INFO("%d", rx2);
 ROS_INFO("%d", rx3);
-*/
+
 		std_msgs::Int32MultiArray for_st1 ;
         for_st1.data.push_back(r0);
         for_st1.data.push_back(r1);

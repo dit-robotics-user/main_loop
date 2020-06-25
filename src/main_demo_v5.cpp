@@ -3,7 +3,8 @@
 //agent --->agent_new_5.cpp
 //goap  --->main_demo_5.py
 //srv   --->goap_demo_2.srv
-//20200604 apdate main  
+//20200604 apdate main 
+//launch two machine version  
 //==========================
 #include "ros/ros.h"
 #include "std_msgs/String.h"

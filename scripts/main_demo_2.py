@@ -43,7 +43,7 @@ north = 1
 south = 2
 north_position = (1, 1)
 south_position = (2, 2)
-#action_path, go_home_path = setting(1, mymain.cup_color)
+action_path, go_home_path = setting(1, mymain.cup_color)
 give_next_action = True
 go_home_flag = False
 demo_path = []
@@ -111,7 +111,7 @@ def goap_server():
 		mymain.output_position = path.position
 		mymain.output_wait = path.wait
 
-		if mymain.action_done is True and demo_path[0].name == mymain.child_name:
+		if mymain.action_done is True and demo_path[0].name == mymain.child_name and action_name == mymain.name:
 
 			#print(path.name)
 			#print(path.position)

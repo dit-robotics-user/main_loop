@@ -29,21 +29,21 @@ void build_maze(int maze[mazeSizeX][mazeSizeY])
     for(int i = 0; i < mazeSizeX; i++)
     {
         maze[i][0] = 0;
-        maze[i][1] = 0;
-        maze[i][2] = 0;
+        //maze[i][1] = 0;
+        //maze[i][2] = 0;
         maze[i][mazeSizeY-1] = 0;
-        maze[i][mazeSizeY-2] = 0;
-        maze[i][mazeSizeY-3] = 0;
+        //maze[i][mazeSizeY-2] = 0;
+        //maze[i][mazeSizeY-3] = 0;
     }
     //left and right walls
     for(int i = 0; i < mazeSizeY; i++)
     {
         maze[0][i] = 0;
-        maze[1][i] = 0;
-        maze[2][i] = 0;
+        //maze[1][i] = 0;
+        //maze[2][i] = 0;
         maze[mazeSizeX-1][i] = 0;
-        maze[mazeSizeX-2][i] = 0;
-        maze[mazeSizeX-3][i] = 0;
+        //maze[mazeSizeX-2][i] = 0;
+        //maze[mazeSizeX-3][i] = 0;
     }
 }
 

@@ -214,7 +214,7 @@ int main(int argc, char **argv){
     srv_cup.request.OUO = 0;
     srv_ns.request.OAO = 0;
 
-    int color_[5]={2,0,0,0,0};
+    int color_[5]={0,0,0,0,0};
     temp.change_cup_color(color_);
 
     //availible form 

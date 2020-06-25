@@ -68,6 +68,7 @@ def handle_return_to_main(req):  #main輸入參數與獲得結果存取處(servi
 	mymain.north_or_south = req.north_or_south 
 	mymain.name = req.mission_name
 	mymain.child_name = req.mission_child_name
+	set_frommain.set_finish =  1
 	return [mymain.output_speed,mymain.output_mode,mymain.output_degree,mymain.output_position,mymain.output,mymain.output_wait,mymain.output_name,mymain.output_child_name]
 
 	

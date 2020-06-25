@@ -5,7 +5,7 @@
 	<node pkg="main_loop" type="path_planning_" name="path_planning_" output="log" respawn="true" >
 	</node>
 
-	<node pkg="main_loop" type="main_demo_v4" name="main_demo_v4" output="screen" respawn="true">
+	<node pkg="main_loop" type="main_demo_v5" name="main_demo_v5" output="screen" respawn="true">
 	</node>
 	<node pkg="main_loop" type="agent_new_5" name="agent_new_5">
 	</node>
@@ -14,10 +14,6 @@
 	<node pkg="eurobot_gui" type="eurobot_gui.py" name="eurobot_gui" output="screen" respawn="true">
 	</node>
 	
-		<node pkg="serial_port" type="serial_port_node" name="serial_port_node" output="log" respawn="true" >
-	</node>
-	<node pkg="serial_port" type="serial_port_node_2" name="serial_port_node_2" output="log" respawn="true" >
-	</node>	
 	   <include file="$(find lidar_2020)/launch/octagonal_range.launch">
     </include>	
 	

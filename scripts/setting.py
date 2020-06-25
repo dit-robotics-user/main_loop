@@ -48,7 +48,7 @@ def setting(mode, action_list, current_world_state, mission_list, my_pos, my_deg
         c6 = Action('lighthouse', ['lighthouse_unactivated'], ['get_points', 'lighthouse_activated'], [a13], (530, 300), 85, 150, 3, 1, 15, 4, 4, True)
 
         #   put first round cup
-        c7 = Action('put_green1', ['have_cups', 'first_time'], ['green1_put'], [a4, a9, a6], (300,450), 85, 150, 3, 1, 15, 4, 4, True)
+        c7 = Action('put_green1', ['have_cups', 'first_time'], ['green1_put'], [a4, a9, a6], (300, 450), 85, 150, 3, 1, 15, 4, 4, True)
         c8 = Action('put_red1', ['green1_put'], ['red1_put', 'no_cups', 'second_time'], [a4, a10], (600, 500), 85, 150, 3, 1, 15, 4, 4, True)
         c9 = Action('put_initial1', ['red1_put'], ['get_points'], [a13, a5], (700, 900), 85, 150, 3, 1, 15, 4, 4, True)
 

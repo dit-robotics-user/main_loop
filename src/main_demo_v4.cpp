@@ -4,6 +4,7 @@
 //goap  --->main_demo_2.py
 //srv   --->goap_demo_4.srv
 //20200604 apdate main  
+//no lidar
 //==========================
 #include "ros/ros.h"
 #include "std_msgs/String.h"
@@ -246,8 +247,7 @@ void sub_state::callback(const main_loop::agent::ConstPtr& msg){
 
 void sub_state::sub_world_state_callback(const main_loop::world_state::ConstPtr& msg){
     lighthouse_done = msg->lighthouse_done;
-    flag_done = msg->flag_done;
-    
+    flag_done = msg->flag_done;  
 }
 
 bool sub_state::lidar_be_blocked(float speed_degree,float car_degree){
@@ -392,9 +392,7 @@ int main(int argc, char **argv)
     
 
 
-    while(ros::ok()){
-    
-       
+    while(ros::ok()){  
         //status update
         int s = temp.from_agent.status; 
         Status stat  = static_cast<Status>(s);

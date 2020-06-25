@@ -53,6 +53,9 @@ public:
     void ChangeActionWait(bool tf){
         action_wait = tf;
     }
+    void ChangeIsBlocked(bool tf){
+        is_blocked = tf;
+    }
     void ChangeReplanPath(bool tf){
         replan_path = tf;
     }
@@ -171,11 +174,12 @@ class sub_state{   //--->定義輸出輸入所需參數
 		~sub_state(){};
 		void callback(const main_loop::agent::ConstPtr& msg);
         void sub_world_state_callback(const main_loop::world_state::ConstPtr& msg);
-        bool lidar_be_blocked(float speed_degree,float car_degree);
+        bool lidar_be_blocked();
         bool blocking_with_direction(bool blocking_condition, int my_angle, int desire_angle);  //(blocking_condition = current_state.IsBlocked(), my_a = temp.from_agent.my_degree)
         bool lighthouse_done ;
         bool flag_done ; 
         int cup_color[5]; 
+        bool emergency[8];
         int movement_from_goap[7];
         main_loop::agent from_agent;
 
@@ -183,7 +187,6 @@ class sub_state{   //--->定義輸出輸入所需參數
 		ros::NodeHandle n ;
 		ros::Subscriber Agent_sub ;		
         ros::Subscriber world_state_sub ;	
-        bool emergency[8];
         	 
 };
 
@@ -248,7 +251,7 @@ void sub_state::sub_world_state_callback(const main_loop::world_state::ConstPtr&
     
 }
 
-bool sub_state::lidar_be_blocked(float speed_degree,float car_degree){
+bool sub_state::lidar_be_blocked(){
     ////lidar傳被阻擋上來
     bool blockk=false;
     for(int i=0;i<8;i++){
@@ -277,21 +280,31 @@ bool sub_state::blocking_with_direction(bool blocking_condition, int my_angle, i
         if(angle_b > 360){
             angle_b -= 360;
         }
-        if(desire_angle < angle_b || desire_angle > angle_a){
+	ROS_INFO("%d,%d,%d", angle_a, angle_b, desire_angle);
+        if(desire_angle < angle_b && desire_angle > angle_a){
             // forward motion
-            for(int i=0;i<=3;i++){
+            for(int i=1;i<=4;i++){
                 if(emergency[i]==true){
                     blocked=true;
                 }
             }
+	    if(blocked==true){
+	    	ROS_INFO("FORWARD BLOCK");
+ 	    }
         }
         else{
             // backward motion 
-            for(int i=4;i<=7;i++){
+            for(int i=5;i<=7;i++){
                 if(emergency[i]==true){
                     blocked=true;
                 }
             }
+	    if(emergency[0]==true){
+	        blocked=true;
+ 	    }
+	    if(blocked==true){
+	    	ROS_INFO("BACKWARD BLOCK");
+ 	    }
         }   
     }
     return blocked ;
@@ -344,8 +357,8 @@ int main(int argc, char **argv)
     int action_done = false;
     int kill_mission = false;
     int replan_mission = false;
-    int margin = 50;
-    int angle_margin = 10;
+    int margin = 20;
+    int angle_margin = 4;
     int switch_mode_distance = 4000000;//square
     ActionMode m;
     RobotState robot;
@@ -414,17 +427,17 @@ int main(int argc, char **argv)
 
             case Status::SET_INITIAL_POS:   //2--->設置ST的初始值 應該要根據strategy可以變動值
                 r0 = 0x1000;
-                r1 = 700;
-                r2 = 300;
+                r1 = 640;
+                r2 = 95;
                 r3 = 90;
                 break;            
             case Status::STARTING_SCRIPT:   //3--->跑撞牆定位(測試時先把它註解)
-                /*
+                
                 r0 = 0x2000;
                 r1 = 0;
                 r2 = 0;
                 r3 = 0;
-                */
+                
                 break;
 
             case Status::READY:{    //4
@@ -438,7 +451,8 @@ int main(int argc, char **argv)
             case Status::RUN:{ //5
                	count ++;
                 //將agent資訊存入current state
-                state current_state(temp.from_agent.my_pos_x,temp.from_agent.my_pos_y,temp.from_agent.my_degree,temp.lidar_be_blocked(0,temp.from_agent.my_degree),temp.from_agent.wrist,temp.from_agent.hand,temp.from_agent.finger);//<--------get undergoing, finish, my_x, my_y, block from other nodes ()********
+                //state current_state(temp.from_agent.my_pos_x,temp.from_agent.my_pos_y,temp.from_agent.my_degree,temp.lidar_be_blocked(),temp.from_agent.wrist,temp.from_agent.hand,temp.from_agent.finger);//<--------get undergoing, finish, my_x, my_y, block from other nodes ()********
+                state current_state(temp.from_agent.my_pos_x,temp.from_agent.my_pos_y,temp.from_agent.my_degree,false,temp.from_agent.wrist,temp.from_agent.hand,temp.from_agent.finger);//<--------get undergoing, finish, my_x, my_y, block from other nodes ()********
                 state action_state(0,0,0,false,0,0,0);
                 action_state = current_state;
                 if(action_done){
@@ -505,6 +519,12 @@ int main(int argc, char **argv)
                 bool desire_wait = act.Wait();
                 int desire_angle = act.Angle();
                 desire_movement = act.Movement();
+
+                //current_state.ChangeIsBlocked(temp.blocking_with_direction(temp.lidar_be_blocked(),temp.from_agent.my_degree,desire_angle)); 
+                current_state.ChangeIsBlocked(false); 
+//ROS_INFO("lidar[]:%d,%d,%d,%d,%d,%d,%d,%d",temp.emergency[0],temp.emergency[1],temp.emergency[2],temp.emergency[3],temp.emergency[4],temp.emergency[5],temp.emergency[6],temp.emergency[7]);
+              
+ 
                                     
  
                 m = ActionMode::POSITION_MODE;
@@ -526,6 +546,12 @@ int main(int argc, char **argv)
                         switch(robot){
                             case RobotState::AT_POS:{
                                 debug_2.robot_case="AT_POS";
+                                /*
+                                r0 = 0x5000;
+                                r1 = 0;
+                                r2 = 0;
+                                r3 = 0;
+                                */
                                 //rx2
                                 long int out = 0;
                                 for(int i = 0; i < 5; i ++){
@@ -654,6 +680,7 @@ int main(int argc, char **argv)
                 debug_1.desire_finger=rx2;
                 debug_1.is_wait=desire_wait;
                 debug_1.mission_name = goap_srv.response.mission_name;
+                debug_1.mission_child_name = goap_srv.response.mission_child_name;
 
                  
                 break;
@@ -701,7 +728,7 @@ int main(int argc, char **argv)
         debug_2.enemy1_pos.push_back(path_srv.request.enemy1_y);
         debug_2.enemy2_pos.push_back(path_srv.request.enemy2_x);
         debug_2.enemy2_pos.push_back(path_srv.request.enemy2_y);
-        debug_2.is_blocked=temp.lidar_be_blocked(0,temp.from_agent.my_degree);
+        debug_2.is_blocked=temp.lidar_be_blocked();
         debug_2.wrist_state=temp.from_agent.wrist;
         debug_2.finger_state=temp.from_agent.finger;
         debug_2.hand_state=temp.from_agent.hand;

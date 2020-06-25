@@ -347,8 +347,8 @@ int main(int argc, char **argv)
     int action_done = false;
     int kill_mission = false;
     int replan_mission = false;
-    int margin = 50;
-    int angle_margin = 10;
+    int margin = 20;
+    int angle_margin = 5;
     int switch_mode_distance = 4000000;//square
     ActionMode m;
     RobotState robot;

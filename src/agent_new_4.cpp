@@ -2,6 +2,7 @@
 //加入友軍、敵人位置
 //還有NS跟cup color資料
 //0614 update
+//這個是獨立的小雞
 //===================
 #include "ros/ros.h"
 #include <iostream>
@@ -190,7 +191,7 @@ int main(int argc, char **argv){
     srv_cup.request.OUO = 0;
     srv_ns.request.OAO = 0;
 
-    int color_[5]={2,0,0,0,0};
+    int color_[5]={2,0,0,0,0};//--->如果要測試相機要把這個改成{2,0,0,0,0}這樣就會讓goap進不去被卡死
     temp.change_cup_color(color_);
     int timer = 0 ; //--->單台測試時，小雞跳轉的counter(in status 4)
 

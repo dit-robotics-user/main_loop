@@ -77,6 +77,9 @@ def output_processor(output_action, current_left_layer, current_right_layer):
         output[14] = output_action.effects[0]
     elif output_action.type_number is 6:  # flag
         output[15] = output_action.effects[0]
+    elif output_action.type_number is 14:  # close all
+		for i in range(12):
+			output[i] = 0;
     return output
 
 

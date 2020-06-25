@@ -37,6 +37,7 @@ def setting(mode):
 		a26 = Action('auto_grab_2', [], [2], [], (0, 0), 0, 0, 0, 0, 0, 13, 0, True)
 		a27 = Action('auto_grab_3', [], [3], [], (0, 0), 0, 0, 0, 0, 0, 13, 0, True)
 		a28 = Action('auto_grab_4', [], [4], [], (0, 0), 0, 0, 0, 0, 0, 13, 0, True)
+		a30 = Action('open_all', [], [], [], (0, 0), 0, 0, 0, 0, 0, 14, 0, True)
 
 		child_list = [a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16, a17, a18, a19, a20, a21,
 					  a22, a23, a24, a25, a26, a27, a28]
@@ -71,6 +72,7 @@ def setting(mode):
 		c16 = Action('put_3', [], [], [a24, a15], (1600, 1800), 0, 300, 0, 0, 0, 0, 0, True)
 
 		#   push windsock
+		c24 = Action('hand_close_all', [], [], [a30], (1337, 1816), 277, 300, 0, 0, 0, 0, 0, True)
 		c17 = Action('hand_goto', [], [], [a19], (1337, 1816), 277, 300, 0, 0, 0, 0, 0, True)
 		c18 = Action('hand_prepare', [], [], [a16], (1810, 200), 270, 300, 3, 1, 15, 4, 4, True)
 		c19 = Action('hand_push', [], [], [a17], (1810, 781), 270, 300, 3, 1, 15, 4, 4, True)
@@ -81,10 +83,9 @@ def setting(mode):
 
 		#   go home
 		c22 = Action('go_home', [], ['at_home'], [a19], (700, 300), 90, 300, 3, 1, 15, 4, 4, True)
-		c23 = Action('raise_flag', ['at_home'], ['flag_raised', 'go_home'], [a18], (700, 300), 90, 300, 3, 1, 15, 4, 4,
-					True)
+		c23 = Action('raise_flag', ['at_home'], ['flag_raised', 'go_home'], [a18], (700, 300), 90, 300, 3, 1, 15, 4, 4,True)
 
-		demo_path = [c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14, c15, c16, c17, c18, c19, c20, c21]
+		demo_path = [c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14, c15, c16, c24, c17, c18, c19, c20, c21]
 		go_home_path = [c22,c23]
 
 	return demo_path, go_home_path

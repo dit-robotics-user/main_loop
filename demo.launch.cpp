@@ -23,5 +23,10 @@
    <node pkg="main_loop" type="path_planning_" name="path_planning_" output="log" respawn="true">
    </node>
 
+	<node pkg="serial_port" type="serial_port_node" name="serial_port_node" output="log" respawn="true">
+	</node>
+
+	<node pkg="serial_port" type="serial_port_node_2" name="serial_port_node_2" output="log" respawn="true">
+	</node>
 
 </launch>

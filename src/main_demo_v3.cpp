@@ -416,7 +416,7 @@ int main(int argc, char **argv)
     int action_done = false;
     int kill_mission = false;
     int replan_mission = false;
-    int margin = 20;
+    int margin = 6;
     int angle_margin = 4;
     int switch_mode_distance = 4000000;//square
     ActionMode m;
@@ -581,6 +581,7 @@ int main(int argc, char **argv)
 
                 
                 current_state.ChangeIsBlocked(false); //--->不開lidar請把這行註解打開
+                current_state.ChangeIsBlocked(false); //--->不開lidar請把這行註解打開
 
                                     
  
@@ -693,6 +694,7 @@ int main(int argc, char **argv)
 									int now_desired_angle = temp.adjust_direction(action_state.MyPosX(),action_state.MyPosY(),desire_pos_x,desire_pos_y);
 									ROS_INFO("now_desired_angle:%d",now_desired_angle);
 									current_state.ChangeIsBlocked(temp.blocking_with_direction(temp.lidar_be_blocked(),temp.from_agent.my_degree,now_desired_angle)); 
+									current_state.ChangeIsBlocked(false); //--->不開lidar請把這行註解打開
 									if(current_state.IsBlocked() == true){
 										debug_2.robot_case="BLOCKED";
 										//return stop; //<-------------tell STM to stop
@@ -741,6 +743,7 @@ int main(int argc, char **argv)
                                     }
                                     //lidar方向判讀
 									current_state.ChangeIsBlocked(temp.blocking_with_direction(temp.lidar_be_blocked(),temp.from_agent.my_degree,now_degree)); 
+									current_state.ChangeIsBlocked(false); //--->不開lidar請把這行註解打開
 									if(current_state.IsBlocked() == true){
 										debug_2.robot_case="BLOCKED";
 										//return stop; //<-------------tell STM to stop

@@ -29,13 +29,13 @@ def setting(mode, cup_color):
 		c1 = Action('goto_1', ['no_cups'], ['cup_prepare'], [a13], (939, 796), 330, 150, 3, 1, 15, 1, 4, True)
 		#   get cup 1
 		c2 = Action('cup_prepare1', ['no_cups'], ['cup_prepare'], [a6, a2, a8], (1598, 256), 270, 150, 3, 1, 15, 1, 4, True)
-		c3 = Action('cup_get1', ['cup_prepare'], ['cup_get'], [a3, a7, a6], (1598, 106), 270, 180, 3, 1, 15, 4, 4, True)
+		c3 = Action('cup_get1', ['cup_prepare'], ['cup_get'], [a3, a7, a6], (1600, 100), 266, 180, 3, 1, 15, 4, 4, True)
 		c4 = Action('cup_hold1', ['cup_get'],  ['get_points', 'have_cups'], [a5], (1598, 223), 0, 150, 3, 1, 15, 1, 4, True)
 
 		#   put first round cup
-		c5 = Action('put_red1', ['green1_put'], ['red1_put', 'no_cups', 'second_time'], [a4, a10, a6], (909, 223), 0, 150, 3,
+		c5 = Action('put_red1', ['green1_put'], ['red1_put', 'no_cups', 'second_time'], [a4, a10, a6], (965, 223), 355, 150, 3,
 					1, 15, 4, 4, True)
-		c6 = Action('put_green1', ['have_cups', 'first_time'], ['green1_put'], [a4, a9, a6], (342, 223), 0, 150, 3, 1, 15,
+		c6 = Action('put_green1', ['have_cups', 'first_time'], ['green1_put'], [a4, a9, a6], (318, 223), 0, 150, 3, 1, 15,
 					4, 4, 	True)
 
 		#   activate lighthouse
@@ -45,18 +45,18 @@ def setting(mode, cup_color):
 
 		#   get cup 2
 		c10 = Action('cup_prepare2', ['no_cups'], ['cup_prepare'], [a6, a2, a8], (315, 852), 180, 150, 3, 1, 15, 1, 4, True)
-		c11 = Action('cup_get2', ['cup_prepare'], ['cup_get'], [a3, a7, a6], (100, 865), 180, 150, 3, 1, 15, 4, 4, True)
+		c11 = Action('cup_get2', ['cup_prepare'], ['cup_get'], [a3, a7, a6], (111, 865), 180, 150, 3, 1, 15, 4, 4, True)
 		c12 = Action('cup_hold2', ['cup_get'], ['get_points', 'have_cups'], [a5], (296, 852), 180, 150, 3, 1, 15, 1, 4, True)
 
 		#   put second round cup
 		c13 = Action('put_set2', ['have_cups', 'second_time'], ['cup_set'], [a4, a12, a6], (808, 268), 90, 150, 3, 1, 15, 4, 4, True)
 		c14 = Action('put_greenset2', ['have_cups', 'second_time'], ['cup_set'], [a13], (808, 206), 180, 150, 3, 1, 15, 4, 4, True)
-		c15 = Action('put_green2', ['cup_set'], ['green2_put'], [a4, a11, a6], (680, 206), 180, 150, 3, 1, 15, 4, 4, True)
-		c16 = Action('put_leftoverset2', ['have_cups', 'second_time'], ['cup_set'], [a13], (680, 206), 90, 150, 3, 1, 15, 4, 4, True)
+		c15 = Action('put_green2', ['cup_set'], ['green2_put'], [a4, a11, a6], (718, 206), 180, 150, 3, 1, 15, 4, 4, True)
+		c16 = Action('put_leftoverset2', ['have_cups', 'second_time'], ['cup_set'], [a13], (718, 206), 90, 150, 3, 1, 15, 4, 4, True)
 		c17 = Action('put_leftover2', ['green2_put'], ['leftover2_put'], [a4, a7, a6], (808, 268), 90, 150, 3, 1, 15, 4, 4, True)
 		c18 = Action('put_redset2', ['have_cups', 'second_time'], ['cup_set'], [a13], (808, 206), 0, 150, 3, 1, 15, 4, 4, True)
-		c19 = Action('put_red2', ['leftover2_put'], ['red2_put', 'no_cups', 'home_full'], [a4, a12, a6], (914, 206), 0, 150, 3, 1, 15, 4, 4, True)
-		c20 = Action('put_initialize2', ['red2_put'], ['get_points'], [a13, a5], (909, 988), 270, 150, 3, 1, 15, 4, 4, True)
+		c19 = Action('put_red2', ['leftover2_put'], ['red2_put', 'no_cups', 'home_full'], [a4, a12, a6], (900, 206), 0, 150, 3, 1, 15, 4, 4, True)
+		c20 = Action('put_initialize2', ['red2_put'], ['get_points'], [a13, a5], (900, 988), 90, 150, 3, 1, 15, 4, 4, True)
 
 		#  go home
 		c21= Action('go_home', [], ['at_home'], [a13], (300, 700), 90, 150, 3, 1, 15, 4, 4, True)

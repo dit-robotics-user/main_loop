@@ -77,6 +77,9 @@ def output_processor(output_action, current_left_layer, current_right_layer):
         output[14] = output_action.effects[0]
     elif output_action.type_number is 6:  # flag
         output[15] = output_action.effects[0]
+    elif output_action.type_number is 14:  # close all
+		for i in range(12):
+			output[i] = 1;
     return output
 
 
@@ -108,7 +111,7 @@ class set_frommain:
 
 goal = []
 path_done = False
-go_home_time = 20
+go_home_time = 160
 left_side = 3
 right_side = 3
 north = 0
@@ -118,7 +121,7 @@ south_position = (1500, 300)      ######
 demo_path = []
 give_next_action = True
 go_home_flag = False
-action_path, go_home_path = setting(1)
+action_path, go_home_path_north, go_home_path_south = setting(1)
 action_name = 0 
 counter = 0
 
@@ -161,19 +164,17 @@ def goap_server():
 		#goap的loop放這:
 		if set_frommain.set_finish == 1 :
 			if counter == 0:
-				action_path, go_home_path = setting(1)
+				action_path, go_home_path_north, go_home_path_south = setting(1)
 				print('setfinish')
 				counter=1		
 		
 			path_done = False
 			if mymain.time >= go_home_time and go_home_flag == False:  # switch to go home mode
 				demo_path[:] = []
-				for action in go_home_path:
-					if mymain.north_or_south == north:
-						action.position = north_position
-					elif mymain.north_or_south == south:
-						action.position = south_position
-				action_path = go_home_path
+				if mymain.north_or_south == north:
+					action_path = go_home_path_north
+				elif mymain.north_or_south == south:
+					action_path = go_home_path_south
 				go_home_flag = True
 				give_next_action = True
 				

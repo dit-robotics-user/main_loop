@@ -190,7 +190,7 @@ void sub_class::publish_(float time ){  //publish data to main
 }
 
 int main(int argc, char **argv){
-    ros::init(argc,argv, "agent_new_3");
+    ros::init(argc,argv, "agent_new_4");
     ros::NodeHandle nh;
     ros::ServiceClient client_cup = nh.serviceClient<main_loop::cup>("cup");
     ros::ServiceClient client_ns = nh.serviceClient<main_loop::ns>("ns");

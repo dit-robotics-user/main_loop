@@ -114,7 +114,7 @@ south_position = (1500, 300)      ######
 demo_path = []
 give_next_action = True
 go_home_flag = False
-action_path, go_home_path = setting(1)
+action_path, go_home_path_north, go_home_path_south = setting(1)
 action_name = 0 
 
 
@@ -143,15 +143,13 @@ def goap_server():
 	while True:
 		path_done = False
 		if mymain.time >= go_home_time and go_home_flag == False:  # switch to go home mode
-			demo_path[:] = []
-			for action in go_home_path:
+				demo_path[:] = []
 				if mymain.north_or_south == north:
-					action.position = north_position
+					action_path = go_home_path_north
 				elif mymain.north_or_south == south:
-					action.position = south_position
-			action_path = go_home_path
-			go_home_flag = True
-			give_next_action = True
+					action_path = go_home_path_south
+				go_home_flag = True
+				give_next_action = True
 			
 		if give_next_action == True:  # expand action into its child actions
 			for c_action in action_path[0].child_action:

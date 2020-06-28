@@ -26,6 +26,7 @@
 
 #define pi 3.14159265359
 using namespace std;
+bool masterDelayStartTime = 0;
 
 class state{
 public:
@@ -536,6 +537,11 @@ int main(int argc, char **argv)
                 break;
             }
             case Status::RUN:{ //5
+				if(masterDelayStartTime == 0)
+				{
+					masterDelayStartTime = 1;
+					ros::Duration(5).sleep();
+				}			
                 count ++;
                 //將agent資訊存入current state
                 
@@ -656,6 +662,7 @@ int main(int argc, char **argv)
                                 r1 = 0;
                                 r2 = 0;
                                 r3 = 0;
+                                
                                 //rx0
                                 long int out = 0;
                                 for(int i = 0; i < 12; i ++){

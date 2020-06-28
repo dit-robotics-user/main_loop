@@ -110,12 +110,12 @@ int old_action[10] = {9,9,9,9,6,6,6,6,1,6};
 int command_action[4];
 int desire_speed = 0;
 
-int my_pos_x=700;
-int my_pos_y=2800;
+int my_pos_x=550;
+int my_pos_y=2900;
 int my_degree=180;
 
-int margin = 50;
-int angle_margin = 10;
+int margin = 5;
+int angle_margin = 3;
 
 int switch_mode_distance = 4000000;//square
 int distance_square = 0;
@@ -209,8 +209,8 @@ int main(int argc, char **argv){
     goap_srv.request.mission_name = "setting" ;
     goap_srv.request.mission_child_name = "setting" ;
 
-path_srv.request.goal_pos_x = 1000; 
-        path_srv.request.goal_pos_y = 1000; 
+	path_srv.request.goal_pos_x = 488; 
+        path_srv.request.goal_pos_y = 2875; 
 
 
 	while(ros::ok()){
@@ -426,7 +426,7 @@ ROS_INFO("my degree:%d", my_degree);
             case RobotState::AT_POS:
             	ROS_INFO("at pos");
 
-			r0=0;
+			r0=0x5000;
 			r1=0;
 			r2=0;
 			r3=0;
@@ -505,7 +505,7 @@ ROS_INFO("my degree:%d", my_degree);
 				ROS_INFO ("child mission: %s ", goap_srv.response.mission_child_name.c_str());
 
 				action_done = false;
-				if(count>3 && command_finish()){
+				if(count>5 && command_finish()){
 					ROS_INFO("finish");
 					//old_action
 					for(int i = 0; i < 10; i ++){

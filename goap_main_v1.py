@@ -33,6 +33,15 @@ def output_processor(output_action):
     elif output_action.type_number is 10:  # flag
         output[9] = output_action.effects[0]
 
+    elif output_action.type_number is 12:  # hand3+4
+		output[2] = output_action.effects[0]
+		output[3] = output_action.effects[0]
+
+    elif output_action.type_number is 13:  # hand3+4
+		output[6] = output_action.effects[0]
+		output[7] = output_action.effects[0]
+
+
     return output
 
 

@@ -393,7 +393,7 @@ bool at_pos(int x, int y, int deg, int c_x, int c_y, int c_deg, int m, int angle
 int main(int argc, char **argv)
 {
     //ROS的topic和service定義處
- 	ros::init (argc, argv, "main_demo_v4");
+ 	ros::init (argc, argv, "main_demo_v5");
 	ros::NodeHandle nh;    	
     ros::Publisher pub_st1 = nh.advertise<std_msgs::Int32MultiArray>("txST1", 1);
 	ros::Publisher pub_st2 = nh.advertise<std_msgs::Int32MultiArray>("txST2", 1);
@@ -421,7 +421,7 @@ int main(int argc, char **argv)
     int action_done = false;
     int kill_mission = false;
     int replan_mission = false;
-    int margin = 20;
+    int margin = 6;
     int angle_margin = 4;
     int switch_mode_distance = 4000000;//square
     ActionMode m;
@@ -497,6 +497,7 @@ int main(int argc, char **argv)
                 r3 = 90;
                 break;            
             case Status::STARTING_SCRIPT:   //3
+				ros::Duration(6).sleep();
                 r0 = 0x2000;
                 r1 = 0;
                 r2 = 0;
@@ -514,11 +515,11 @@ int main(int argc, char **argv)
                 strategy_srv.request.init_pos.push_back(temp.from_agent.my_pos_x);
                 strategy_srv.request.init_pos.push_back(temp.from_agent.my_pos_y);
                 strategy_srv.request.cup_color = {}; 
-                strategy_srv.request.cup_color.push_back(temp.cup_color[4]);
-                strategy_srv.request.cup_color.push_back(temp.cup_color[3]); 
-                strategy_srv.request.cup_color.push_back(temp.cup_color[2]);
+                strategy_srv.request.cup_color.push_back(temp.cup_color[0]);
                 strategy_srv.request.cup_color.push_back(temp.cup_color[1]); 
-                strategy_srv.request.cup_color.push_back(temp.cup_color[0]); 
+                strategy_srv.request.cup_color.push_back(temp.cup_color[2]);
+                strategy_srv.request.cup_color.push_back(temp.cup_color[3]); 
+                strategy_srv.request.cup_color.push_back(temp.cup_color[4]); 
                 if(temp.cup_color[0]!=2 && set_goap==0){
                     if(client_set_goap.call(strategy_srv)){
                         if(strategy_srv.response.goap_return==true){
@@ -721,6 +722,9 @@ int main(int argc, char **argv)
 									int now_desired_angle = temp.adjust_direction(action_state.MyPosX(),action_state.MyPosY(),desire_pos_x,desire_pos_y);
 									ROS_INFO("now_desired_angle:%d",now_desired_angle);
 									current_state.ChangeIsBlocked(temp.blocking_with_direction(temp.lidar_be_blocked(),temp.from_agent.my_degree,now_desired_angle)); 
+									if(action_state.KillMission()==true || action_state.ReplanMission()==true ){
+										current_state.ChangeIsBlocked(true);
+									}
 									if(current_state.IsBlocked() == true){
 										debug_2.robot_case="BLOCKED";
 										//return stop; //<-------------tell STM to stop
@@ -745,7 +749,7 @@ int main(int argc, char **argv)
                                         ROS_INFO("desire_pos_y=%d",desire_pos_y);
                                         ROS_INFO("action_state.MyPosX()=%d",action_state.MyPosX());
                                         ROS_INFO("action_state.MyPosY()=%d",action_state.MyPosY());
-                                        ROS_ERROR("Failed to call service path plan");
+                                        ROS_INFO("Failed to call service path plan");
                                     }
                                     if(now_degree<0){  //--->如果回傳值為負值表示path plan 沒有算出資料 就存取上一次計算出的數值
                                         now_degree = last_degree;
@@ -768,6 +772,9 @@ int main(int argc, char **argv)
                                     }
                                     //lidar方向判讀
 									current_state.ChangeIsBlocked(temp.blocking_with_direction(temp.lidar_be_blocked(),temp.from_agent.my_degree,now_degree)); 
+									if(action_state.KillMission()==true || action_state.ReplanMission()==true ){
+										current_state.ChangeIsBlocked(true);
+									}
 									if(current_state.IsBlocked() == true){
 										debug_2.robot_case="BLOCKED";
 										//return stop; //<-------------tell STM to stop

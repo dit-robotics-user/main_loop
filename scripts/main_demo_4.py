@@ -23,7 +23,7 @@ def output_processor(output_action):
 class mymain:  #main輸入與輸出參數需在此calss定義
 	action_done = False           # <---
 	my_pos = (0, 0,)              # <---
-	cup_color = [0, 0, 0, 0, 0]  # <---
+	cup_color = [0, 1, 0, 1, 0]  # <---
 	north_or_south = 0           # <---
 	time = 0                     # <---
 	name = 0                     # <---
@@ -42,11 +42,11 @@ class set_frommain:
 	init_pos = (3,3)
 	set_finish = 0 
 	setting_finish = 0 
-	cup_color = [0, 0, 0, 0, 0]  # <---
+	cup_color = [0, 1, 0, 1, 0]  # <---
 	
 	
 
-go_home_time = 300
+go_home_time = 160
 path_done = False
 north = 0
 south = 1
@@ -56,7 +56,7 @@ give_next_action = True
 go_home_flag = False
 demo_path = []
 counter = 0 
-
+action_path, go_home_path_north, go_home_path_south = setting(1, set_frommain.cup_color)
 
                    
 def handle_return_to_main(req):  #main輸入參數與獲得結果存取處(service回調函式)  
@@ -89,6 +89,9 @@ def goap_server():
 	global go_home_flag
 	global go_home_time
 	global counter
+	global go_home_path_north
+	global go_home_path_south
+	global go_home_path
 
 	
 	#定義goap service name:
@@ -100,19 +103,20 @@ def goap_server():
 		#goap的loop放這:
 		if set_frommain.set_finish == 1 :
 			if counter == 0:
-				action_path, go_home_path = setting(1, set_frommain.cup_color)
+				action_path, go_home_path_north, go_home_path_south = setting(1, set_frommain.cup_color)
 				print('setfinish')
 				counter=1
 
 			path_done = False
 			if mymain.time >= go_home_time and go_home_flag == False:
-				demo_path.clear()
-				for action in go_home_path:
-					if mymain.north_or_south == north:
-						action.position = north_position
-					elif mymain.north_or_south == south:
-						action.position = south_position
-				action_path = go_home_path
+				demo_path[:] = []
+				if mymain.north_or_south == north:
+					#action.position = north_position
+					action_path = go_home_path_north
+				elif mymain.north_or_south == south:
+					#action.position = south_position
+					action_path = go_home_path_south
+				#action_path = go_home_path
 				go_home_flag = True
 				give_next_action = True
 
@@ -138,7 +142,7 @@ def goap_server():
 			mymain.output_position = path.position
 			mymain.output_wait = path.wait
 
-			if mymain.action_done is True and demo_path[0].name == mymain.child_name:
+			if mymain.action_done is True and demo_path[0].name == mymain.child_name and action_name == mymain.name :
 
 				#print(path.name)
 				#print(path.position)

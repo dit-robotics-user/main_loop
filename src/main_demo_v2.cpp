@@ -275,7 +275,7 @@ int main(int argc, char **argv)
     long int r2=0;
     long int r3=0;
     long int rx0=0;
-    long int rx1=0;
+    long int rx1=1;
     long int rx2=0;
     long int rx3=0;
 

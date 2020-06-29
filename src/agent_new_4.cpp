@@ -24,7 +24,8 @@ class sub_class{
         void ST1_sub_callback(const std_msgs::Int32MultiArray::ConstPtr& msg);
         void ST2_sub_callback(const std_msgs::Int32MultiArray::ConstPtr& msg); 
         void lidarmsg_sub_callback(const lidar_2020::alert_range::ConstPtr& msg);
-        void camera_sub_callback(const main_loop::position::ConstPtr& msg);
+        void camera_sub_callback_R(const main_loop::position::ConstPtr& msg);
+		void camera_sub_callback_L(const main_loop::position::ConstPtr& msg);
         void status_sub_callback(const std_msgs::Int32::ConstPtr& msg);
         void strategy_sub_callback(const std_msgs::Int32::ConstPtr& msg);
         void publish_(float time);
@@ -46,7 +47,8 @@ class sub_class{
         ros::Subscriber strategy_sub = n.subscribe<std_msgs::Int32>("strategy", 1, &sub_class::strategy_sub_callback,this);
 		ros::Subscriber ST1_sub = n.subscribe<std_msgs::Int32MultiArray>("rxST1", 1, &sub_class::ST1_sub_callback,this);
         ros::Subscriber ST2_sub = n.subscribe<std_msgs::Int32MultiArray>("rxST2", 1, &sub_class::ST2_sub_callback,this);
-        ros::Subscriber camera_sub= n.subscribe<main_loop::position>("enemy_pose", 1, &sub_class::camera_sub_callback,this);
+        ros::Subscriber camera_sub_R= n.subscribe<main_loop::position>("enemy_pose_R", 1, &sub_class::camera_sub_callback_R,this);
+        ros::Subscriber camera_sub_L= n.subscribe<main_loop::position>("enemy_pose_L", 1, &sub_class::camera_sub_callback_L,this);
         ros::Subscriber lidarmsg_sub= n.subscribe<lidar_2020::alert_range>("ranging_alert", 1, &sub_class::lidarmsg_sub_callback,this);
         int status_dominate = 0 ;
         int enemy1_pos_x = 0 ;
@@ -111,7 +113,29 @@ sub_class::sub_class(int my_pos_x_,int my_pos_y_, int ini_status){
 void sub_class::strategy_sub_callback(const std_msgs::Int32::ConstPtr& msg){
     pub_to_main.strategy = msg->data ; 
 }
-void sub_class::camera_sub_callback(const main_loop::position::ConstPtr& msg){
+void sub_class::camera_sub_callback_R(const main_loop::position::ConstPtr& msg){
+    enemy1_pos_x =  msg->enemy1_x ;
+    enemy1_pos_y =  msg->enemy1_y ;
+    enemy2_pos_x =  msg->enemy2_x ;
+    enemy2_pos_y =  msg->enemy2_y ;
+    if(enemy1_pos_x == -1){
+        enemy1_pos_x = pub_to_main.enemy1_x;
+    }
+    if(enemy1_pos_y == -1){
+        enemy1_pos_y = pub_to_main.enemy1_y;
+    }
+    if(enemy2_pos_x == -1){
+        enemy2_pos_x = pub_to_main.enemy2_x;
+    }
+    if(enemy2_pos_y == -1){
+        enemy2_pos_y = pub_to_main.enemy2_y;
+    }
+    pub_to_main.enemy1_x = enemy1_pos_x;
+    pub_to_main.enemy1_y = enemy1_pos_y;
+    pub_to_main.enemy2_x = enemy2_pos_x;
+    pub_to_main.enemy2_y = enemy2_pos_y;
+}
+void sub_class::camera_sub_callback_L(const main_loop::position::ConstPtr& msg){
     enemy1_pos_x =  msg->enemy1_x ;
     enemy1_pos_y =  msg->enemy1_y ;
     enemy2_pos_x =  msg->enemy2_x ;

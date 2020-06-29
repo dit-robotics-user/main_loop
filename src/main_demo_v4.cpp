@@ -228,6 +228,7 @@ void sub_state::callback(const main_loop::agent::ConstPtr& msg){
     from_agent.hand = msg -> hand ; 
     from_agent.finger = msg->finger ;
     from_agent.time = msg->time ;  
+    from_agent.ns = msg->ns;
     from_agent.strategy = msg->strategy;  
 	from_agent.enemy1_x = msg->enemy1_x;
 	from_agent.enemy1_y = msg->enemy1_y;
@@ -410,7 +411,7 @@ int main(int argc, char **argv)
     long int r2=0;
     long int r3=0;
     long int rx0=0;
-    long int rx1=0;
+    long int rx1=1;
     long int rx2=0;
     long int rx3=0;
 
@@ -421,7 +422,7 @@ int main(int argc, char **argv)
     int action_done = false;
     int kill_mission = false;
     int replan_mission = false;
-    int margin = 20;
+    int margin = 6;
     int angle_margin = 4;
     int switch_mode_distance = 4000000;//square
     ActionMode m;
@@ -497,6 +498,7 @@ int main(int argc, char **argv)
                 r3 = 90;
                 break;            
             case Status::STARTING_SCRIPT:   //3
+				//ros::Duration(6).sleep();
                 r0 = 0x2000;
                 r1 = 0;
                 r2 = 0;
@@ -514,11 +516,11 @@ int main(int argc, char **argv)
                 strategy_srv.request.init_pos.push_back(temp.from_agent.my_pos_x);
                 strategy_srv.request.init_pos.push_back(temp.from_agent.my_pos_y);
                 strategy_srv.request.cup_color = {}; 
-                strategy_srv.request.cup_color.push_back(temp.cup_color[4]);
-                strategy_srv.request.cup_color.push_back(temp.cup_color[3]); 
-                strategy_srv.request.cup_color.push_back(temp.cup_color[2]);
+                strategy_srv.request.cup_color.push_back(temp.cup_color[0]);
                 strategy_srv.request.cup_color.push_back(temp.cup_color[1]); 
-                strategy_srv.request.cup_color.push_back(temp.cup_color[0]); 
+                strategy_srv.request.cup_color.push_back(temp.cup_color[2]);
+                strategy_srv.request.cup_color.push_back(temp.cup_color[3]); 
+                strategy_srv.request.cup_color.push_back(temp.cup_color[4]); 
                 if(temp.cup_color[0]!=2 && set_goap==0){
                     if(client_set_goap.call(strategy_srv)){
                         if(strategy_srv.response.goap_return==true){
@@ -567,7 +569,7 @@ int main(int argc, char **argv)
                 goap_srv.request.cup_color.push_back(temp.cup_color[2]);
                 goap_srv.request.cup_color.push_back(temp.cup_color[3]); 
                 goap_srv.request.cup_color.push_back(temp.cup_color[4]); 
-                goap_srv.request.north_or_south = 0 ; 
+                goap_srv.request.north_or_south = temp.from_agent.ns ; 
                 goap_srv.request.action_done=action_state.MyActionDone();
                 goap_srv.request.pos.push_back(action_state.MyPosX());
                 goap_srv.request.pos.push_back(action_state.MyPosY()); 
@@ -719,8 +721,10 @@ int main(int argc, char **argv)
                                     
                                     //lidar方向判讀
 									int now_desired_angle = temp.adjust_direction(action_state.MyPosX(),action_state.MyPosY(),desire_pos_x,desire_pos_y);
-									ROS_INFO("now_desired_angle:%d",now_desired_angle);
 									current_state.ChangeIsBlocked(temp.blocking_with_direction(temp.lidar_be_blocked(),temp.from_agent.my_degree,now_desired_angle)); 
+									if(action_state.KillMission()==true || action_state.ReplanMission()==true ){
+										current_state.ChangeIsBlocked(true);
+									}
 									if(current_state.IsBlocked() == true){
 										debug_2.robot_case="BLOCKED";
 										//return stop; //<-------------tell STM to stop
@@ -768,6 +772,9 @@ int main(int argc, char **argv)
                                     }
                                     //lidar方向判讀
 									current_state.ChangeIsBlocked(temp.blocking_with_direction(temp.lidar_be_blocked(),temp.from_agent.my_degree,now_degree)); 
+									if(action_state.KillMission()==true || action_state.ReplanMission()==true ){
+										current_state.ChangeIsBlocked(true);
+									}			
 									if(current_state.IsBlocked() == true){
 										debug_2.robot_case="BLOCKED";
 										//return stop; //<-------------tell STM to stop

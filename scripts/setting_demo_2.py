@@ -75,14 +75,14 @@ def setting(mode):
 		c13 = Action('lift_both_layer', [], [], [a20, a21], (1350, 1800), 0, 300, 0, 0, 0, 0, 0, True)
 		c14 = Action('put_1', [], [], [a15], (1834, 1800), 0, 300, 0, 0, 0, 0, 0, True)
 		c15 = Action('put_2', [], [], [a24, a15], (1700, 1800), 0, 300, 0, 0, 0, 0, 0, True)
-		c16 = Action('put_3', [], [], [a24, a15], (1600, 1800), 0, 300, 0, 0, 0, 0, 0, True)
+		c16 = Action('put_3', [], [], [a24, a15], (1550, 1800), 0, 300, 0, 0, 0, 0, 0, True)
 
 		#   push windsock
 		c17 = Action('hand_close_all', [], [], [a30], (1300, 1800), 90, 300, 0, 0, 0, 0, 0, True)
 		c18 = Action('hand_goto', [], [], [a19], (1300, 700), 90, 300, 0, 0, 0, 0, 0, True)
 		c19 = Action('hand_goto2', [], [], [a19], (1808, 300), 270, 300, 0, 0, 0, 0, 0, True)
 		c20 = Action('hand_prepare', [], [], [a16], (1808, 155), 270, 300, 3, 1, 15, 4, 4, True)
-		c21 = Action('hand_push', [], [], [a17], (1808, 781), 270, 300, 3, 1, 15, 4, 4, True)
+		c21 = Action('hand_push', [], [], [a17], (1807, 781), 270, 300, 3, 1, 15, 4, 4, True)
 
 		#   pos mode grab
 		c22= Action('go_default_1', [], [], [a19], (1618, 486), 220, 300, 3, 1, 15, 4, 4, True)	

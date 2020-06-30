@@ -10,7 +10,7 @@
    	timeout="20" />         
 
     	<machine name="master"
-    	address="10.42.0.236"
+    	address="10.42.0.235"
     	user="ubuntu"
     	ssh-port = "22"
     	env-loader="~/env.sh"

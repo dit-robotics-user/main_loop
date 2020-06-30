@@ -288,7 +288,7 @@ bool sub_state::blocking_with_direction(bool blocking_condition, int my_angle, i
 			*/
 			if(desire_angle < angle_a && desire_angle > angle_b){
 				// forward motion
-				for(int i=0;i<=3;i++){
+				for(int i=1;i<=2;i++){
 					if(emergency[i]==true){
 						/*
 						ROS_INFO("desire_angle:%d",desire_angle);
@@ -301,7 +301,7 @@ bool sub_state::blocking_with_direction(bool blocking_condition, int my_angle, i
 				}
 			}else{
 				// backward motion 
-				for(int i=4;i<=7;i++){
+				for(int i=5;i<=6;i++){
 					if(emergency[i]==true){
 						/*
 						ROS_INFO("desire_angle:%d",desire_angle);

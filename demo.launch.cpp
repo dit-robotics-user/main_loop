@@ -28,5 +28,9 @@
 
 	<node pkg="serial_port" type="serial_port_node_2" name="serial_port_node_2" output="log" respawn="true">
 	</node>
+	
+	<include file="$(find lidar_2020)/launch/octagonal_range.launch">
+    </include>	
+
 
 </launch>

@@ -33,14 +33,22 @@ def output_processor(output_action):
     elif output_action.type_number is 10:  # flag
         output[9] = output_action.effects[0]
 
-    elif output_action.type_number is 12:  # hand3+4
+    elif output_action.type_number is 12:  # hand1+2
+		output[0] = output_action.effects[0]
+		output[1] = output_action.effects[0]
+
+    elif output_action.type_number is 13:  # hand1+2
+		output[4] = output_action.effects[0]
+		output[5] = output_action.effects[0]
+
+    elif output_action.type_number is 14:  # hand3+4
 		output[2] = output_action.effects[0]
 		output[3] = output_action.effects[0]
 
-    elif output_action.type_number is 13:  # hand3+4
+    elif output_action.type_number is 15:  # hand3+4
 		output[6] = output_action.effects[0]
 		output[7] = output_action.effects[0]
-
+	
 
     return output
 
@@ -62,12 +70,8 @@ class mymain:  #main輸入與輸出參數需在此calss定義
 	output_name = "start"        # --->
 	output_child_name = "start"  # --->
 
-go_home_time = 4000
+go_home_time = 400
 path_done = False
-north = 1
-south = 2
-north_position = (1, 1)
-south_position = (2, 2)
 action_path, go_home_path = setting(1)#, mymain.cup_color)
 give_next_action = True
 go_home_flag = False
@@ -101,12 +105,7 @@ def goap_server():
 		#rospy.loginfo('test test');
 		path_done = False
 		if mymain.time >= go_home_time and go_home_flag == False:
-			demo_path.clear()
-			for action in go_home_path:
-				if mymain.north_or_south == north:
-					action.position = north_position
-				elif mymain.north_or_south == south:
-					action.position = south_position
+			demo_path[:] = []
 			action_path = go_home_path
 			go_home_flag = True
 			give_next_action = True

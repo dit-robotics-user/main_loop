@@ -49,16 +49,13 @@ find_package(catkin REQUIRED COMPONENTS
 ##   * add every package in MSG_DEP_SET to generate_messages(DEPENDENCIES ...)
 
 add_message_files(
-	FILES
-	agent.msg
-	main_state.msg
-	from_goap.msg
-	agent.msg
-	string_with_header.msg
-	position.msg
-	world_state.msg
-	goap_debug.msg
-	main_debug.msg
+   FILES
+   agent.msg
+   main_state.msg
+   from_goap.msg
+   agent.msg
+   string_with_header.msg
+   position.msg
 )
 
 ## Generate services in the 'srv' folder
@@ -67,7 +64,6 @@ add_service_files(
 	AddTwoInts.srv
 	path.srv
 	goap_.srv
-	goap_demo.srv
 )
 
 ## Generate actions in the 'action' folder
@@ -220,20 +216,21 @@ add_executable(path_planning_ src/path_planning_.cpp)
 add_dependencies(path_planning_ main_loop_gencpp)
 target_link_libraries(path_planning_ ${catkin_LIBRARIES})
 
-add_executable(agent_new src/agent_new.cpp)
-add_dependencies(agent_new main_loop_gencpp)
-target_link_libraries(agent_new ${catkin_LIBRARIES})
+##add_executable(agent_new src/agent_new.cpp)
+##add_dependencies(agent_new main_loop_gencpp)
+##target_link_libraries(agent_new ${catkin_LIBRARIES})
 
-add_executable(main_demo_v2 src/main_demo_v2.cpp)
-add_dependencies(main_demo_v2 main_loop_gencpp)
-target_link_libraries(main_demo_v2 ${catkin_LIBRARIES})
+##add_executable(main_demo_v2 src/main_demo_v2.cpp)
+##add_dependencies(main_demo_v2 main_loop_gencpp)
+##target_link_libraries(main_demo_v2 ${catkin_LIBRARIES})
 
-add_executable(main_v1 src/main_v1.cpp)
-add_dependencies(main_v1 main_loop_gencpp)
-target_link_libraries(main_v1 ${catkin_LIBRARIES})
+add_executable(main_frank src/main_frank.cpp)
+add_dependencies(main_frank main_loop_gencpp)
+target_link_libraries(main_frank ${catkin_LIBRARIES})
 
-add_dependencies(agent_new ${catkin_EXPORTED_TARGETS})
-target_link_libraries(main_demo_v2 ${catkin_LIBRARIES} python2.7)
+
+##add_dependencies(agent_new ${catkin_EXPORTED_TARGETS})
+##target_link_libraries(main_demo_v2 ${catkin_LIBRARIES} python2.7)
 
 
 

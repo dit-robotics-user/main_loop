@@ -169,7 +169,6 @@ def setting(mode):#, cup_color):
 		# go to
 		c24 = Action('goto1', [], ['at_home'], [a40], (1380, 1666), 271, 800, 3, 1, 15, 4, 4, True)
 		c25 = Action('goto2', [], ['at_home'], [a45], (1458, 1175), 181, 800, 3, 1, 15, 4, 4, True)
-		#c26 = Action('goto3', [], ['at_home'], [a34], (1350, 1195), 0, 800, 3, 1, 15, 4, 4, True)
 		
 		c27 = Action('go_home2', [], ['at_home'], [a33], (382, 2750), 305, 800, 3, 1, 15, 4, 4, True)
 

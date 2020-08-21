@@ -211,8 +211,8 @@ int main(int argc, char **argv){
     float last_clustering_time = 0 ;
     float clustering_time = 0 ; 
     float temp_timer ;
-    int cup_suck = 0;
-    int ns_suck = 0;
+    int cup_trash = 0;
+    int ns_trash = 0;
     int count = 0 ; 
     srv_cup.request.OUO = 0;
     srv_ns.request.OAO = 0;
@@ -271,53 +271,6 @@ int main(int argc, char **argv){
                     srv_ns.request.OAO=1;//--->30s call ns service 
                 }
 
-                //cup service
-                if(srv_cup.request.OUO==1){
-                    if(client_cup.call(srv_cup)){
-                        if(srv_cup.response.CupResult[0]!=0 && srv_cup.response.CupResult[0]!=1 ){
-                            cup_suck = 1 ;     
-                            ROS_INFO("cup_suck");
-                        }else{
-                            srv_cup.request.OUO = 2 ;//finish
-                            for(int k_=0;k_<5;k_++){
-                                color_[k_]=srv_cup.response.CupResult[k_];
-                            }
-                        }  
-                        if(srv_cup.request.OUO == 2){
-                            temp.change_cup_color(color_);
-                        }
-                    }else{
-                        cup_suck = 1 ;     
-                        ROS_INFO("fail to call");
-                    }   
-                }
-                if(cup_suck == 1 ){
-                    srv_cup.request.OUO = 3;
-                }
-                
-
-                //ns service 
-                if(srv_ns.request.OAO==1||srv_ns.request.OAO==10){
-                    if(client_ns.call(srv_ns)){
-                        if(srv_ns.response.ns !=0 && srv_ns.response.ns!=1 ){
-                            ROS_INFO("cup_suck");
-                            ns_suck = 1 ;     
-                        }else{
-                            srv_ns.request.OAO = 2 ;//finish 
-                            temp.change_ns(srv_ns.response.ns);
-                        }  
-                    }else{
-                        ROS_INFO("fail to call");
-                        ns_suck = 1 ; 
-                    }   
-                }
-                if(cup_suck == 1 ){
-                    srv_ns.request.OAO = 3;
-                }
-                if(srv_ns.request.OAO==10 ){
-                    srv_ns.request.OAO = 0;
-                }
-
 
                 break;
 
@@ -333,6 +286,54 @@ int main(int argc, char **argv){
             
                 break;
        }
+        //cup service
+        if(srv_cup.request.OUO==1){
+            if(client_cup.call(srv_cup)){
+                if(srv_cup.response.CupResult[0]!=0 && srv_cup.response.CupResult[0]!=1 ){
+                    cup_trash = 1 ;     
+                    
+                }else{
+                    srv_cup.request.OUO = 2 ;//finish
+                    for(int k_=0;k_<5;k_++){
+                        color_[k_]=srv_cup.response.CupResult[k_];
+						ROS_INFO("color_[%d]:%d",k_,srv_cup.response.CupResult[k_]);
+                    }
+			cup_trash = 0;
+                }  
+                if(srv_cup.request.OUO == 2){
+                    temp.change_cup_color(color_);
+                }
+            }else{
+                cup_trash = 1 ;     
+                //ROS_INFO("fail to call");
+            }   
+        }
+        if(cup_trash == 1 ){
+            srv_cup.request.OUO = 3;
+        }
+
+        //ns service 
+        if(srv_ns.request.OAO==1||srv_ns.request.OAO==10){
+            if(client_ns.call(srv_ns)){
+                if(srv_ns.response.ns !=0 && srv_ns.response.ns!=1 ){
+                    ROS_INFO("cup_trash");
+                    ns_trash = 1 ;     
+                }else{
+                    srv_ns.request.OAO = 2 ;//finish 
+                    temp.change_ns(srv_ns.response.ns);
+                }  
+            }else{
+                ROS_INFO("fail to call");
+                ns_trash = 1 ; 
+            }   
+        }
+
+        if(cup_trash == 1 ){
+            srv_ns.request.OAO = 3;
+        }
+        if(srv_ns.request.OAO==10 ){
+            srv_ns.request.OAO = 0;
+        }
 
         last_clustering_time=clustering_time;
         temp.publish_(clustering_time);  // publish data to main 

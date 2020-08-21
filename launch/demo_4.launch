@@ -7,7 +7,7 @@
 
 	<node pkg="main_loop" type="main_demo_v4" name="main_demo_v4" output="screen" respawn="true">
 	</node>
-	<node pkg="main_loop" type="agent_new_4" name="agent_new_4">
+	<node pkg="main_loop" type="agent_new_4" name="agent_new_4" output="screen" >
 	</node>
 	<node pkg="main_loop" type="main_demo_4.py" name="main_demo_4" output="screen" respawn="true">
 	</node>

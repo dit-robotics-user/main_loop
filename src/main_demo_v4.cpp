@@ -411,19 +411,19 @@ int main(int argc, char **argv)
     long int r2=0;
     long int r3=0;
     long int rx0=0;
-    long int rx1=1;
-    long int rx2=0;
+    long int rx1=1; //0            1
+    long int rx2=0; //341        0
     long int rx3=0;
 
     int goal_covered_counter = 0;
     int cover_limit = 20;
-    int old_grab_status[5] = {0};
+    int old_grab_status[5] = {0,0,0,0,0};/////////////////////////////////////////
     int distance_square = 0;
     int action_done = false;
     int kill_mission = false;
     int replan_mission = false;
-    int margin = 6;
-    int angle_margin = 4;
+    int margin = 6; //6
+    int angle_margin = 4; //4
     int switch_mode_distance = 4000000;//square
     ActionMode m;
     RobotState robot;
@@ -635,9 +635,11 @@ int main(int argc, char **argv)
 
                                 //rx2
                                 long int out = 0;
+                                bool push_flag = false;
                                 for(int i = 0; i < 5; i ++){
                                     if(desire_movement[i+2] != -1){
                                         old_grab_status[i] = desire_movement[i+2];
+                                        push_flag = true;
                                     }
                                 }
                                 for(int i = 4; i >= 0; i --){
@@ -663,7 +665,6 @@ int main(int argc, char **argv)
                                 }               
                                 bool b;
                                 if(rx0==current_state.MyTx0()){
-                   
                                     b = true;
                                 }
                                 else{

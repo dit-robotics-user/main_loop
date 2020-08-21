@@ -46,7 +46,7 @@ class set_frommain:
 	
 	
 
-go_home_time = 160
+go_home_time = 250
 path_done = False
 north = 0
 south = 1
@@ -103,7 +103,8 @@ def goap_server():
 		#goap的loop放這:
 		if set_frommain.set_finish == 1 :
 			if counter == 0:
-				action_path, go_home_path_north, go_home_path_south = setting(1, set_frommain.cup_color)
+				action_path, go_home_path_north, go_home_path_south = setting(1, set_frommain.cup_color) #吃到杯子顏色
+				print(set_frommain.cup_color) #杯子顏色
 				print('setfinish')
 				counter=1
 

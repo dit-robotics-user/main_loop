@@ -91,11 +91,12 @@ void sub_class::status_publish(){
     status.data = now_status() ;
 	status_pub.publish(status);
 }
-void sub_class::change_cup_color(int color[]){
+void sub_class::change_cup_color(int color[]){  //cup color 
     pub_to_main.cup_color={};
     for(int k=0;k<5;k++){
         pub_to_main.cup_color.push_back(color[k]);
     }
+	//ROS_INFO("change color");
 }
 sub_class::sub_class(int my_pos_x_,int my_pos_y_, int ini_status){
     pub_to_main.my_pos_x = 700 ; 
@@ -209,8 +210,8 @@ int main(int argc, char **argv){
     float last_clustering_time = 0 ;
     float clustering_time = 0 ; 
     float temp_timer ;
-    int cup_suck = 0;
-    int ns_suck = 0;
+    int cup_trash = 0;
+    int ns_trash = 0;
     int count = 0 ; 
     srv_cup.request.OUO = 0;
     srv_ns.request.OAO = 0;
@@ -296,23 +297,25 @@ int main(int argc, char **argv){
         if(srv_cup.request.OUO==1){
             if(client_cup.call(srv_cup)){
                 if(srv_cup.response.CupResult[0]!=0 && srv_cup.response.CupResult[0]!=1 ){
-                    cup_suck = 1 ;     
-                    ROS_INFO("cup_suck");
+                    cup_trash = 1 ;     
+                    
                 }else{
                     srv_cup.request.OUO = 2 ;//finish
                     for(int k_=0;k_<5;k_++){
                         color_[k_]=srv_cup.response.CupResult[k_];
+						ROS_INFO("color_[%d]:%d",k_,srv_cup.response.CupResult[k_]);
                     }
+			cup_trash = 0;
                 }  
                 if(srv_cup.request.OUO == 2){
                     temp.change_cup_color(color_);
                 }
             }else{
-                cup_suck = 1 ;     
-                ROS_INFO("fail to call");
+                cup_trash = 1 ;     
+                //ROS_INFO("fail to call");
             }   
         }
-        if(cup_suck == 1 ){
+        if(cup_trash == 1 ){
             srv_cup.request.OUO = 3;
         }
 
@@ -320,18 +323,19 @@ int main(int argc, char **argv){
         if(srv_ns.request.OAO==1||srv_ns.request.OAO==10){
             if(client_ns.call(srv_ns)){
                 if(srv_ns.response.ns !=0 && srv_ns.response.ns!=1 ){
-                    ROS_INFO("cup_suck");
-                    ns_suck = 1 ;     
+                    ROS_INFO("cup_trash");
+                    ns_trash = 1 ;     
                 }else{
                     srv_ns.request.OAO = 2 ;//finish 
                     temp.change_ns(srv_ns.response.ns);
                 }  
             }else{
                 ROS_INFO("fail to call");
-                ns_suck = 1 ; 
+                ns_trash = 1 ; 
             }   
         }
-        if(cup_suck == 1 ){
+
+        if(cup_trash == 1 ){
             srv_ns.request.OAO = 3;
         }
         if(srv_ns.request.OAO==10 ){
